@@ -5,6 +5,7 @@ const initialState: AppSettingsState = {
   theme: "light",
   font: "sans-serif",
   fontSize: "medium",
+  isOpenSideBar: true,
 };
 
 const appSettingsSlice = createSlice({
@@ -20,8 +21,12 @@ const appSettingsSlice = createSlice({
     setFontSize: (state, action: PayloadAction<FontSize>) => {
       state.fontSize = action.payload;
     },
+    toggleSideBar: (state) => {
+      state.isOpenSideBar = !state.isOpenSideBar;
+    },
   },
 });
 
-export const { setTheme, setFont, setFontSize } = appSettingsSlice.actions;
+export const { setTheme, setFont, setFontSize, toggleSideBar } =
+  appSettingsSlice.actions;
 export default appSettingsSlice.reducer;

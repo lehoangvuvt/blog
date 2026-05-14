@@ -1,9 +1,8 @@
 import { apiClient } from "@/shared/api/client";
-import axios from "axios";
 
 export const getUploadPresignedUrl = async (
   fileName: string,
-  mimeType: string,
+  mimeType: string
 ) => {
   const response = await apiClient.post("/files/upload-url", {
     fileName,

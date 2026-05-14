@@ -1,6 +1,10 @@
-import axios from 'axios';
+import axios from "axios";
 
 export const apiClient = axios.create({
-    baseURL: "http://localhost:3001",
-    withCredentials: true,
+  baseURL: process.env.NEXT_PUBLIC_BASE_API_URL,
+  withCredentials: true,
+});
+
+apiClient.interceptors.request.use((config) => {
+  return config;
 });

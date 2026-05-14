@@ -11,4 +11,5 @@ export type AppSettingsState = {
   theme: Theme;
   font: Font;
   fontSize: FontSize;
+  isOpenSideBar: boolean;
 };

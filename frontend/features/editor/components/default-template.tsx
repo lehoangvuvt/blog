@@ -84,7 +84,10 @@ import { defaultTheme } from "./theme";
 import "./styles.css";
 import { useAppSelector } from "@/store/hooks";
 import { selectTheme } from "@/features/app-settings/selectors";
-import { getUploadPresignedUrl, uploadFile } from "@/features/files/api/upload.api";
+import {
+  getUploadPresignedUrl,
+  uploadFile,
+} from "@/features/files/api/upload.api";
 
 type TableConfig = {
   rows?: number;
@@ -248,35 +251,38 @@ function FloatingToolbarRenderer() {
       {isImageSelected ? (
         <>
           <button
-            type='button'
+            type="button"
             onClick={() => commands.setImageAlignment("left")}
-            className={`lexkit-toolbar-button ${activeStates.isImageAlignedLeft ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.isImageAlignedLeft ? "active" : ""
+            }`}
             title="Align Left"
           >
             <AlignLeft size={14} />
           </button>
           <button
-            type='button'
+            type="button"
             onClick={() => commands.setImageAlignment("center")}
-            className={`lexkit-toolbar-button ${activeStates.isImageAlignedCenter ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.isImageAlignedCenter ? "active" : ""
+            }`}
             title="Align Center"
           >
             <AlignCenter size={14} />
           </button>
           <button
-            type='button'
+            type="button"
             onClick={() => commands.setImageAlignment("right")}
-            className={`lexkit-toolbar-button ${activeStates.isImageAlignedRight ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.isImageAlignedRight ? "active" : ""
+            }`}
             title="Align Right"
           >
             <AlignRight size={14} />
           </button>
           <div className="w-px h-6 bg-border mx-1" />
           <button
-            type='button'
+            type="button"
             onClick={() =>
               commands.setImageCaption(prompt("Enter caption:") || "")
             }
@@ -289,60 +295,66 @@ function FloatingToolbarRenderer() {
       ) : (
         <>
           <button
-            type='button'
+            type="button"
             onClick={() => commands.toggleBold()}
-            className={`lexkit-toolbar-button ${activeStates.bold ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.bold ? "active" : ""
+            }`}
             title="Bold"
           >
             <Bold size={14} />
           </button>
           <button
-            type='button'
+            type="button"
             onClick={() => commands.toggleItalic()}
-            className={`lexkit-toolbar-button ${activeStates.italic ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.italic ? "active" : ""
+            }`}
             title="Italic"
           >
             <Italic size={14} />
           </button>
           <button
-            type='button'
+            type="button"
             onClick={() => commands.toggleUnderline()}
-            className={`lexkit-toolbar-button ${activeStates.underline ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.underline ? "active" : ""
+            }`}
             title="Underline"
           >
             <Underline size={14} />
           </button>
           <button
-            type='button'
+            type="button"
             onClick={() => commands.toggleStrikethrough()}
-            className={`lexkit-toolbar-button ${activeStates.strikethrough ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.strikethrough ? "active" : ""
+            }`}
             title="Strikethrough"
           >
             <Strikethrough size={14} />
           </button>
           <div className="w-px h-6 bg-border mx-1" />
           <button
-            type='button'
+            type="button"
             onClick={() => commands.formatText("code")}
-            className={`lexkit-toolbar-button ${activeStates.code ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.code ? "active" : ""
+            }`}
             title="Inline Code"
           >
             <Code size={14} />
           </button>
           <button
-            type='button'
+            type="button"
             onClick={() =>
               activeStates.isLink
                 ? commands.removeLink()
                 : commands.insertLink()
             }
-            className={`lexkit-toolbar-button ${activeStates.isLink ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.isLink ? "active" : ""
+            }`}
             title={activeStates.isLink ? "Remove Link" : "Insert Link"}
           >
             {activeStates.isLink ? <Unlink size={14} /> : <Link size={14} />}
@@ -351,64 +363,70 @@ function FloatingToolbarRenderer() {
           {hasExtension("blockFormat") && (
             <>
               <button
-                type='button'
+                type="button"
                 onClick={() => commands.toggleParagraph()}
-                className={`lexkit-toolbar-button ${!activeStates.isH1 &&
+                className={`lexkit-toolbar-button ${
+                  !activeStates.isH1 &&
                   !activeStates.isH2 &&
                   !activeStates.isH3 &&
                   !activeStates.isH4 &&
                   !activeStates.isH5 &&
                   !activeStates.isH6 &&
                   !activeStates.isQuote
-                  ? "active"
-                  : ""
-                  }`}
+                    ? "active"
+                    : ""
+                }`}
                 title="Paragraph"
               >
                 P
               </button>
               <button
-                type='button'
+                type="button"
                 onClick={() => commands.toggleHeading("h1")}
-                className={`lexkit-toolbar-button ${activeStates.isH1 ? "active" : ""
-                  }`}
+                className={`lexkit-toolbar-button ${
+                  activeStates.isH1 ? "active" : ""
+                }`}
                 title="Heading 1"
               >
                 H1
               </button>
               <button
-                type='button'
+                type="button"
                 onClick={() => commands.toggleHeading("h2")}
-                className={`lexkit-toolbar-button ${activeStates.isH2 ? "active" : ""
-                  }`}
+                className={`lexkit-toolbar-button ${
+                  activeStates.isH2 ? "active" : ""
+                }`}
                 title="Heading 2"
               >
                 H2
               </button>
               <button
-                type='button'
+                type="button"
                 onClick={() => commands.toggleHeading("h3")}
-                className={`lexkit-toolbar-button ${activeStates.isH3 ? "active" : ""
-                  }`}
+                className={`lexkit-toolbar-button ${
+                  activeStates.isH3 ? "active" : ""
+                }`}
                 title="Heading 3"
               >
                 H3
               </button>
               <button
-                type='button'
+                type="button"
                 onClick={() => commands.toggleQuote()}
-                className={`lexkit-toolbar-button ${activeStates.isQuote ? "active" : ""
-                  }`}
+                className={`lexkit-toolbar-button ${
+                  activeStates.isQuote ? "active" : ""
+                }`}
                 title="Quote"
               >
                 <Quote size={14} />
               </button>
               {hasExtension("code") && (
                 <button
-                  type='button'
+                  type="button"
                   onClick={() => commands.toggleCodeBlock()}
-                  className={`lexkit-toolbar-button ${activeStates.isInCodeBlock ? "active" : ""
-                    }`}
+                  className={`lexkit-toolbar-button ${
+                    activeStates.isInCodeBlock ? "active" : ""
+                  }`}
                   title="Code Block"
                 >
                   <Terminal size={14} />
@@ -420,19 +438,21 @@ function FloatingToolbarRenderer() {
           {hasExtension("list") && (
             <>
               <button
-                type='button'
+                type="button"
                 onClick={() => commands.toggleUnorderedList()}
-                className={`lexkit-toolbar-button ${activeStates.unorderedList ? "active" : ""
-                  }`}
+                className={`lexkit-toolbar-button ${
+                  activeStates.unorderedList ? "active" : ""
+                }`}
                 title="Bullet List"
               >
                 <List size={14} />
               </button>
               <button
-                type='button'
+                type="button"
                 onClick={() => commands.toggleOrderedList()}
-                className={`lexkit-toolbar-button ${activeStates.orderedList ? "active" : ""
-                  }`}
+                className={`lexkit-toolbar-button ${
+                  activeStates.orderedList ? "active" : ""
+                }`}
                 title="Numbered List"
               >
                 <ListOrdered size={14} />
@@ -487,18 +507,18 @@ function Toolbar({
   const currentBlockFormat = activeStates.isH1
     ? "h1"
     : activeStates.isH2
-      ? "h2"
-      : activeStates.isH3
-        ? "h3"
-        : activeStates.isH4
-          ? "h4"
-          : activeStates.isH5
-            ? "h5"
-            : activeStates.isH6
-              ? "h6"
-              : activeStates.isQuote
-                ? "quote"
-                : "p";
+    ? "h2"
+    : activeStates.isH3
+    ? "h3"
+    : activeStates.isH4
+    ? "h4"
+    : activeStates.isH5
+    ? "h5"
+    : activeStates.isH6
+    ? "h6"
+    : activeStates.isQuote
+    ? "quote"
+    : "p";
 
   const handleBlockFormatChange = (value: string) => {
     if (value === "p") commands.toggleParagraph();
@@ -513,59 +533,65 @@ function Toolbar({
         {/* Text Formatting */}
         <div className="lexkit-toolbar-section">
           <button
-            type='button'
+            type="button"
             onClick={() => commands.toggleBold()}
-            className={`lexkit-toolbar-button ${activeStates.bold ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.bold ? "active" : ""
+            }`}
             title="Bold (Ctrl+B)"
           >
             <Bold size={16} />
           </button>
           <button
-            type='button'
+            type="button"
             onClick={() => commands.toggleItalic()}
-            className={`lexkit-toolbar-button ${activeStates.italic ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.italic ? "active" : ""
+            }`}
             title="Italic (Ctrl+I)"
           >
             <Italic size={16} />
           </button>
           <button
-            type='button'
+            type="button"
             onClick={() => commands.toggleUnderline()}
-            className={`lexkit-toolbar-button ${activeStates.underline ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.underline ? "active" : ""
+            }`}
             title="Underline (Ctrl+U)"
           >
             <Underline size={16} />
           </button>
           <button
-            type='button'
+            type="button"
             onClick={() => commands.toggleStrikethrough()}
-            className={`lexkit-toolbar-button ${activeStates.strikethrough ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.strikethrough ? "active" : ""
+            }`}
             title="Strikethrough"
           >
             <Strikethrough size={16} />
           </button>
           <button
-            type='button'
+            type="button"
             onClick={() => commands.formatText("code")}
-            className={`lexkit-toolbar-button ${activeStates.code ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.code ? "active" : ""
+            }`}
             title="Inline Code"
           >
             <Code size={16} />
           </button>
           <button
-            type='button'
+            type="button"
             onClick={() =>
               activeStates.isLink
                 ? commands.removeLink()
                 : commands.insertLink()
             }
-            className={`lexkit-toolbar-button ${activeStates.isLink ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.isLink ? "active" : ""
+            }`}
             title={activeStates.isLink ? "Remove Link" : "Insert Link"}
           >
             {activeStates.isLink ? <Unlink size={16} /> : <Link size={16} />}
@@ -583,10 +609,11 @@ function Toolbar({
             />
             {hasExtension("code") && (
               <button
-                type='button'
+                type="button"
                 onClick={() => commands.toggleCodeBlock()}
-                className={`lexkit-toolbar-button ${activeStates.isInCodeBlock ? "active" : ""
-                  }`}
+                className={`lexkit-toolbar-button ${
+                  activeStates.isInCodeBlock ? "active" : ""
+                }`}
                 title="Code Block"
               >
                 <Terminal size={16} />
@@ -599,19 +626,21 @@ function Toolbar({
         {hasExtension("list") && (
           <div className="lexkit-toolbar-section">
             <button
-              type='button'
+              type="button"
               onClick={() => commands.toggleUnorderedList()}
-              className={`lexkit-toolbar-button ${activeStates.unorderedList ? "active" : ""
-                }`}
+              className={`lexkit-toolbar-button ${
+                activeStates.unorderedList ? "active" : ""
+              }`}
               title="Bullet List"
             >
               <List size={16} />
             </button>
             <button
-              type='button'
+              type="button"
               onClick={() => commands.toggleOrderedList()}
-              className={`lexkit-toolbar-button ${activeStates.orderedList ? "active" : ""
-                }`}
+              className={`lexkit-toolbar-button ${
+                activeStates.orderedList ? "active" : ""
+              }`}
               title="Numbered List"
             >
               <ListOrdered size={16} />
@@ -619,7 +648,7 @@ function Toolbar({
             {(activeStates.unorderedList || activeStates.orderedList) && (
               <>
                 <button
-                  type='button'
+                  type="button"
                   onClick={() => commands.indentList()}
                   className="lexkit-toolbar-button"
                   title="Indent List"
@@ -627,7 +656,7 @@ function Toolbar({
                   <Indent size={14} />
                 </button>
                 <button
-                  type='button'
+                  type="button"
                   onClick={() => commands.outdentList()}
                   className="lexkit-toolbar-button"
                   title="Outdent List"
@@ -643,7 +672,7 @@ function Toolbar({
         {hasExtension("horizontalRule") && (
           <div className="lexkit-toolbar-section">
             <button
-              type='button'
+              type="button"
               onClick={() => commands.insertHorizontalRule()}
               className="lexkit-toolbar-button"
               title="Insert Horizontal Rule"
@@ -657,7 +686,7 @@ function Toolbar({
         {hasExtension("table") && (
           <div className="lexkit-toolbar-section">
             <button
-              type='button'
+              type="button"
               onClick={() => setShowTableDialog(true)}
               className="lexkit-toolbar-button"
               title="Insert Table (Ctrl+Shift+T)"
@@ -672,7 +701,9 @@ function Toolbar({
           <div className="lexkit-toolbar-section">
             <Dropdown
               trigger={
-                <div className={`lexkit-toolbar-button ${activeStates.imageSelected ? "active" : ""
+                <div
+                  className={`lexkit-toolbar-button ${
+                    activeStates.imageSelected ? "active" : ""
                   }`}
                   title="Insert Image"
                 >
@@ -683,7 +714,7 @@ function Toolbar({
               onOpenChange={setShowImageDropdown}
             >
               <button
-                type='button'
+                type="button"
                 className="lexkit-dropdown-item"
                 onClick={() => {
                   handlers.insertFromUrl();
@@ -693,7 +724,7 @@ function Toolbar({
                 <Link size={16} /> From URL
               </button>
               <button
-                type='button'
+                type="button"
                 className="lexkit-dropdown-item"
                 onClick={() => {
                   handlers.insertFromFile();
@@ -706,17 +737,15 @@ function Toolbar({
             {activeStates.imageSelected && (
               <Dropdown
                 trigger={
-                  <button
-                    type="button"
-                    className="lexkit-toolbar-button" title="Align Image">
+                  <div className="lexkit-toolbar-button" title="Align Image">
                     <AlignCenter size={16} />
-                  </button>
+                  </div>
                 }
                 isOpen={showAlignDropdown}
                 onOpenChange={setShowAlignDropdown}
               >
                 <button
-                  type='button'
+                  type="button"
                   className="lexkit-dropdown-item"
                   onClick={() => {
                     handlers.setAlignment("left");
@@ -726,7 +755,7 @@ function Toolbar({
                   <AlignLeft size={16} /> Align Left
                 </button>
                 <button
-                  type='button'
+                  type="button"
                   className="lexkit-dropdown-item"
                   onClick={() => {
                     handlers.setAlignment("center");
@@ -736,7 +765,7 @@ function Toolbar({
                   <AlignCenter size={16} /> Align Center
                 </button>
                 <button
-                  type='button'
+                  type="button"
                   className="lexkit-dropdown-item"
                   onClick={() => {
                     handlers.setAlignment("right");
@@ -746,7 +775,7 @@ function Toolbar({
                   <AlignRight size={16} /> Align Right
                 </button>
                 <button
-                  type='button'
+                  type="button"
                   className="lexkit-dropdown-item"
                   onClick={() => {
                     handlers.setCaption();
@@ -771,17 +800,18 @@ function Toolbar({
         {hasExtension("htmlEmbed") && (
           <div className="lexkit-toolbar-section">
             <button
-              type='button'
+              type="button"
               onClick={() => commands.insertHTMLEmbed()}
-              className={`lexkit-toolbar-button ${activeStates.isHTMLEmbedSelected ? "active" : ""
-                }`}
+              className={`lexkit-toolbar-button ${
+                activeStates.isHTMLEmbedSelected ? "active" : ""
+              }`}
               title="Insert HTML Embed"
             >
               <FileCode size={16} />
             </button>
             {activeStates.isHTMLEmbedSelected && (
               <button
-                type='button'
+                type="button"
                 onClick={() => commands.toggleHTMLPreview()}
                 className="lexkit-toolbar-button"
                 title="Toggle Preview/Edit"
@@ -800,7 +830,7 @@ function Toolbar({
         {hasExtension("history") && (
           <div className="lexkit-toolbar-section">
             <button
-              type='button'
+              type="button"
               onClick={() => commands.undo()}
               disabled={!activeStates.canUndo}
               className="lexkit-toolbar-button"
@@ -809,7 +839,7 @@ function Toolbar({
               <Undo size={16} />
             </button>
             <button
-              type='button'
+              type="button"
               onClick={() => commands.redo()}
               disabled={!activeStates.canRedo}
               className="lexkit-toolbar-button"
@@ -823,7 +853,7 @@ function Toolbar({
         {/* Command Palette */}
         <div className="lexkit-toolbar-section">
           <button
-            type='button'
+            type="button"
             onClick={onCommandPaletteOpen}
             className="lexkit-toolbar-button"
             title="Command Palette (Ctrl+K)"
@@ -835,7 +865,7 @@ function Toolbar({
         {/* Theme Toggle */}
         <div className="lexkit-toolbar-section">
           <button
-            type='button'
+            type="button"
             onClick={toggleTheme}
             className="lexkit-toolbar-button"
             title={isDark ? "Light Mode" : "Dark Mode"}
@@ -911,7 +941,7 @@ function Toolbar({
               Cancel
             </button>
             <button
-              type='button'
+              type="button"
               onClick={() => {
                 commands.insertTable(tableConfig);
                 setShowTableDialog(false);
@@ -973,11 +1003,13 @@ function ErrorBoundary({ children }: { children: React.ReactNode }) {
 // Editor Content Component
 function EditorContent({
   className,
+  onContentChange,
   isDark,
   toggleTheme,
   onReady,
 }: {
   className?: string;
+  onContentChange: (content: string) => void;
   isDark: boolean;
   toggleTheme: () => void;
   onReady?: (methods: DefaultTemplateRef) => void;
@@ -1032,7 +1064,7 @@ function EditorContent({
     paletteCommands.forEach((cmd) => commands.registerCommand(cmd));
 
     const originalShowCommand = commands.showCommandPalette;
-    (commands).showCommandPalette = () => setCommandPaletteOpen(true);
+    commands.showCommandPalette = () => setCommandPaletteOpen(true);
 
     const unregisterShortcuts = registerKeyboardShortcuts(
       commands,
@@ -1052,12 +1084,19 @@ function EditorContent({
       onReady?.(methods);
     }
 
+    if (editor) {
+      const editorState = editor.getEditorState();
+      const jsonState = editorState.toJSON();
+
+      onContentChange?.(JSON.stringify(jsonState));
+    }
+
     return () => {
       unregisterShortcuts();
       document.removeEventListener("keydown", handleKeyDown);
       commands.showCommandPalette = originalShowCommand;
     };
-  }, [editor, commands, onReady, methods]);
+  }, [editor, commands, onReady, methods, onContentChange]);
 
   const handleHtmlChange = (html: string) =>
     setContent((prev) => ({ ...prev, html }));
@@ -1108,14 +1147,15 @@ function EditorContent({
 // Main DefaultTemplate Component
 interface DefaultTemplateProps {
   className?: string;
+  theme?: "light" | "dark";
+  onContentChange?: (content: string) => void;
   onReady?: (methods: DefaultTemplateRef) => void;
 }
 
 export const DefaultTemplate = forwardRef<
   DefaultTemplateRef,
   DefaultTemplateProps
->(({ className, onReady }, ref) => {
-  const theme = useAppSelector(selectTheme);
+>(({ className, theme, onReady, onContentChange }, ref) => {
   const [editorTheme, setEditorTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
@@ -1130,7 +1170,10 @@ export const DefaultTemplate = forwardRef<
     imageExtension.configure({
       uploadHandler: async (file: File) => {
         const mimeType = file.type;
-        const getUploadPresignedUrlResponse = await getUploadPresignedUrl(file.name, mimeType);
+        const getUploadPresignedUrlResponse = await getUploadPresignedUrl(
+          file.name,
+          mimeType
+        );
         const { url, publicUrl } = getUploadPresignedUrlResponse;
         const uploadFileResponse = await uploadFile(file, url);
         return publicUrl;
@@ -1162,6 +1205,7 @@ export const DefaultTemplate = forwardRef<
     >
       <Provider extensions={extensions} config={{ theme: defaultTheme }}>
         <EditorContent
+          onContentChange={(content) => onContentChange?.(content)}
           className={className}
           isDark={isDark}
           toggleTheme={toggleTheme}

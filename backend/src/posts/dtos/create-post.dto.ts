@@ -1,0 +1,26 @@
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsBoolean,
+  IsJSON,
+  IsString,
+} from 'class-validator';
+
+export default class CreatePostDto {
+  @IsString()
+  title: string;
+
+  @IsString()
+  subTitle: string;
+
+  @IsJSON()
+  content: string;
+
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsString({ each: true })
+  tags: string[];
+
+  @IsBoolean()
+  published: boolean;
+}
