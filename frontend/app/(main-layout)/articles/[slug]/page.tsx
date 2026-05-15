@@ -7,27 +7,7 @@ import { CommentsSection } from "@/app/(main-layout)/articles/[slug]/components/
 import HeadingNavigation, {
   Heading,
 } from "@/app/(main-layout)/articles/[slug]/components/headings";
-
-type Author = {
-  id: string;
-  email: string;
-  avatar?: string;
-};
-
-type Tag = {
-  id: string;
-  name: string;
-};
-
-type Post = {
-  title: string;
-  subTitle?: string;
-  htmlContent?: string;
-  thumbnailImage?: string;
-  createdAt?: string;
-  author?: Author;
-  tags?: Tag[];
-};
+import { PostDetails } from "@/features/posts/types";
 
 function slugify(text: string) {
   return text
@@ -99,7 +79,7 @@ export default async function ArticlePage({
   const { slug } = await params;
 
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_API_URL}/posts/slug/${slug}`,
+    `${process.env.NEXT_PUBLIC_BASE_API_URL}/posts/${slug}`,
     {
       next: { revalidate: 60 },
     }
@@ -109,7 +89,7 @@ export default async function ArticlePage({
     throw new Error("Failed to fetch post");
   }
 
-  const post: Post = await res.json();
+  const post: PostDetails = await res.json();
 
   const sanitizedHtmlContent = DOMPurify.sanitize(post.htmlContent ?? "", {
     USE_PROFILES: { html: true },
@@ -147,14 +127,21 @@ export default async function ArticlePage({
                       />
                     ) : (
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-100 text-sm font-medium text-neutral-500">
-                        {post.author.email.charAt(0).toUpperCase()}
+                        {`${post.author.email
+                          .charAt(0)
+                          .toUpperCase()}${post.author.email
+                          .charAt(1)
+                          .toUpperCase()}`}
                       </div>
                     )}
 
                     <div className="flex flex-wrap items-center gap-x-2 text-sm text-neutral-500">
-                      <span className="font-medium text-neutral-900">
-                        {post.author.email}
-                      </span>
+                      <Link
+                        href={`/@${post.author.slug}`}
+                        className="font-medium text-neutral-900  hover:underline cursor-pointer"
+                      >
+                        {post.author.slug}
+                      </Link>
 
                       {post.createdAt && (
                         <>

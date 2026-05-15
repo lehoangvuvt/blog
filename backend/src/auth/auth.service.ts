@@ -25,7 +25,7 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto) {
-    const { email, password } = dto;
+    const { email, password, fullName } = dto;
 
     const hashedPassword = await argon2.hash(password, {
       type: argon2.argon2id,
@@ -34,7 +34,7 @@ export class AuthService {
       parallelism: 1,
     });
 
-    return await this.usersService.create(email, hashedPassword);
+    return await this.usersService.create(email, fullName, hashedPassword);
   }
 
   async login(dto: RegisterDto) {

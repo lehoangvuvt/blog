@@ -26,7 +26,29 @@ export type Post = {
   postedDate: string;
   slug: string;
   author?: {
-    id: string;
     email: string;
+    slug: string;
+    fullName?: string;
+    avatar?: string;
   };
+};
+
+export type PostDetails = {
+  title: string;
+  subTitle?: string;
+  htmlContent?: string;
+  thumbnailImage?: string;
+  createdAt?: string;
+  author?: {
+    email: string;
+    slug: string;
+    fullName?: string;
+    avatar?: string;
+  };
+  tags?: Tag[];
+};
+
+export type Tag = {
+  id: string;
+  name: string;
 };

@@ -21,35 +21,35 @@ function usePostThemeClasses() {
       fontSize === "small"
         ? "text-lg"
         : fontSize === "large"
-          ? "text-2xl"
-          : "text-xl",
+        ? "text-2xl"
+        : "text-xl",
 
     subtitleSize:
       fontSize === "small"
         ? "text-sm"
         : fontSize === "large"
-          ? "text-lg"
-          : "text-base",
+        ? "text-lg"
+        : "text-base",
 
     metaSize:
       fontSize === "small"
         ? "text-xs"
         : fontSize === "large"
-          ? "text-base"
-          : "text-sm",
+        ? "text-base"
+        : "text-sm",
 
     fontClass:
       font === "serif"
         ? "font-serif"
         : font === "monospace"
-          ? "font-mono"
-          : "font-sans",
+        ? "font-mono"
+        : "font-sans",
     sizeClass:
       fontSize === "small"
         ? "text-sm"
         : fontSize === "large"
-          ? "text-lg"
-          : "text-base",
+        ? "text-lg"
+        : "text-base",
 
     borderClass: isDark ? "border-white/10" : "border-black/10",
     titleClass: isDark ? "text-white" : "text-[#242424]",
@@ -90,11 +90,16 @@ export const PostItem = {
     );
   },
 
-  Author({ children }: { children: React.ReactNode }) {
+  Author({ children, link }: { children: React.ReactNode; link: string }) {
     const styles = usePostThemeClasses();
 
     return (
-      <span className={`font-medium ${styles.titleClass}`}>{children}</span>
+      <Link
+        href={link}
+        className={`font-medium ${styles.titleClass} hover:underline cursor-pointer`}
+      >
+        {children}
+      </Link>
     );
   },
 
@@ -114,7 +119,7 @@ export const PostItem = {
     return (
       <Link
         href={link}
-        className={`line-clamp-2 cursor-pointer font-semibold tracking-tight group-hover:underline ${styles.titleSize} ${styles.titleClass}`}
+        className={`line-clamp-2 cursor-pointer font-semibold tracking-tight hover:underline ${styles.titleSize} ${styles.titleClass}`}
       >
         {children}
       </Link>
@@ -145,7 +150,7 @@ export const PostItem = {
         <img
           src={src}
           alt={alt}
-          className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+          className="h-full w-full object-cover transition duration-300"
         />
       </div>
     );

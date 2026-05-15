@@ -1,10 +1,16 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma, User } from 'generated/prisma/client';
+import { FindManyPostsDto } from 'src/posts/dtos/find-many-posts.dto';
+import { PostsService } from 'src/posts/posts.service';
 import { PrismaService } from 'src/prisma.service';
+import { generateSlug } from 'src/shared/utils';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private postsService: PostsService,
+  ) {}
 
   async findMany(): Promise<User[]> {
     return await this.prisma.user.findMany();
@@ -24,12 +30,20 @@ export class UsersService {
     });
   }
 
-  async create(email: string, password: string): Promise<User> {
+  async create(
+    email: string,
+    fullName: string,
+    password: string,
+  ): Promise<User> {
+    const slug = generateSlug(fullName);
+
     try {
       const user = await this.prisma.user.create({
         data: {
           email,
           password,
+          full_name: fullName,
+          slug,
         },
       });
 
@@ -44,5 +58,10 @@ export class UsersService {
 
       throw err;
     }
+  }
+
+  async findUserPosts(dto: FindManyPostsDto) {
+    const posts = await this.postsService.findMany(dto);
+    return posts;
   }
 }

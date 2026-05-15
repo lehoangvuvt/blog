@@ -5,6 +5,9 @@ export default class RegisterDto {
   email: string;
 
   @IsString()
+  fullName: string;
+
+  @IsString()
   @MinLength(5)
   @MaxLength(20)
   password: string;

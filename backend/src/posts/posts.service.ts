@@ -1,59 +1,17 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { nanoid } from 'nanoid';
-import DOMPurify from 'isomorphic-dompurify';
 // biome-ignore lint/style/useImportType: <explanation>
 import { PrismaService } from 'src/prisma.service';
 import type CreatePostDto from './dtos/create-post.dto';
 import type { Prisma } from 'generated/prisma/browser';
 import type { FindManyPostsDto } from './dtos/find-many-posts.dto';
+import { generateSlug, sanitizedHtmlContent } from 'src/shared/utils';
 
 @Injectable()
 export class PostsService {
   constructor(private prismaService: PrismaService) {}
-
-  generateSlug(text: string): string {
-    const slug = text
-      .normalize('NFD')
-      // biome-ignore lint/suspicious/noMisleadingCharacterClass: <explanation>
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/đ/g, 'd')
-      .replace(/Đ/g, 'D')
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '');
-
-    return `${slug}-${nanoid(6)}`;
-  }
-
-  sanitizedHtmlContent(htmlContent: string): string {
-    return DOMPurify.sanitize(htmlContent ?? '', {
-      ALLOWED_TAGS: [
-        'p',
-        'br',
-        'strong',
-        'em',
-        'u',
-        's',
-        'h1',
-        'h2',
-        'h3',
-        'ul',
-        'ol',
-        'li',
-        'blockquote',
-        'a',
-        'img',
-        'pre',
-        'code',
-      ],
-      ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'target', 'rel'],
-    });
-  }
 
   async findMany(dto: FindManyPostsDto) {
     const {
@@ -123,7 +81,9 @@ export class PostsService {
           },
           author: {
             select: {
-              id: true,
+              slug: true,
+              full_name: true,
+              avatar: true,
               email: true,
             },
           },
@@ -146,7 +106,12 @@ export class PostsService {
           ? String(post.thumbnail_image)
           : null,
         postedDate: post.created_at,
-        author: post.author,
+        author: {
+          email: post.author?.email,
+          fullName: post.author?.full_name,
+          avatar: post.author?.avatar,
+          slug: post.author?.slug,
+        },
         tags: post.tags,
       })),
 
@@ -176,10 +141,10 @@ export class PostsService {
         title,
         sub_title: subTitle,
         json_content: jsonContent,
-        html_content: this.sanitizedHtmlContent(htmlContent),
+        html_content: sanitizedHtmlContent(htmlContent),
         ...(thumbnailImage && { thumbnail_image: thumbnailImage }),
         authorId: 'f3781824-de4a-4433-910d-9cc426608bbf',
-        slug: this.generateSlug(title),
+        slug: generateSlug(title),
         published,
         tags: {
           connectOrCreate: tags.map((tag) => ({
@@ -227,7 +192,12 @@ export class PostsService {
       title: post.title,
       subTitle: post.sub_title,
       htmlContent: post.html_content,
-      author: post.author,
+      author: {
+        email: post.author?.email,
+        fullName: post.author?.full_name,
+        avatar: post.author?.avatar,
+        slug: post.author?.slug,
+      },
       thumbnailImage: post.thumbnail_image
         ? String(post.thumbnail_image)
         : null,

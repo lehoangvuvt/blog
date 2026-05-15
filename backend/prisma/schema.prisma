@@ -13,10 +13,14 @@ datasource db {
 }
 
 model User {
-  id        String  @id @default(uuid())
-  email     String  @unique
-  password  String
-  is_active Boolean @default(false)
+  id           String  @id @default(uuid())
+  email        String  @unique
+  password     String
+  slug         String  @unique
+  full_name    String? @db.VarChar(50)
+  avatar       String?
+  introduction String? @db.VarChar(200)
+  is_active    Boolean @default(false)
 
   posts Post[]
 
@@ -31,7 +35,7 @@ model Post {
   slug            String   @unique
   thumbnail_image String?
   json_content    Json
-  html_content    String @db.Text
+  html_content    String   @db.Text
   published       Boolean? @default(false)
   author          User?    @relation(fields: [authorId], references: [id])
   authorId        String?

@@ -13,7 +13,7 @@ export class PostsController {
     return await this.postsService.findMany(query);
   }
 
-  @Get('slug/:slug')
+  @Get('/:slug')
   async findBySlug(@Param('slug') slug: string) {
     return await this.postsService.findBySlug(slug);
   }

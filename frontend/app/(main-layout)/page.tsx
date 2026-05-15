@@ -6,17 +6,12 @@ import { PostItem } from "@/features/posts/components/post-item";
 import { usePosts } from "@/features/posts/hooks/use-posts";
 
 export default function Home() {
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-  } = usePosts({
-    limit: 5,
-    published: true,
-    sortBy: "latest",
-  });
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    usePosts({
+      limit: 5,
+      published: true,
+      sortBy: "latest",
+    });
 
   const posts = data?.pages.flatMap((page) => page.data) ?? [];
 
@@ -34,15 +29,21 @@ export default function Home() {
           >
             {isLoading &&
               Array.from({ length: 5 }).map((_, index) => (
-                <PostItem.Skeleton key={`initial-skeleton-${// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                  index}`} />
+                <PostItem.Skeleton
+                  key={`initial-skeleton-${
+                    // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                    index
+                  }`}
+                />
               ))}
 
             {posts.map((post) => (
               <PostItem.Container key={post.id}>
                 <PostItem.Content>
                   <PostItem.Header>
-                    <PostItem.Author>{post.author?.email}</PostItem.Author>
+                    <PostItem.Author link={`/@${post.author?.slug}`}>
+                      {post.author?.slug}
+                    </PostItem.Author>
 
                     <PostItem.Dot />
 
@@ -55,7 +56,9 @@ export default function Home() {
                     </PostItem.Date>
                   </PostItem.Header>
 
-                  <PostItem.Title link={`/articles/${post.slug}`}>{post.title}</PostItem.Title>
+                  <PostItem.Title link={`/articles/${post.slug}`}>
+                    {post.title}
+                  </PostItem.Title>
 
                   <PostItem.SubTitle>{post.subTitle}</PostItem.SubTitle>
                 </PostItem.Content>
@@ -69,12 +72,16 @@ export default function Home() {
 
             {isFetchingNextPage &&
               Array.from({ length: 5 }).map((_, index) => (
-                <PostItem.Skeleton key={`next-page-skeleton-${// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                  index}`} />
+                <PostItem.Skeleton
+                  key={`next-page-skeleton-${
+                    // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                    index
+                  }`}
+                />
               ))}
           </PostsContainer>
         </main>
       </MainLayout>
-    </div >
+    </div>
   );
 }
