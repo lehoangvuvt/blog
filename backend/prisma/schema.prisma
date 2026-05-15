@@ -28,8 +28,10 @@ model Post {
   id              Int      @id @default(autoincrement())
   title           String
   sub_title       String
+  slug            String   @unique
   thumbnail_image String?
-  content         Json
+  json_content    Json
+  html_content    String @db.Text
   published       Boolean? @default(false)
   author          User?    @relation(fields: [authorId], references: [id])
   authorId        String?

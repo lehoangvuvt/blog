@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+// biome-ignore lint/style/useImportType: <explanation>
 import { PostsService } from './posts.service';
-import CreatePostDto from './dtos/create-post.dto';
-import { FindManyPostsDto } from './dtos/find-many-posts.dto';
+import type CreatePostDto from './dtos/create-post.dto';
+import type { FindManyPostsDto } from './dtos/find-many-posts.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -10,6 +11,11 @@ export class PostsController {
   @Get()
   async findMany(@Query() query: FindManyPostsDto) {
     return await this.postsService.findMany(query);
+  }
+
+  @Get('slug/:slug')
+  async findBySlug(@Param('slug') slug: string) {
+    return await this.postsService.findBySlug(slug);
   }
 
   @Post('')

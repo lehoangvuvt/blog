@@ -1,6 +1,7 @@
 export type CreatePostInput = {
   title: string;
-  content: string;
+  jsonContent: string;
+  htmlContent: string;
   subTitle: string;
   tags: string[];
   published: boolean;
@@ -15,4 +16,17 @@ export type GetPostsParams = {
   page?: number;
   limit?: number;
   sortBy?: "latest" | "oldest";
+};
+
+export type Post = {
+  id: string;
+  title: string;
+  subTitle?: string;
+  thumbnailImage?: string | null;
+  postedDate: string;
+  slug: string;
+  author?: {
+    id: string;
+    email: string;
+  };
 };

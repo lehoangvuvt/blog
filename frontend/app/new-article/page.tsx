@@ -41,7 +41,8 @@ export default function NewArticlePage() {
   >("idle");
   const [publishError, setPublishError] = useState("");
 
-  const [content, setContent] = useState("");
+  const [jsonContent, setJsonContent] = useState("");
+  const [htmlContent, setHtmlContent] = useState("");
 
   const titleRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -83,6 +84,7 @@ export default function NewArticlePage() {
     };
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     const el = titleRef.current;
     if (!el) return;
@@ -92,7 +94,7 @@ export default function NewArticlePage() {
     const lineHeight = 1.1 * 64;
     const maxHeight = lineHeight * 3;
 
-    el.style.height = Math.min(el.scrollHeight, maxHeight) + "px";
+    el.style.height = `${Math.min(el.scrollHeight, maxHeight)}px`;
   }, [title]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -136,7 +138,8 @@ export default function NewArticlePage() {
         title,
         subTitle: subtitle,
         published: true,
-        content,
+        jsonContent: jsonContent,
+        htmlContent: htmlContent,
         tags,
         ...(thumbnailPreview && { thumbnailImage: thumbnailPreview }),
       });
@@ -176,10 +179,9 @@ export default function NewArticlePage() {
       className={`
         min-h-screen transition-all duration-1000 ease-out
         ${mounted ? "opacity-100" : "opacity-0"}
-        ${
-          darkMode
-            ? "bg-[#111111] text-[#f5f1ea]"
-            : "bg-[#f8f5ef] text-[#1c1c1c]"
+        ${darkMode
+          ? "bg-[#111111] text-[#f5f1ea]"
+          : "bg-[#f8f5ef] text-[#1c1c1c]"
         }
       `}
     >
@@ -187,10 +189,9 @@ export default function NewArticlePage() {
         className={`
           fixed inset-0 -z-10 transition-opacity duration-1000
           ${mounted ? "opacity-100" : "opacity-0"}
-          ${
-            darkMode
-              ? "bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_30%)]"
-              : "bg-[radial-gradient(circle_at_top,rgba(0,0,0,0.04),transparent_35%)]"
+          ${darkMode
+            ? "bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_30%)]"
+            : "bg-[radial-gradient(circle_at_top,rgba(0,0,0,0.04),transparent_35%)]"
           }
         `}
       />
@@ -206,17 +207,15 @@ export default function NewArticlePage() {
           className={`
               mx-auto flex h-16 max-w-5xl items-center justify-between
               rounded-2xl border px-6 backdrop-blur-xl
-              ${
-                darkMode
-                  ? "border-white/10 bg-white/[0.03]"
-                  : "border-black/5 bg-white/70"
-              }
+              ${darkMode
+              ? "border-white/10 bg-white/[0.03]"
+              : "border-black/5 bg-white/70"
+            }
             `}
         >
           <div
-            className={`flex items-center gap-3 text-sm ${
-              darkMode ? "text-white/45" : "text-black/45"
-            }`}
+            className={`flex items-center gap-3 text-sm ${darkMode ? "text-white/45" : "text-black/45"
+              }`}
           >
             <span>
               {darkMode
@@ -227,14 +226,14 @@ export default function NewArticlePage() {
 
           <div className="flex items-center gap-3">
             <button
+              type='button'
               onClick={() => setDarkMode((p) => !p)}
               className={`
                   flex h-10 w-10 items-center justify-center rounded-full border
-                  ${
-                    darkMode
-                      ? "border-white/10 text-white/70 hover:bg-white/5"
-                      : "border-black/10 text-black/70 hover:bg-black/5"
-                  }
+                  ${darkMode
+                  ? "border-white/10 text-white/70 hover:bg-white/5"
+                  : "border-black/10 text-black/70 hover:bg-black/5"
+                }
                 `}
             >
               {darkMode ? (
@@ -258,11 +257,10 @@ export default function NewArticlePage() {
           <span
             className={`
                 rounded-full border px-4 py-2 text-xs uppercase tracking-[0.25em]
-                ${
-                  darkMode
-                    ? "border-white/10 text-white/40"
-                    : "border-black/10 text-black/40"
-                }
+                ${darkMode
+                ? "border-white/10 text-white/40"
+                : "border-black/10 text-black/40"
+              }
               `}
           >
             {moodLabel}
@@ -297,10 +295,9 @@ export default function NewArticlePage() {
               tracking-[-0.06em] outline-none md:text-7xl
               transition-all duration-300
               ${shake ? "scale-[1.01]" : ""}
-              ${
-                darkMode
-                  ? "text-white placeholder:text-white/15"
-                  : "text-black placeholder:text-black/15"
+              ${darkMode
+                ? "text-white placeholder:text-white/15"
+                : "text-black placeholder:text-black/15"
               }
             `}
           />
@@ -333,10 +330,9 @@ export default function NewArticlePage() {
               w-full resize-none overflow-hidden bg-transparent
               text-lg leading-8 outline-none transition-all duration-300
               md:text-xl
-              ${
-                darkMode
-                  ? "text-white/65 placeholder:text-white/20"
-                  : "text-black/60 placeholder:text-black/20"
+              ${darkMode
+                ? "text-white/65 placeholder:text-white/20"
+                : "text-black/60 placeholder:text-black/20"
               }
             `}
           />
@@ -359,23 +355,21 @@ export default function NewArticlePage() {
           className="mt-10"
         >
           <p
-            className={`mb-3 text-xs uppercase tracking-[0.2em] ${
-              darkMode ? "text-white/40" : "text-black/40"
-            }`}
+            className={`mb-3 text-xs uppercase tracking-[0.2em] ${darkMode ? "text-white/40" : "text-black/40"
+              }`}
           >
             Thumbnail
           </p>
 
           <label
             className={`
-      group relative flex cursor-pointer items-center justify-center overflow-hidden
-      rounded-3xl border transition-all duration-300
-      aspect-[16/9]
-      ${
-        darkMode
-          ? "border-white/10 bg-white/[0.03] hover:bg-white/[0.05]"
-          : "border-black/10 bg-black/[0.02] hover:bg-black/[0.04]"
-      }
+            group relative flex cursor-pointer items-center justify-center overflow-hidden
+            rounded-3xl border transition-all duration-300
+            aspect-[16/9]
+            ${darkMode
+                ? "border-white/10 bg-white/[0.03] hover:bg-white/[0.05]"
+                : "border-black/10 bg-black/[0.02] hover:bg-black/[0.04]"
+              }
     `}
           >
             <input
@@ -402,9 +396,8 @@ export default function NewArticlePage() {
             ) : (
               <div className="flex flex-col items-center text-center">
                 <div
-                  className={`mb-4 flex h-14 w-14 items-center justify-center rounded-full ${
-                    darkMode ? "bg-white text-black" : "bg-black text-white"
-                  }`}
+                  className={`mb-4 flex h-14 w-14 items-center justify-center rounded-full ${darkMode ? "bg-white text-black" : "bg-black text-white"
+                    }`}
                 >
                   +
                 </div>
@@ -412,9 +405,8 @@ export default function NewArticlePage() {
                 <p className="font-serif text-xl">Add a thumbnail image</p>
 
                 <p
-                  className={`mt-2 text-sm ${
-                    darkMode ? "text-white/45" : "text-black/45"
-                  }`}
+                  className={`mt-2 text-sm ${darkMode ? "text-white/45" : "text-black/45"
+                    }`}
                 >
                   Recommended ratio: 16:9
                 </p>
@@ -439,15 +431,14 @@ export default function NewArticlePage() {
             prose max-w-none transition-colors duration-700
             prose-headings:font-serif prose-headings:tracking-tight
             prose-p:text-[1.12rem] prose-p:leading-9 prose-blockquote:italic
-            ${
-              darkMode
-                ? `
+            ${darkMode
+              ? `
                   prose-invert
                   prose-p:text-white/75
                   prose-blockquote:border-l-white/20
                   prose-blockquote:text-white/50
                 `
-                : `
+              : `
                   prose-neutral
                   prose-p:text-black/75
                   prose-blockquote:border-l-black/20
@@ -457,7 +448,10 @@ export default function NewArticlePage() {
           `}
         >
           <DefaultTemplate
-            onContentChange={(content) => setContent(content)}
+            onContentChange={(json, html) => {
+              setJsonContent(json);
+              setHtmlContent(html);
+            }}
             theme={darkMode ? "dark" : "light"}
           />
         </div>
@@ -473,14 +467,14 @@ export default function NewArticlePage() {
         <div
           className={`
             flex items-center justify-between rounded-2xl border px-4 py-3 backdrop-blur-xl
-            ${
-              darkMode
-                ? "border-white/10 bg-white/[0.05]"
-                : "border-black/10 bg-white/80"
+            ${darkMode
+              ? "border-white/10 bg-white/[0.05]"
+              : "border-black/10 bg-white/80"
             }
           `}
         >
           <button
+            type='button'
             onClick={() => {
               const ok = confirm("Discard this article?");
               if (!ok) return;
@@ -490,10 +484,9 @@ export default function NewArticlePage() {
             }}
             className={`
               text-sm transition-colors
-              ${
-                darkMode
-                  ? "text-red-400 hover:text-red-300"
-                  : "text-red-500 hover:text-red-400"
+              ${darkMode
+                ? "text-red-400 hover:text-red-300"
+                : "text-red-500 hover:text-red-400"
               }
             `}
           >
@@ -502,15 +495,15 @@ export default function NewArticlePage() {
 
           <div className="flex items-center gap-3">
             <button
+              type='button'
               onClick={() => {
                 console.log("Saving draft...", { title, tags });
               }}
               className={`
                 rounded-xl border px-4 py-2 text-sm transition-all
-                ${
-                  darkMode
-                    ? "border-white/10 text-white/70 hover:bg-white/5"
-                    : "border-black/10 text-black/70 hover:bg-black/5"
+                ${darkMode
+                  ? "border-white/10 text-white/70 hover:bg-white/5"
+                  : "border-black/10 text-black/70 hover:bg-black/5"
                 }
               `}
             >
@@ -518,6 +511,7 @@ export default function NewArticlePage() {
             </button>
 
             <button
+              type='button'
               onClick={() => {
                 setPublishStatus("idle");
                 setPublishError("");
@@ -525,10 +519,9 @@ export default function NewArticlePage() {
               }}
               className={`
                 rounded-xl px-4 py-2 text-sm font-medium transition-all
-                ${
-                  darkMode
-                    ? "bg-white text-black hover:bg-white/90"
-                    : "bg-black text-white hover:bg-black/90"
+                ${darkMode
+                  ? "bg-white text-black hover:bg-white/90"
+                  : "bg-black text-white hover:bg-black/90"
                 }
               `}
             >
@@ -541,39 +534,36 @@ export default function NewArticlePage() {
       {showPublishModal && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 px-6">
           <div
-            className={`w-full max-w-md rounded-2xl border p-6 backdrop-blur-xl ${
-              darkMode
-                ? "border-white/10 bg-[#111]/90 text-white"
-                : "border-black/10 bg-white text-black"
-            }`}
+            className={`w-full max-w-md rounded-2xl border p-6 backdrop-blur-xl ${darkMode
+              ? "border-white/10 bg-[#111]/90 text-white"
+              : "border-black/10 bg-white text-black"
+              }`}
           >
             <h2 className="text-lg font-semibold">
               {publishStatus === "success"
                 ? "Published successfully"
                 : publishStatus === "publishing"
-                ? "Publishing your story"
-                : "Prepare to Publish"}
+                  ? "Publishing your story"
+                  : "Prepare to Publish"}
             </h2>
 
             <p className="mt-1 text-sm opacity-60">
               {publishStatus === "success"
                 ? "Your article is now live."
                 : publishStatus === "publishing"
-                ? "Please wait while we create your post."
-                : "Add or adjust tags before publishing"}
+                  ? "Please wait while we create your post."
+                  : "Add or adjust tags before publishing"}
             </p>
 
             {publishStatus === "publishing" && (
               <div className="mt-5">
                 <div
-                  className={`h-2 overflow-hidden rounded-full ${
-                    darkMode ? "bg-white/10" : "bg-black/10"
-                  }`}
+                  className={`h-2 overflow-hidden rounded-full ${darkMode ? "bg-white/10" : "bg-black/10"
+                    }`}
                 >
                   <div
-                    className={`h-full w-1/2 animate-pulse rounded-full ${
-                      darkMode ? "bg-white" : "bg-black"
-                    }`}
+                    className={`h-full w-1/2 animate-pulse rounded-full ${darkMode ? "bg-white" : "bg-black"
+                      }`}
                   />
                 </div>
               </div>
@@ -582,9 +572,8 @@ export default function NewArticlePage() {
             {publishStatus === "success" && (
               <div className="mt-6 flex flex-col items-center rounded-2xl py-4 text-center">
                 <div
-                  className={`mb-4 flex h-14 w-14 items-center justify-center rounded-full text-xl ${
-                    darkMode ? "bg-white text-black" : "bg-black text-white"
-                  }`}
+                  className={`mb-4 flex h-14 w-14 items-center justify-center rounded-full text-xl ${darkMode ? "bg-white text-black" : "bg-black text-white"
+                    }`}
                 >
                   ✓
                 </div>
@@ -592,9 +581,8 @@ export default function NewArticlePage() {
                 <p className="font-serif text-xl">Your story is published.</p>
 
                 <p
-                  className={`mt-2 text-sm ${
-                    darkMode ? "text-white/55" : "text-black/55"
-                  }`}
+                  className={`mt-2 text-sm ${darkMode ? "text-white/55" : "text-black/55"
+                    }`}
                 >
                   Readers can now discover your writing.
                 </p>
@@ -606,14 +594,14 @@ export default function NewArticlePage() {
                 <div className="mt-4 flex flex-wrap gap-2">
                   {tags.map((tag) => (
                     <button
+                      type='button'
                       key={tag}
                       disabled={publishStatus === "publishing"}
                       onClick={() => removeTag(tag)}
-                      className={`rounded-full px-3 py-1 text-xs transition disabled:opacity-40 ${
-                        darkMode
-                          ? "bg-white/10 hover:bg-white/20"
-                          : "bg-black/10 hover:bg-black/20"
-                      }`}
+                      className={`rounded-full px-3 py-1 text-xs transition disabled:opacity-40 ${darkMode
+                        ? "bg-white/10 hover:bg-white/20"
+                        : "bg-black/10 hover:bg-black/20"
+                        }`}
                     >
                       {tag} ✕
                     </button>
@@ -632,19 +620,18 @@ export default function NewArticlePage() {
                       }
                     }}
                     placeholder="Add tag..."
-                    className={`flex-1 rounded-lg border px-3 py-2 text-sm outline-none disabled:opacity-40 ${
-                      darkMode
-                        ? "border-white/10 bg-white/5"
-                        : "border-black/10 bg-white"
-                    }`}
+                    className={`flex-1 rounded-lg border px-3 py-2 text-sm outline-none disabled:opacity-40 ${darkMode
+                      ? "border-white/10 bg-white/5"
+                      : "border-black/10 bg-white"
+                      }`}
                   />
 
                   <button
+                    type='button'
                     disabled={publishStatus === "publishing"}
                     onClick={addPublishTag}
-                    className={`rounded-lg px-3 py-2 text-sm disabled:opacity-40 ${
-                      darkMode ? "bg-white text-black" : "bg-black text-white"
-                    }`}
+                    className={`rounded-lg px-3 py-2 text-sm disabled:opacity-40 ${darkMode ? "bg-white text-black" : "bg-black text-white"
+                      }`}
                   >
                     Add
                   </button>
@@ -659,6 +646,7 @@ export default function NewArticlePage() {
 
               <div className="ml-auto flex gap-2">
                 <button
+                  type='button'
                   disabled={publishStatus === "publishing"}
                   onClick={() => {
                     setShowPublishModal(false);
@@ -672,13 +660,13 @@ export default function NewArticlePage() {
 
                 {publishStatus !== "success" && (
                   <button
+                    type='button'
                     disabled={publishStatus === "publishing"}
                     onClick={handlePublish}
                     className={`
                       rounded-lg px-4 py-2 text-sm transition-all
                       disabled:cursor-not-allowed disabled:opacity-70
-                      ${
-                        darkMode ? "bg-white text-black" : "bg-black text-white"
+                      ${darkMode ? "bg-white text-black" : "bg-black text-white"
                       }
                     `}
                   >
@@ -699,11 +687,10 @@ export default function NewArticlePage() {
             <div
               className={`
           w-full max-w-md rounded-3xl border px-8 py-8 shadow-2xl backdrop-blur-2xl
-          ${
-            darkMode
-              ? "border-white/10 bg-[#111]/90 text-white"
-              : "border-black/10 bg-white/90 text-black"
-          }
+          ${darkMode
+                  ? "border-white/10 bg-[#111]/90 text-white"
+                  : "border-black/10 bg-white/90 text-black"
+                }
         `}
             >
               <div className="flex flex-col items-center text-center">
@@ -717,9 +704,8 @@ export default function NewArticlePage() {
                 </div>
 
                 <p
-                  className={`text-xs uppercase tracking-[0.25em] ${
-                    darkMode ? "text-white/40" : "text-black/40"
-                  }`}
+                  className={`text-xs uppercase tracking-[0.25em] ${darkMode ? "text-white/40" : "text-black/40"
+                    }`}
                 >
                   Published Successfully
                 </p>
@@ -729,9 +715,8 @@ export default function NewArticlePage() {
                 </h3>
 
                 <p
-                  className={`mt-3 max-w-sm text-sm leading-7 ${
-                    darkMode ? "text-white/60" : "text-black/60"
-                  }`}
+                  className={`mt-3 max-w-sm text-sm leading-7 ${darkMode ? "text-white/60" : "text-black/60"
+                    }`}
                 >
                   Readers can now discover and share your writing.
                 </p>
@@ -743,11 +728,10 @@ export default function NewArticlePage() {
                   rel="noreferrer"
                   className={`
               mt-8 inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-medium transition-all
-              ${
-                darkMode
-                  ? "bg-white text-black hover:bg-white/90"
-                  : "bg-black text-white hover:bg-black/90"
-              }
+              ${darkMode
+                      ? "bg-white text-black hover:bg-white/90"
+                      : "bg-black text-white hover:bg-black/90"
+                    }
             `}
                 >
                   Read Published Post
@@ -757,26 +741,26 @@ export default function NewArticlePage() {
                 {/* ACTIONS */}
                 <div className="mt-8 flex w-full gap-3">
                   <button
+                    type='button'
                     onClick={() => {
                       navigator.clipboard.writeText(
-                        `${window.location.origin}/posts/${
-                          publishedPost?.slug ?? publishedPost?.id
+                        `${window.location.origin}/posts/${publishedPost?.slug ?? publishedPost?.id
                         }`
                       );
                     }}
                     className={`
-                flex-1 rounded-2xl border px-4 py-3 text-sm transition-all
-                ${
-                  darkMode
-                    ? "border-white/10 hover:bg-white/5"
-                    : "border-black/10 hover:bg-black/5"
-                }
-              `}
+                    flex-1 rounded-2xl border px-4 py-3 text-sm transition-all
+                    ${darkMode
+                        ? "border-white/10 hover:bg-white/5"
+                        : "border-black/10 hover:bg-black/5"
+                      }
+                  `}
                   >
                     Copy Link
                   </button>
 
                   <button
+                    type='button'
                     onClick={() => {
                       setShowPublishModal(false);
                       setPublishStatus("idle");
@@ -784,11 +768,10 @@ export default function NewArticlePage() {
                     }}
                     className={`
                 flex-1 rounded-2xl px-4 py-3 text-sm transition-all
-                ${
-                  darkMode
-                    ? "bg-white text-black hover:bg-white/90"
-                    : "bg-black text-white hover:bg-black/90"
-                }
+                ${darkMode
+                        ? "bg-white text-black hover:bg-white/90"
+                        : "bg-black text-white hover:bg-black/90"
+                      }
               `}
                   >
                     Done

@@ -15,7 +15,10 @@ export default class CreatePostDto {
   subTitle: string;
 
   @IsJSON()
-  content: string;
+  jsonContent: string;
+
+  @IsString()
+  htmlContent: string;
 
   @IsArray()
   @ArrayNotEmpty()

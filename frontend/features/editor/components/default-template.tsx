@@ -4,7 +4,6 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef, forwardRef } from "react";
-import { useTheme } from "next-themes";
 import {
   // Core system
   createEditorSystem,
@@ -253,9 +252,8 @@ function FloatingToolbarRenderer() {
           <button
             type="button"
             onClick={() => commands.setImageAlignment("left")}
-            className={`lexkit-toolbar-button ${
-              activeStates.isImageAlignedLeft ? "active" : ""
-            }`}
+            className={`lexkit-toolbar-button ${activeStates.isImageAlignedLeft ? "active" : ""
+              }`}
             title="Align Left"
           >
             <AlignLeft size={14} />
@@ -263,9 +261,8 @@ function FloatingToolbarRenderer() {
           <button
             type="button"
             onClick={() => commands.setImageAlignment("center")}
-            className={`lexkit-toolbar-button ${
-              activeStates.isImageAlignedCenter ? "active" : ""
-            }`}
+            className={`lexkit-toolbar-button ${activeStates.isImageAlignedCenter ? "active" : ""
+              }`}
             title="Align Center"
           >
             <AlignCenter size={14} />
@@ -273,9 +270,8 @@ function FloatingToolbarRenderer() {
           <button
             type="button"
             onClick={() => commands.setImageAlignment("right")}
-            className={`lexkit-toolbar-button ${
-              activeStates.isImageAlignedRight ? "active" : ""
-            }`}
+            className={`lexkit-toolbar-button ${activeStates.isImageAlignedRight ? "active" : ""
+              }`}
             title="Align Right"
           >
             <AlignRight size={14} />
@@ -297,9 +293,8 @@ function FloatingToolbarRenderer() {
           <button
             type="button"
             onClick={() => commands.toggleBold()}
-            className={`lexkit-toolbar-button ${
-              activeStates.bold ? "active" : ""
-            }`}
+            className={`lexkit-toolbar-button ${activeStates.bold ? "active" : ""
+              }`}
             title="Bold"
           >
             <Bold size={14} />
@@ -307,9 +302,8 @@ function FloatingToolbarRenderer() {
           <button
             type="button"
             onClick={() => commands.toggleItalic()}
-            className={`lexkit-toolbar-button ${
-              activeStates.italic ? "active" : ""
-            }`}
+            className={`lexkit-toolbar-button ${activeStates.italic ? "active" : ""
+              }`}
             title="Italic"
           >
             <Italic size={14} />
@@ -317,9 +311,8 @@ function FloatingToolbarRenderer() {
           <button
             type="button"
             onClick={() => commands.toggleUnderline()}
-            className={`lexkit-toolbar-button ${
-              activeStates.underline ? "active" : ""
-            }`}
+            className={`lexkit-toolbar-button ${activeStates.underline ? "active" : ""
+              }`}
             title="Underline"
           >
             <Underline size={14} />
@@ -327,9 +320,8 @@ function FloatingToolbarRenderer() {
           <button
             type="button"
             onClick={() => commands.toggleStrikethrough()}
-            className={`lexkit-toolbar-button ${
-              activeStates.strikethrough ? "active" : ""
-            }`}
+            className={`lexkit-toolbar-button ${activeStates.strikethrough ? "active" : ""
+              }`}
             title="Strikethrough"
           >
             <Strikethrough size={14} />
@@ -338,9 +330,8 @@ function FloatingToolbarRenderer() {
           <button
             type="button"
             onClick={() => commands.formatText("code")}
-            className={`lexkit-toolbar-button ${
-              activeStates.code ? "active" : ""
-            }`}
+            className={`lexkit-toolbar-button ${activeStates.code ? "active" : ""
+              }`}
             title="Inline Code"
           >
             <Code size={14} />
@@ -352,9 +343,8 @@ function FloatingToolbarRenderer() {
                 ? commands.removeLink()
                 : commands.insertLink()
             }
-            className={`lexkit-toolbar-button ${
-              activeStates.isLink ? "active" : ""
-            }`}
+            className={`lexkit-toolbar-button ${activeStates.isLink ? "active" : ""
+              }`}
             title={activeStates.isLink ? "Remove Link" : "Insert Link"}
           >
             {activeStates.isLink ? <Unlink size={14} /> : <Link size={14} />}
@@ -365,17 +355,16 @@ function FloatingToolbarRenderer() {
               <button
                 type="button"
                 onClick={() => commands.toggleParagraph()}
-                className={`lexkit-toolbar-button ${
-                  !activeStates.isH1 &&
-                  !activeStates.isH2 &&
-                  !activeStates.isH3 &&
-                  !activeStates.isH4 &&
-                  !activeStates.isH5 &&
-                  !activeStates.isH6 &&
-                  !activeStates.isQuote
+                className={`lexkit-toolbar-button ${!activeStates.isH1 &&
+                    !activeStates.isH2 &&
+                    !activeStates.isH3 &&
+                    !activeStates.isH4 &&
+                    !activeStates.isH5 &&
+                    !activeStates.isH6 &&
+                    !activeStates.isQuote
                     ? "active"
                     : ""
-                }`}
+                  }`}
                 title="Paragraph"
               >
                 P
@@ -383,9 +372,8 @@ function FloatingToolbarRenderer() {
               <button
                 type="button"
                 onClick={() => commands.toggleHeading("h1")}
-                className={`lexkit-toolbar-button ${
-                  activeStates.isH1 ? "active" : ""
-                }`}
+                className={`lexkit-toolbar-button ${activeStates.isH1 ? "active" : ""
+                  }`}
                 title="Heading 1"
               >
                 H1
@@ -393,9 +381,8 @@ function FloatingToolbarRenderer() {
               <button
                 type="button"
                 onClick={() => commands.toggleHeading("h2")}
-                className={`lexkit-toolbar-button ${
-                  activeStates.isH2 ? "active" : ""
-                }`}
+                className={`lexkit-toolbar-button ${activeStates.isH2 ? "active" : ""
+                  }`}
                 title="Heading 2"
               >
                 H2
@@ -403,9 +390,8 @@ function FloatingToolbarRenderer() {
               <button
                 type="button"
                 onClick={() => commands.toggleHeading("h3")}
-                className={`lexkit-toolbar-button ${
-                  activeStates.isH3 ? "active" : ""
-                }`}
+                className={`lexkit-toolbar-button ${activeStates.isH3 ? "active" : ""
+                  }`}
                 title="Heading 3"
               >
                 H3
@@ -413,9 +399,8 @@ function FloatingToolbarRenderer() {
               <button
                 type="button"
                 onClick={() => commands.toggleQuote()}
-                className={`lexkit-toolbar-button ${
-                  activeStates.isQuote ? "active" : ""
-                }`}
+                className={`lexkit-toolbar-button ${activeStates.isQuote ? "active" : ""
+                  }`}
                 title="Quote"
               >
                 <Quote size={14} />
@@ -424,9 +409,8 @@ function FloatingToolbarRenderer() {
                 <button
                   type="button"
                   onClick={() => commands.toggleCodeBlock()}
-                  className={`lexkit-toolbar-button ${
-                    activeStates.isInCodeBlock ? "active" : ""
-                  }`}
+                  className={`lexkit-toolbar-button ${activeStates.isInCodeBlock ? "active" : ""
+                    }`}
                   title="Code Block"
                 >
                   <Terminal size={14} />
@@ -440,9 +424,8 @@ function FloatingToolbarRenderer() {
               <button
                 type="button"
                 onClick={() => commands.toggleUnorderedList()}
-                className={`lexkit-toolbar-button ${
-                  activeStates.unorderedList ? "active" : ""
-                }`}
+                className={`lexkit-toolbar-button ${activeStates.unorderedList ? "active" : ""
+                  }`}
                 title="Bullet List"
               >
                 <List size={14} />
@@ -450,9 +433,8 @@ function FloatingToolbarRenderer() {
               <button
                 type="button"
                 onClick={() => commands.toggleOrderedList()}
-                className={`lexkit-toolbar-button ${
-                  activeStates.orderedList ? "active" : ""
-                }`}
+                className={`lexkit-toolbar-button ${activeStates.orderedList ? "active" : ""
+                  }`}
                 title="Numbered List"
               >
                 <ListOrdered size={14} />
@@ -507,18 +489,18 @@ function Toolbar({
   const currentBlockFormat = activeStates.isH1
     ? "h1"
     : activeStates.isH2
-    ? "h2"
-    : activeStates.isH3
-    ? "h3"
-    : activeStates.isH4
-    ? "h4"
-    : activeStates.isH5
-    ? "h5"
-    : activeStates.isH6
-    ? "h6"
-    : activeStates.isQuote
-    ? "quote"
-    : "p";
+      ? "h2"
+      : activeStates.isH3
+        ? "h3"
+        : activeStates.isH4
+          ? "h4"
+          : activeStates.isH5
+            ? "h5"
+            : activeStates.isH6
+              ? "h6"
+              : activeStates.isQuote
+                ? "quote"
+                : "p";
 
   const handleBlockFormatChange = (value: string) => {
     if (value === "p") commands.toggleParagraph();
@@ -535,9 +517,8 @@ function Toolbar({
           <button
             type="button"
             onClick={() => commands.toggleBold()}
-            className={`lexkit-toolbar-button ${
-              activeStates.bold ? "active" : ""
-            }`}
+            className={`lexkit-toolbar-button ${activeStates.bold ? "active" : ""
+              }`}
             title="Bold (Ctrl+B)"
           >
             <Bold size={16} />
@@ -545,9 +526,8 @@ function Toolbar({
           <button
             type="button"
             onClick={() => commands.toggleItalic()}
-            className={`lexkit-toolbar-button ${
-              activeStates.italic ? "active" : ""
-            }`}
+            className={`lexkit-toolbar-button ${activeStates.italic ? "active" : ""
+              }`}
             title="Italic (Ctrl+I)"
           >
             <Italic size={16} />
@@ -555,9 +535,8 @@ function Toolbar({
           <button
             type="button"
             onClick={() => commands.toggleUnderline()}
-            className={`lexkit-toolbar-button ${
-              activeStates.underline ? "active" : ""
-            }`}
+            className={`lexkit-toolbar-button ${activeStates.underline ? "active" : ""
+              }`}
             title="Underline (Ctrl+U)"
           >
             <Underline size={16} />
@@ -565,9 +544,8 @@ function Toolbar({
           <button
             type="button"
             onClick={() => commands.toggleStrikethrough()}
-            className={`lexkit-toolbar-button ${
-              activeStates.strikethrough ? "active" : ""
-            }`}
+            className={`lexkit-toolbar-button ${activeStates.strikethrough ? "active" : ""
+              }`}
             title="Strikethrough"
           >
             <Strikethrough size={16} />
@@ -575,9 +553,8 @@ function Toolbar({
           <button
             type="button"
             onClick={() => commands.formatText("code")}
-            className={`lexkit-toolbar-button ${
-              activeStates.code ? "active" : ""
-            }`}
+            className={`lexkit-toolbar-button ${activeStates.code ? "active" : ""
+              }`}
             title="Inline Code"
           >
             <Code size={16} />
@@ -589,9 +566,8 @@ function Toolbar({
                 ? commands.removeLink()
                 : commands.insertLink()
             }
-            className={`lexkit-toolbar-button ${
-              activeStates.isLink ? "active" : ""
-            }`}
+            className={`lexkit-toolbar-button ${activeStates.isLink ? "active" : ""
+              }`}
             title={activeStates.isLink ? "Remove Link" : "Insert Link"}
           >
             {activeStates.isLink ? <Unlink size={16} /> : <Link size={16} />}
@@ -611,9 +587,8 @@ function Toolbar({
               <button
                 type="button"
                 onClick={() => commands.toggleCodeBlock()}
-                className={`lexkit-toolbar-button ${
-                  activeStates.isInCodeBlock ? "active" : ""
-                }`}
+                className={`lexkit-toolbar-button ${activeStates.isInCodeBlock ? "active" : ""
+                  }`}
                 title="Code Block"
               >
                 <Terminal size={16} />
@@ -628,9 +603,8 @@ function Toolbar({
             <button
               type="button"
               onClick={() => commands.toggleUnorderedList()}
-              className={`lexkit-toolbar-button ${
-                activeStates.unorderedList ? "active" : ""
-              }`}
+              className={`lexkit-toolbar-button ${activeStates.unorderedList ? "active" : ""
+                }`}
               title="Bullet List"
             >
               <List size={16} />
@@ -638,9 +612,8 @@ function Toolbar({
             <button
               type="button"
               onClick={() => commands.toggleOrderedList()}
-              className={`lexkit-toolbar-button ${
-                activeStates.orderedList ? "active" : ""
-              }`}
+              className={`lexkit-toolbar-button ${activeStates.orderedList ? "active" : ""
+                }`}
               title="Numbered List"
             >
               <ListOrdered size={16} />
@@ -702,9 +675,8 @@ function Toolbar({
             <Dropdown
               trigger={
                 <div
-                  className={`lexkit-toolbar-button ${
-                    activeStates.imageSelected ? "active" : ""
-                  }`}
+                  className={`lexkit-toolbar-button ${activeStates.imageSelected ? "active" : ""
+                    }`}
                   title="Insert Image"
                 >
                   <ImageIcon size={16} />
@@ -802,9 +774,8 @@ function Toolbar({
             <button
               type="button"
               onClick={() => commands.insertHTMLEmbed()}
-              className={`lexkit-toolbar-button ${
-                activeStates.isHTMLEmbedSelected ? "active" : ""
-              }`}
+              className={`lexkit-toolbar-button ${activeStates.isHTMLEmbedSelected ? "active" : ""
+                }`}
               title="Insert HTML Embed"
             >
               <FileCode size={16} />
@@ -910,7 +881,7 @@ function Toolbar({
               onChange={(e) =>
                 setTableConfig((prev) => ({
                   ...prev,
-                  columns: parseInt(e.target.value) || 1,
+                  columns: Number.parseInt(e.target.value) || 1,
                 }))
               }
               className="lexkit-input"
@@ -1009,15 +980,16 @@ function EditorContent({
   onReady,
 }: {
   className?: string;
-  onContentChange: (content: string) => void;
+  onContentChange: (jsonContent: string, htmlContent: string) => void;
   isDark: boolean;
   toggleTheme: () => void;
   onReady?: (methods: DefaultTemplateRef) => void;
 }) {
   const { commands, hasExtension, activeStates, lexical: editor } = useEditor();
-  const [mode, setMode] = useState<EditorMode>("visual");
-  const [content, setContent] = useState({ html: "", markdown: "" });
+
+  const [mode] = useState<EditorMode>("visual");
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+
   const commandsRef = useRef<EditorCommands>(commands);
   const readyRef = useRef(false);
 
@@ -1029,39 +1001,46 @@ function EditorContent({
     () => ({
       injectMarkdown: (content: string) => {
         setTimeout(() => {
-          if (editor) {
-            editor.update(() => {
-              commandsRef.current.importFromMarkdown(content, {
-                immediate: true,
-                preventFocus: true,
-              });
+          if (!editor) return;
+
+          editor.update(() => {
+            commandsRef.current.importFromMarkdown(content, {
+              immediate: true,
+              preventFocus: true,
             });
-          }
-        }, 100); // Small delay to ensure editor is ready
-      },
-      injectHTML: (content: string) => {
-        setTimeout(() => {
-          if (editor) {
-            editor.update(() => {
-              commandsRef.current.importFromHTML(content, {
-                preventFocus: true,
-              });
-            });
-          }
+          });
         }, 100);
       },
+
+      injectHTML: (content: string) => {
+        setTimeout(() => {
+          if (!editor) return;
+
+          editor.update(() => {
+            commandsRef.current.importFromHTML(content, {
+              preventFocus: true,
+            });
+          });
+        }, 100);
+      },
+
       getMarkdown: () => commandsRef.current.exportToMarkdown(),
+
       getHTML: () => commandsRef.current.exportToHTML(),
     }),
     [editor]
   );
 
+  // Setup commands, shortcuts, command palette
   useEffect(() => {
     if (!editor || !commands) return;
 
     const paletteCommands = commandsToCommandPaletteItems(commands);
+
     // biome-ignore lint/complexity/noForEach: <explanation>
-    paletteCommands.forEach((cmd) => commands.registerCommand(cmd));
+    paletteCommands.forEach((cmd) => {
+      commands.registerCommand(cmd);
+    });
 
     const originalShowCommand = commands.showCommandPalette;
     commands.showCommandPalette = () => setCommandPaletteOpen(true);
@@ -1077,6 +1056,7 @@ function EditorContent({
         setCommandPaletteOpen(true);
       }
     };
+
     document.addEventListener("keydown", handleKeyDown);
 
     if (!readyRef.current) {
@@ -1084,25 +1064,30 @@ function EditorContent({
       onReady?.(methods);
     }
 
-    if (editor) {
-      const editorState = editor.getEditorState();
-      const jsonState = editorState.toJSON();
-
-      onContentChange?.(JSON.stringify(jsonState));
-    }
-
     return () => {
       unregisterShortcuts();
       document.removeEventListener("keydown", handleKeyDown);
       commands.showCommandPalette = originalShowCommand;
     };
-  }, [editor, commands, onReady, methods, onContentChange]);
+  }, [editor, commands, onReady, methods]);
 
-  const handleHtmlChange = (html: string) =>
-    setContent((prev) => ({ ...prev, html }));
+  // Listen to latest editor JSON + HTML
+  useEffect(() => {
+    if (!editor) return;
 
-  const handleMarkdownChange = (markdown: string) =>
-    setContent((prev) => ({ ...prev, markdown }));
+    const unregisterUpdateListener = editor.registerUpdateListener(
+      ({ editorState }) => {
+        const jsonContent = JSON.stringify(editorState.toJSON());
+        const htmlContent = commandsRef.current.exportToHTML();
+
+        onContentChange?.(jsonContent, htmlContent);
+      }
+    );
+
+    return () => {
+      unregisterUpdateListener();
+    };
+  }, [editor, onContentChange]);
 
   return (
     <>
@@ -1118,6 +1103,7 @@ function EditorContent({
           />
         )}
       </div>
+
       <div className="lexkit-editor">
         <div
           className="flex flex-col flex-1"
@@ -1132,9 +1118,11 @@ function EditorContent({
             }
             ErrorBoundary={ErrorBoundary}
           />
+
           <FloatingToolbarRenderer />
         </div>
       </div>
+
       <CommandPalette
         isOpen={commandPaletteOpen}
         onClose={() => setCommandPaletteOpen(false)}
@@ -1148,7 +1136,7 @@ function EditorContent({
 interface DefaultTemplateProps {
   className?: string;
   theme?: "light" | "dark";
-  onContentChange?: (content: string) => void;
+  onContentChange?: (jsonContent: string, htmlContent: string) => void;
   onReady?: (methods: DefaultTemplateRef) => void;
 }
 
@@ -1205,7 +1193,7 @@ export const DefaultTemplate = forwardRef<
     >
       <Provider extensions={extensions} config={{ theme: defaultTheme }}>
         <EditorContent
-          onContentChange={(content) => onContentChange?.(content)}
+          onContentChange={(json, html) => onContentChange?.(json, html)}
           className={className}
           isDark={isDark}
           toggleTheme={toggleTheme}

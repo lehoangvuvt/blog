@@ -1,14 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React from "react";
-
 import { useAppSelector } from "@/store/hooks";
 import {
   selectFont,
   selectFontSize,
   selectTheme,
 } from "@/features/app-settings/selectors";
+import Link from "next/link";
 
 function usePostThemeClasses() {
   const theme = useAppSelector(selectTheme);
@@ -22,35 +21,35 @@ function usePostThemeClasses() {
       fontSize === "small"
         ? "text-lg"
         : fontSize === "large"
-        ? "text-2xl"
-        : "text-xl",
+          ? "text-2xl"
+          : "text-xl",
 
     subtitleSize:
       fontSize === "small"
         ? "text-sm"
         : fontSize === "large"
-        ? "text-lg"
-        : "text-base",
+          ? "text-lg"
+          : "text-base",
 
     metaSize:
       fontSize === "small"
         ? "text-xs"
         : fontSize === "large"
-        ? "text-base"
-        : "text-sm",
+          ? "text-base"
+          : "text-sm",
 
     fontClass:
       font === "serif"
         ? "font-serif"
         : font === "monospace"
-        ? "font-mono"
-        : "font-sans",
+          ? "font-mono"
+          : "font-sans",
     sizeClass:
       fontSize === "small"
         ? "text-sm"
         : fontSize === "large"
-        ? "text-lg"
-        : "text-base",
+          ? "text-lg"
+          : "text-base",
 
     borderClass: isDark ? "border-white/10" : "border-black/10",
     titleClass: isDark ? "text-white" : "text-[#242424]",
@@ -109,15 +108,16 @@ export const PostItem = {
     return <span>{children}</span>;
   },
 
-  Title({ children }: { children: React.ReactNode }) {
+  Title({ children, link }: { children: React.ReactNode; link: string }) {
     const styles = usePostThemeClasses();
 
     return (
-      <h2
+      <Link
+        href={link}
         className={`line-clamp-2 cursor-pointer font-semibold tracking-tight group-hover:underline ${styles.titleSize} ${styles.titleClass}`}
       >
         {children}
-      </h2>
+      </Link>
     );
   },
 
@@ -158,11 +158,11 @@ export const PostItem = {
       <article
         className={`animate-pulse border-b py-8 ${styles.borderClass} ${styles.fontClass} ${styles.sizeClass}`}
       >
-        <div className="flex gap-6">
+        <div className="flex gap-6 w-full">
           <div className="min-w-0 flex-1">
             <div className="mb-3 flex items-center gap-2">
               <div
-                className={`h-4 w-24 rounded-full ${styles.skeletonClass}`}
+                className={`h-4 w-4xl rounded-full ${styles.skeletonClass}`}
               />
               <div className={`h-1 w-1 rounded-full ${styles.skeletonClass}`} />
               <div
