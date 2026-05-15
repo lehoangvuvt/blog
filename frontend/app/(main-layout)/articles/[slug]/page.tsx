@@ -2,8 +2,11 @@
 import DOMPurify from "isomorphic-dompurify";
 import MainLayout from "@/shared/components/layout/main-layout/main-layout";
 import Link from "next/link";
-import { ArticleContent } from "./article-content";
-import { CommentsSection } from "./comments-section";
+import { ArticleContent } from "@/app/(main-layout)/articles/[slug]/components/article-content";
+import { CommentsSection } from "@/app/(main-layout)/articles/[slug]/components/comments-section";
+import HeadingNavigation, {
+  Heading,
+} from "@/app/(main-layout)/articles/[slug]/components/headings";
 
 type Author = {
   id: string;
@@ -24,12 +27,6 @@ type Post = {
   createdAt?: string;
   author?: Author;
   tags?: Tag[];
-};
-
-type Heading = {
-  id: string;
-  text: string;
-  level: number;
 };
 
 function slugify(text: string) {
@@ -210,34 +207,10 @@ export default async function ArticlePage({
 
           <ArticleContent html={htmlWithIds} />
 
-          <CommentsSection
-            postId={slug}
-
-          />
+          <CommentsSection postId={slug} />
         </article>
 
-        {headings.length > 0 && (
-          <aside className="hidden xl:block">
-            <div className="sticky top-24 border-l border-black/5 pl-5">
-              <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-neutral-400">
-                On this page
-              </p>
-
-              <nav className="space-y-2">
-                {headings.map((heading) => (
-                  <a
-                    key={heading.id}
-                    href={`#${heading.id}`}
-                    className={`block text-sm leading-6 text-neutral-500 transition-colors duration-300 hover:text-black ${heading.level === 3 ? "pl-4" : ""
-                      } ${heading.level >= 4 ? "pl-8" : ""}`}
-                  >
-                    {heading.text}
-                  </a>
-                ))}
-              </nav>
-            </div>
-          </aside>
-        )}
+        {headings.length > 0 && <HeadingNavigation headings={headings} />}
       </main>
     </MainLayout>
   );
