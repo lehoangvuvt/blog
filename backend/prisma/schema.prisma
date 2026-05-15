@@ -25,13 +25,14 @@ model User {
 }
 
 model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  sub_title String
-  content   Json
-  published Boolean? @default(false)
-  author    User?    @relation(fields: [authorId], references: [id])
-  authorId  String?
+  id              Int      @id @default(autoincrement())
+  title           String
+  sub_title       String
+  thumbnail_image String?
+  content         Json
+  published       Boolean? @default(false)
+  author          User?    @relation(fields: [authorId], references: [id])
+  authorId        String?
 
   tags Tag[]
 

@@ -1,8 +1,13 @@
 "use client";
 
-import { selectSideBarStatus } from "@/features/app-settings/selectors";
 import Header from "@/shared/components/layout/header/header";
 import Sidebar from "@/shared/components/layout/sidebar/sidebar";
+
+import {
+  selectSideBarStatus,
+  selectTheme,
+} from "@/features/app-settings/selectors";
+
 import { useAppSelector } from "@/store/hooks";
 
 export default function MainLayout({
@@ -12,14 +17,24 @@ export default function MainLayout({
 }) {
   const isOpenSideBar = useAppSelector(selectSideBarStatus);
 
+  const theme = useAppSelector(selectTheme);
+
+  const isDark = theme === "dark";
+
   return (
-    <div className="min-h-screen">
+    <div
+      className={`min-h-screen transition-colors duration-300 ${
+        isDark ? "bg-zinc-950 text-white" : "bg-white text-black"
+      }`}
+    >
       <Header />
+
       <Sidebar />
+
       <main
-        className={`${
-          isOpenSideBar ? `pl-60` : `pl-0`
-        } pt-10 delay-50 duration-300 ease-in-out transition-all`}
+        className={`pt-10 transition-all duration-300 ease-in-out ${
+          isOpenSideBar ? "pl-60" : "pl-0"
+        }`}
       >
         <div className="p-6">{children}</div>
       </main>

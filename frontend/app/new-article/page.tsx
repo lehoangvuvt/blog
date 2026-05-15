@@ -1,9 +1,15 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { DefaultTemplate } from "@/features/editor/components/default-template";
 import { createPost } from "@/features/posts/api/create-post";
+import Image from "next/image";
+import {
+  getUploadPresignedUrl,
+  uploadFile,
+} from "@/features/files/api/upload.api";
 
 export default function NewArticlePage() {
   const [mounted, setMounted] = useState(false);
@@ -22,6 +28,8 @@ export default function NewArticlePage() {
 
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [publishTagInput, setPublishTagInput] = useState("");
+
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
   const [publishedPost, setPublishedPost] = useState<{
     id?: string;
@@ -130,6 +138,7 @@ export default function NewArticlePage() {
         published: true,
         content,
         tags,
+        ...(thumbnailPreview && { thumbnailImage: thumbnailPreview }),
       });
       setShowPublishModal(false);
 
@@ -140,6 +149,24 @@ export default function NewArticlePage() {
       setPublishStatus("error");
       setPublishError("Something went wrong while publishing.");
     }
+  };
+
+  const handleThumbnailChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    const mimeType = file.type;
+    const getUploadPresignedUrlResponse = await getUploadPresignedUrl(
+      file.name,
+      mimeType
+    );
+    const { url, publicUrl } = getUploadPresignedUrlResponse;
+    await uploadFile(file, url);
+
+    setThumbnailPreview(publicUrl);
   };
 
   if (!mounted) return <h1>Loading...</h1>;
@@ -322,6 +349,78 @@ export default function NewArticlePage() {
           >
             {subtitle.length}/{SUBTITLE_LIMIT}
           </div>
+        </div>
+
+        <div
+          style={{
+            transform: `translateY(${titleY}px)`,
+            opacity: titleOpacity,
+          }}
+          className="mt-10"
+        >
+          <p
+            className={`mb-3 text-xs uppercase tracking-[0.2em] ${
+              darkMode ? "text-white/40" : "text-black/40"
+            }`}
+          >
+            Thumbnail
+          </p>
+
+          <label
+            className={`
+      group relative flex cursor-pointer items-center justify-center overflow-hidden
+      rounded-3xl border transition-all duration-300
+      aspect-[16/9]
+      ${
+        darkMode
+          ? "border-white/10 bg-white/[0.03] hover:bg-white/[0.05]"
+          : "border-black/10 bg-black/[0.02] hover:bg-black/[0.04]"
+      }
+    `}
+          >
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleThumbnailChange}
+            />
+
+            {thumbnailPreview ? (
+              <>
+                <img
+                  src={thumbnailPreview}
+                  alt="Thumbnail preview"
+                  className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+                />
+
+                <div className="absolute inset-0 bg-black/20 opacity-0 transition-opacity group-hover:opacity-100" />
+
+                <div className="absolute bottom-4 right-4 rounded-full bg-white px-4 py-2 text-xs font-medium text-black shadow-lg">
+                  Change Image
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center text-center">
+                <div
+                  className={`mb-4 flex h-14 w-14 items-center justify-center rounded-full ${
+                    darkMode ? "bg-white text-black" : "bg-black text-white"
+                  }`}
+                >
+                  +
+                </div>
+
+                <p className="font-serif text-xl">Add a thumbnail image</p>
+
+                <p
+                  className={`mt-2 text-sm ${
+                    darkMode ? "text-white/45" : "text-black/45"
+                  }`}
+                >
+                  Recommended ratio: 16:9
+                </p>
+              </div>
+            )}
+          </label>
         </div>
 
         <div

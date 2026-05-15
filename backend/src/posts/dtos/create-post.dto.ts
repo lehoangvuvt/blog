@@ -3,6 +3,7 @@ import {
   IsArray,
   IsBoolean,
   IsJSON,
+  IsOptional,
   IsString,
 } from 'class-validator';
 
@@ -23,4 +24,8 @@ export default class CreatePostDto {
 
   @IsBoolean()
   published: boolean;
+
+  @IsString()
+  @IsOptional()
+  thumbnailImage?: string;
 }
