@@ -208,6 +208,7 @@ export class PostsService {
         thumbnail_image: true,
         created_at: true,
         slug: true,
+        author: true,
         tags: {
           select: {
             id: true,
@@ -226,6 +227,7 @@ export class PostsService {
       title: post.title,
       subTitle: post.sub_title,
       htmlContent: post.html_content,
+      author: post.author,
       thumbnailImage: post.thumbnail_image
         ? String(post.thumbnail_image)
         : null,
