@@ -46,6 +46,12 @@ export type PostDetails = {
     avatar?: string;
   };
   tags?: Tag[];
+  postsByAuthor: {
+    title: string;
+    slug: string;
+    subTitle?: string | null;
+    thumbnailImage?: string | null;
+  }[];
 };
 
 export type Tag = {

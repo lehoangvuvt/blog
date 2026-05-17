@@ -187,6 +187,32 @@ export class PostsService {
       throw new NotFoundException('Post not found');
     }
 
+    let postsByAuthor: Array<{
+      title: string;
+      slug: string;
+      subTitle: string;
+      thumbnailImage: string | null;
+    }> = [];
+
+    if (post.author) {
+      const getpostsByAuthorRes = await this.findMany({
+        authorId: post.author.id,
+        page: 1,
+        limit: 5,
+      });
+
+      if (getpostsByAuthorRes) {
+        postsByAuthor = getpostsByAuthorRes.data
+          .map((p) => ({
+            title: p.title,
+            slug: p.slug,
+            subTitle: p.subTitle,
+            thumbnailImage: p.thumbnailImage,
+          }))
+          .filter((p) => p.slug !== post.slug);
+      }
+    }
+
     return {
       id: post.id,
       title: post.title,
@@ -204,6 +230,7 @@ export class PostsService {
       createdAt: post.created_at,
       slug: post.slug,
       tags: post.tags,
+      postsByAuthor,
     };
   }
 }

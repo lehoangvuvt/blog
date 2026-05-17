@@ -42,7 +42,9 @@ export default function HeadingNavigation({
       }
     );
 
-    headingElements.forEach((el) => observer.observe(el));
+    for(const headingEle of headingElements) {
+      observer.observe(headingEle)
+    }
 
     return () => observer.disconnect();
   }, [headings]);

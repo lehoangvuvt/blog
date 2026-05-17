@@ -5,9 +5,10 @@ import Link from "next/link";
 import { ArticleContent } from "@/app/(main-layout)/articles/[slug]/components/article-content";
 import { CommentsSection } from "@/app/(main-layout)/articles/[slug]/components/comments-section";
 import HeadingNavigation, {
-  Heading,
+  type Heading,
 } from "@/app/(main-layout)/articles/[slug]/components/headings";
-import { PostDetails } from "@/features/posts/types";
+import type { PostDetails } from "@/features/posts/types";
+import { PostsBySameAuthor } from "./components/posts-by-same-author";
 
 function slugify(text: string) {
   return text
@@ -130,8 +131,8 @@ export default async function ArticlePage({
                         {`${post.author.email
                           .charAt(0)
                           .toUpperCase()}${post.author.email
-                          .charAt(1)
-                          .toUpperCase()}`}
+                            .charAt(1)
+                            .toUpperCase()}`}
                       </div>
                     )}
 
@@ -193,6 +194,8 @@ export default async function ArticlePage({
           )}
 
           <ArticleContent html={htmlWithIds} />
+
+          {post.author && <PostsBySameAuthor author={post.author} posts={post.postsByAuthor} />}
 
           <CommentsSection postId={slug} />
         </article>

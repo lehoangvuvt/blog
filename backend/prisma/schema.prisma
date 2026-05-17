@@ -22,7 +22,8 @@ model User {
   introduction String? @db.VarChar(200)
   is_active    Boolean @default(false)
 
-  posts Post[]
+  posts        Post[]
+  postComments PostComments[]
 
   created_at DateTime  @default(now())
   updated_at DateTime?
@@ -40,7 +41,8 @@ model Post {
   author          User?    @relation(fields: [authorId], references: [id])
   authorId        String?
 
-  tags Tag[]
+  tags         Tag[]
+  postComments PostComments[]
 
   created_at DateTime  @default(now())
   updated_at DateTime?
@@ -54,4 +56,26 @@ model Tag {
 
   created_at DateTime  @default(now())
   updated_at DateTime?
+}
+
+model PostComments {
+  id      String @id @default(uuid())
+  content String @db.VarChar(200)
+
+  user    User   @relation(fields: [user_id], references: [id])
+  user_id String
+
+  post    Post @relation(fields: [post_id], references: [id])
+  post_id Int
+
+  replyToComment      PostComments? @relation("CommentReplies", fields: [reply_to_comment_id], references: [id], onDelete: Cascade)
+  reply_to_comment_id String?
+
+  replies PostComments[] @relation("CommentReplies")
+
+  created_at DateTime  @default(now())
+  updated_at DateTime?
+
+  @@index([post_id])
+  @@index([reply_to_comment_id])
 }
