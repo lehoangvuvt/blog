@@ -3,10 +3,16 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import type CreatePostDto from './dtos/create-post.dto';
 import type { FindManyPostsDto } from './dtos/find-many-posts.dto';
+import type { GetRepliesQueryDto } from 'src/post-comments/dtos/get-replies-query.dto';
+// biome-ignore lint/style/useImportType: <explanation>
+import { PostCommentsService } from 'src/post-comments/post-comments.service';
 
 @Controller('posts')
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(
+    private readonly postsService: PostsService,
+    private readonly postCommentsService: PostCommentsService,
+  ) {}
 
   @Get()
   async findMany(@Query() query: FindManyPostsDto) {
@@ -16,6 +22,19 @@ export class PostsController {
   @Get('/:slug')
   async findBySlug(@Param('slug') slug: string) {
     return await this.postsService.findBySlug(slug);
+  }
+
+  @Get('/:postId/comments')
+  async getPostComments(
+    @Param('postId') postId: string,
+    @Query() query: GetRepliesQueryDto,
+  ) {
+    const { limit = 5, page = 1 } = query;
+    return await this.postCommentsService.getCommentsByPostId(
+      Number.parseInt(postId),
+      page,
+      limit,
+    );
   }
 
   @Post('')

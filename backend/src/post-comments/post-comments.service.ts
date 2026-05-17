@@ -11,37 +11,59 @@ import type { GetRepliesQueryDto } from './dtos/get-replies-query.dto';
 export class PostCommentsService {
   constructor(private prismaService: PrismaService) {}
 
-  async findMany(postId: number, page: number, limit: number) {
-    const comments = await this.prismaService.postComments.findMany({
-      where: {
-        post_id: postId,
-        reply_to_comment_id: null,
-      },
-      include: {
-        user: true,
-        replies: {
-          take: 3,
-          orderBy: {
-            created_at: 'asc',
+  async getCommentsByPostId(postId: number, page: number, limit: number) {
+    const [comments, total] = await Promise.all([
+      this.prismaService.postComments.findMany({
+        where: {
+          post_id: postId,
+          reply_to_comment_id: null,
+        },
+        include: {
+          user: true,
+          replies: {
+            take: 3,
+            orderBy: {
+              created_at: 'asc',
+            },
+            include: {
+              user: true,
+            },
           },
-          include: {
-            user: true,
+          _count: {
+            select: {
+              replies: true,
+            },
           },
         },
-        _count: {
-          select: {
-            replies: true,
-          },
+        orderBy: {
+          created_at: 'desc',
         },
-      },
-      orderBy: {
-        created_at: 'desc',
-      },
-      skip: (page - 1) * limit,
-      take: limit,
-    });
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
 
-    return comments;
+      this.prismaService.postComments.count({
+        where: {
+          post_id: postId,
+          reply_to_comment_id: null,
+        },
+      }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+    const hasMore = page < totalPages;
+
+    return {
+      data: comments,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasMore,
+        nextPage: hasMore ? page + 1 : null,
+      },
+    };
   }
 
   async getReplies(commentId: string, query: GetRepliesQueryDto) {
