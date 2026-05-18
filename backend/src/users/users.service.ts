@@ -44,6 +44,7 @@ export class UsersService {
           password,
           full_name: fullName,
           slug,
+          is_active: true,
         },
       });
 

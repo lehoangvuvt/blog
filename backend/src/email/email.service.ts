@@ -36,6 +36,11 @@ export class EmailService {
         html,
       });
 
+      if (response.error) {
+        console.error('Email send failed:', response.error?.message);
+        throw new InternalServerErrorException('Failed to send email');
+      }
+
       return response;
     } catch (error) {
       console.error('Email send failed:', error);
@@ -55,7 +60,7 @@ export class EmailService {
   async sendVerifyEmail(to: string, token: string) {
     const verifyUrl = `${this.appUrl}/verify-email?token=${token}`;
 
-    return this.sendEmail({
+    return await this.sendEmail({
       to,
       subject: 'Verify your email',
       html: this.verifyEmailTemplate(verifyUrl),
@@ -118,27 +123,93 @@ export class EmailService {
 
   private verifyEmailTemplate(verifyUrl: string) {
     return this.baseTemplate(`
-      <h1>Verify your email</h1>
+    <div
+      style="
+        max-width: 560px;
+        margin: 0 auto;
+        padding: 48px 28px;
+        background: #ffffff;
+        color: #242424;
+      "
+    >
+      <div
+        style="
+          margin-bottom: 56px;
+          font-family: Georgia, serif;
+          font-size: 34px;
+          font-weight: bold;
+          letter-spacing: -1.6px;
+          line-height: 1;
+        "
+      >
+        Stories
+      </div>
 
-      <p>
-        Please verify your email address by clicking the button below.
+      <h1
+        style="
+          margin: 0 0 28px;
+          font-family: Georgia, serif;
+          font-size: 40px;
+          line-height: 1.08;
+          font-weight: bold;
+          letter-spacing: -1.8px;
+          color: #242424;
+        "
+      >
+        Verify your email.
+      </h1>
+
+      <p
+        style="
+          margin: 0 0 42px;
+          font-family: Georgia, serif;
+          font-size: 21px;
+          line-height: 1.75;
+          color: #3f3f3f;
+        "
+      >
+        Confirm your email address to continue creating your
+        account and start publishing your stories.
       </p>
 
       <a
         href="${verifyUrl}"
         style="
           display: inline-block;
-          margin-top: 20px;
-          background: black;
-          color: white;
+          background: #242424;
+          color: #ffffff;
           text-decoration: none;
-          padding: 12px 20px;
-          border-radius: 8px;
+          padding: 13px 24px;
+          border-radius: 999px;
+          font-family: Arial, sans-serif;
+          font-size: 15px;
+          font-weight: 500;
         "
       >
-        Verify Email
+        Continue
       </a>
-    `);
+
+      <div
+        style="
+          margin-top: 56px;
+          padding-top: 24px;
+          border-top: 1px solid #e6e6e6;
+        "
+      >
+        <p
+          style="
+            margin: 0;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.7;
+            color: #6b6b6b;
+          "
+        >
+          This verification link will expire in 30 minutes.
+        </p>
+      </div>
+    </div>
+  `);
   }
 
   private resetPasswordTemplate(resetUrl: string) {

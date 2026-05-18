@@ -1,7 +1,10 @@
 import { Body, Controller, Post } from '@nestjs/common';
 // biome-ignore lint/style/useImportType: <explanation>
 import { AuthService } from './auth.service';
-import type RegisterDto from './dtos/register-dto';
+import type RegisterDto from './dtos/register.dto';
+import { CreatePendingRegistrationDto } from './dtos/create-pending-registration.dto';
+import { VerifyEmailDto } from './dtos/verify-email.dto';
+import LoginDto from './dtos/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -12,8 +15,18 @@ export class AuthController {
     return await this.authService.register(body);
   }
 
+  @Post('register/email')
+  createPendingRegistration(@Body() dto: CreatePendingRegistrationDto) {
+    return this.authService.createPendingRegistration(dto);
+  }
+
+  @Post('/verify-email')
+  verifyEmail(@Body() dto: VerifyEmailDto) {
+    return this.authService.verifyEmail(dto.token);
+  }
+
   @Post('/login')
-  async login(@Body() body: RegisterDto) {
+  async login(@Body() body: LoginDto) {
     return await this.authService.login(body);
   }
 

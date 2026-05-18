@@ -1,13 +1,27 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 // biome-ignore lint/style/useImportType: <explanation>
 import { UsersService } from 'src/users/users.service';
 import * as argon2 from 'argon2';
 import * as jwt from 'jsonwebtoken';
-import type RegisterDto from './dtos/register-dto';
+import type RegisterDto from './dtos/register.dto';
 // biome-ignore lint/style/useImportType: <explanation>
 import { ConfigService } from '@nestjs/config';
 // biome-ignore lint/style/useImportType: <explanation>
 import { EmailService } from 'src/email/email.service';
+import { CreatePendingRegistrationDto } from './dtos/create-pending-registration.dto';
+import { PrismaService } from 'src/prisma.service';
+import { createHash, randomBytes } from 'node:crypto';
+import { addMinutes } from 'date-fns';
+import LoginDto from './dtos/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +29,7 @@ export class AuthService {
 
   constructor(
     private readonly configService: ConfigService,
+    private readonly prismaService: PrismaService,
     private readonly usersService: UsersService,
     private readonly emailService: EmailService,
   ) {
@@ -29,8 +44,118 @@ export class AuthService {
     return jwt.verify(token, this.jwtAccessTokenSecret);
   }
 
+  async createPendingRegistration(dto: CreatePendingRegistrationDto) {
+    const email = dto.email.trim().toLowerCase();
+
+    const existingUser = await this.prismaService.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('Email already exists');
+    }
+
+    const rawToken = randomBytes(32).toString('hex');
+
+    const hashedToken = createHash('sha256').update(rawToken).digest('hex');
+
+    await this.prismaService.pendingRegistration.create({
+      data: {
+        email,
+        hashed_token: hashedToken,
+        expires_at: addMinutes(new Date(), 30),
+      },
+    });
+
+    await this.emailService.sendVerifyEmail(email, rawToken);
+
+    return {
+      message: 'Verification email sent',
+    };
+  }
+
+  async verifyEmail(token: string) {
+    const hashedToken = createHash('sha256').update(token).digest('hex');
+
+    const verification =
+      await this.prismaService.pendingRegistration.findUnique({
+        where: {
+          hashed_token: hashedToken,
+        },
+      });
+
+    if (!verification) {
+      throw new BadRequestException('Invalid verification token');
+    }
+
+    if (verification.expires_at < new Date()) {
+      throw new BadRequestException('Verification token expired');
+    }
+
+    if (verification.verified_at) {
+      return {
+        message: 'Email already verified',
+        email: verification.email,
+      };
+    }
+
+    const existingUser = await this.prismaService.user.findUnique({
+      where: {
+        email: verification.email,
+      },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('Email already registered');
+    }
+
+    const updatedVerification =
+      await this.prismaService.pendingRegistration.update({
+        where: {
+          id: verification.id,
+        },
+        data: {
+          verified_at: new Date(),
+        },
+      });
+
+    return {
+      message: 'Email verified successfully',
+      email: updatedVerification.email,
+    };
+  }
+
   async register(dto: RegisterDto) {
-    const { email, password, fullName } = dto;
+    const { token, password, fullName } = dto;
+
+    const hashedToken = createHash('sha256').update(token).digest('hex');
+
+    const verification =
+      await this.prismaService.pendingRegistration.findUnique({
+        where: {
+          hashed_token: hashedToken,
+        },
+      });
+
+    if (!verification) {
+      throw new BadRequestException('Invalid verification token');
+    }
+
+    if (verification.expires_at < new Date()) {
+      throw new BadRequestException('Verification token expired');
+    }
+
+    if (!verification.verified_at) {
+      throw new BadRequestException('Email is not verified');
+    }
+
+    const existingUser = await this.usersService.findOne({
+      email: verification.email,
+    });
+
+    if (existingUser) {
+      throw new ConflictException('Email already exists');
+    }
 
     const hashedPassword = await argon2.hash(password, {
       type: argon2.argon2id,
@@ -40,12 +165,16 @@ export class AuthService {
     });
 
     const response = await this.usersService.create(
-      email,
+      verification.email,
       fullName,
       hashedPassword,
     );
 
-    await this.emailService.sendVerifyEmail(email, '123');
+    await this.prismaService.pendingRegistration.delete({
+      where: {
+        id: verification.id,
+      },
+    });
 
     return {
       fullName: response.full_name,
@@ -54,7 +183,7 @@ export class AuthService {
     };
   }
 
-  async login(dto: RegisterDto) {
+  async login(dto: LoginDto) {
     const { email, password } = dto;
 
     const user = await this.usersService.findOne({ email });

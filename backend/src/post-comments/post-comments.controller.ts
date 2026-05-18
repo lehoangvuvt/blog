@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Controller, Get, Param, Query } from '@nestjs/common';
 // biome-ignore lint/style/useImportType: <explanation>
 import { PostCommentsService } from './post-comments.service';

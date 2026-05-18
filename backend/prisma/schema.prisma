@@ -22,11 +22,24 @@ model User {
   introduction String? @db.VarChar(200)
   is_active    Boolean @default(false)
 
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+
   posts        Post[]
   postComments PostComments[]
+}
+
+model PendingRegistration {
+  id           Int       @id @default(autoincrement())
+  email        String
+  hashed_token String    @unique
+  verified_at  DateTime?
+  expires_at   DateTime
 
   created_at DateTime  @default(now())
-  updated_at DateTime?
+  updated_at DateTime? @updatedAt
+
+  @@index([email])
 }
 
 model Post {
@@ -45,7 +58,7 @@ model Post {
   postComments PostComments[]
 
   created_at DateTime  @default(now())
-  updated_at DateTime?
+  updated_at DateTime? @updatedAt
 }
 
 model Tag {
@@ -55,7 +68,7 @@ model Tag {
   posts Post[]
 
   created_at DateTime  @default(now())
-  updated_at DateTime?
+  updated_at DateTime? @updatedAt
 }
 
 model PostComments {
@@ -74,7 +87,7 @@ model PostComments {
   replies PostComments[] @relation("CommentReplies")
 
   created_at DateTime  @default(now())
-  updated_at DateTime?
+  updated_at DateTime? @updatedAt
 
   @@index([post_id])
   @@index([reply_to_comment_id])
