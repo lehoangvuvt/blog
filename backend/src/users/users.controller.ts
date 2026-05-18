@@ -1,6 +1,7 @@
 import { Controller, Get, Query } from '@nestjs/common';
+// biome-ignore lint/style/useImportType: <explanation>
 import { UsersService } from './users.service';
-import { FindManyPostsDto } from 'src/posts/dtos/find-many-posts.dto';
+import type { FindManyPostsDto } from 'src/posts/dtos/find-many-posts.dto';
 
 @Controller('users')
 export class UsersController {

@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma, User } from 'generated/prisma/client';
-import { FindManyPostsDto } from 'src/posts/dtos/find-many-posts.dto';
+import { Prisma, type User } from 'generated/prisma/client';
+import type { FindManyPostsDto } from 'src/posts/dtos/find-many-posts.dto';
 import { PostsService } from 'src/posts/posts.service';
 import { PrismaService } from 'src/prisma.service';
 import { generateSlug } from 'src/shared/utils';

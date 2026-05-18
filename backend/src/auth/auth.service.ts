@@ -1,13 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+// biome-ignore lint/style/useImportType: <explanation>
 import { UsersService } from 'src/users/users.service';
 import * as argon2 from 'argon2';
 import * as jwt from 'jsonwebtoken';
-import RegisterDto from './dtos/register-dto';
+import type RegisterDto from './dtos/register-dto';
+// biome-ignore lint/style/useImportType: <explanation>
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
-  private jwtAccessTokenSecret: string = '';
+  private jwtAccessTokenSecret = '';
 
   constructor(
     private configService: ConfigService,
@@ -34,7 +36,17 @@ export class AuthService {
       parallelism: 1,
     });
 
-    return await this.usersService.create(email, fullName, hashedPassword);
+    const response = await this.usersService.create(
+      email,
+      fullName,
+      hashedPassword,
+    );
+
+    return {
+      fullName: response.full_name,
+      email: response.email,
+      slug: response.slug,
+    };
   }
 
   async login(dto: RegisterDto) {
@@ -60,7 +72,10 @@ export class AuthService {
     return {
       token,
       user: {
+        fullName: user.full_name,
+        avatar: user.avatar,
         email: user.email,
+        slug: user.slug,
         createdAt: user.created_at,
       },
     };
