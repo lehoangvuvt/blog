@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { PostsModule } from './posts/posts.module';
 import { PostCommentsModule } from './post-comments/post-comments.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { PostCommentsModule } from './post-comments/post-comments.module';
     AuthModule,
     PostsModule,
     PostCommentsModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

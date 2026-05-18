@@ -6,14 +6,17 @@ import * as jwt from 'jsonwebtoken';
 import type RegisterDto from './dtos/register-dto';
 // biome-ignore lint/style/useImportType: <explanation>
 import { ConfigService } from '@nestjs/config';
+// biome-ignore lint/style/useImportType: <explanation>
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class AuthService {
   private jwtAccessTokenSecret = '';
 
   constructor(
-    private configService: ConfigService,
-    private usersService: UsersService,
+    private readonly configService: ConfigService,
+    private readonly usersService: UsersService,
+    private readonly emailService: EmailService,
   ) {
     const secret = this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET');
     if (!secret) {
@@ -41,6 +44,8 @@ export class AuthService {
       fullName,
       hashedPassword,
     );
+
+    await this.emailService.sendVerifyEmail(email, '123');
 
     return {
       fullName: response.full_name,
