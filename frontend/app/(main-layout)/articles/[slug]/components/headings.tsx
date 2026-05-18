@@ -42,8 +42,8 @@ export default function HeadingNavigation({
       }
     );
 
-    for(const headingEle of headingElements) {
-      observer.observe(headingEle)
+    for (const headingEle of headingElements) {
+      observer.observe(headingEle);
     }
 
     return () => observer.disconnect();
@@ -51,7 +51,7 @@ export default function HeadingNavigation({
 
   return (
     <aside className="hidden xl:block">
-      <div className="sticky top-24 border-l border-black/5 pl-5">
+      <div className="sticky top-24 max-h-[calc(100vh-6rem)] overflow-y-auto border-l border-black/5 pl-5 pr-2">
         <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-neutral-400">
           On this page
         </p>
@@ -65,17 +65,15 @@ export default function HeadingNavigation({
                 key={heading.id}
                 href={`#${heading.id}`}
                 className={`
-                  relative block rounded-md py-1 text-sm leading-6 transition-all duration-300
-                  
-                  ${
-                    isActive
-                      ? "translate-x-1 font-medium text-black"
-                      : "text-neutral-500 hover:text-black"
-                  }
-
-                  ${heading.level === 3 ? "pl-4" : ""}
-                  ${heading.level >= 4 ? "pl-8" : ""}
-                `}
+              relative block rounded-md py-1 text-sm leading-6 transition-all duration-300
+              ${
+                isActive
+                  ? "translate-x-1 font-medium text-black"
+                  : "text-neutral-500 hover:text-black"
+              }
+              ${heading.level === 3 ? "pl-4" : ""}
+              ${heading.level >= 4 ? "pl-8" : ""}
+            `}
               >
                 {isActive && (
                   <span className="absolute top-0 left-[-21px] h-full w-[2px] rounded-full bg-black" />

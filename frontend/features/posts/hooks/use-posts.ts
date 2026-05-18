@@ -3,7 +3,10 @@ import { getPosts } from "@/features/posts/api/get-posts";
 import type { GetPostsParams, Post } from "@/features/posts/types";
 import type { PaginationResponse } from "@/shared/types/types";
 
-export const usePosts = (params?: Omit<GetPostsParams, "page">) => {
+export const usePosts = (
+  params?: Omit<GetPostsParams, "page">,
+  enabled: boolean = true
+) => {
   return useInfiniteQuery<
     PaginationResponse<Post>,
     Error,
@@ -15,6 +18,8 @@ export const usePosts = (params?: Omit<GetPostsParams, "page">) => {
 
     initialPageParam: 1,
 
+    enabled: !!enabled,
+
     queryFn: ({ pageParam }) => {
       return getPosts({
         ...params,
@@ -24,7 +29,7 @@ export const usePosts = (params?: Omit<GetPostsParams, "page">) => {
 
     getNextPageParam: (lastPage) => {
       return lastPage.meta.hasMore
-        ? (lastPage.meta.nextPage ?? undefined)
+        ? lastPage.meta.nextPage ?? undefined
         : undefined;
     },
   });

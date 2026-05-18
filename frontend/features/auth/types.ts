@@ -34,10 +34,18 @@ type LoginPayload = {
   password: string;
 };
 
+type User = {
+  id: string;
+  email: string;
+  fullName: string;
+  avatarUrl?: string | null;
+};
+
 export type {
   RegisterPayload,
   RegisterResponse,
   IAuthFormInput,
   LoginResponse,
   LoginPayload,
+  User,
 };

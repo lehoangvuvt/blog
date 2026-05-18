@@ -1,70 +1,56 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import type { IAuthFormInput } from "@/features/auth/types";
-import { useState } from "react";
 import Link from "next/link";
-import { useLogin } from "@/features/auth/hooks/use-login";
-import { useRouter } from "next/navigation";
-import { useSendVerifyEmail } from "../hooks/use-send-verify-email";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 
-export default function AuthForm({ type }: { type: "signup" | "signin" }) {
-  const router = useRouter();
-  const [registerSuccess, setRegisterSuccess] = useState(false);
+type ForgotPasswordInput = {
+  email: string;
+};
+
+export default function ForgotPasswordPage() {
+  const [emailSent, setEmailSent] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<IAuthFormInput>({
+  } = useForm<ForgotPasswordInput>({
     defaultValues: {
       email: "",
-      password: "",
-      fullName: "",
     },
   });
 
-  const {
-    mutate: sendVerifyEmail,
-    isPending: isSendingVerifyEmail,
-    error: sendVerifyEmailError,
-  } = useSendVerifyEmail();
+  const onSubmit = async (data: ForgotPasswordInput) => {
+    try {
+      setIsPending(true);
+      setError(null);
 
-  const {
-    mutate: loginMutation,
-    isPending: isLoginPending,
-    error: loginError,
-  } = useLogin();
-
-  const isPending = isSendingVerifyEmail || isLoginPending;
-  const error = sendVerifyEmailError || loginError;
-
-  const onSubmit = (data: IAuthFormInput) => {
-    if (type === "signup" && data.email) {
-      sendVerifyEmail(data.email, {
-        onSuccess: () => {
-          setRegisterSuccess(true);
-        },
-        onError: console.error,
-      });
-
-      return;
-    }
-
-    if (data.password) {
-      loginMutation(
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_API_URL}/auth/forgot-password`,
         {
-          email: data.email,
-          password: data.password,
-        },
-        {
-          onSuccess: (response) => {
-            localStorage.setItem("accessToken", response.token);
-            router.push("/");
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-          onError: console.error,
+          body: JSON.stringify({
+            email: data.email,
+          }),
         }
       );
+
+      if (!res.ok) {
+        const result = await res.json().catch(() => null);
+        throw new Error(result?.message || "Failed to send reset email");
+      }
+
+      setEmailSent(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setIsPending(false);
     }
   };
 
@@ -91,7 +77,7 @@ export default function AuthForm({ type }: { type: "signup" | "signin" }) {
       <div className="relative w-full max-w-md rounded-[2rem] border border-white/40 bg-white/90 p-8 shadow-[0_20px_80px_rgba(0,0,0,0.08)] backdrop-blur-xl md:p-10">
         <div className="text-center">
           <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-black text-3xl text-white shadow-lg">
-            ⌨
+            ✉
           </div>
 
           <h1 className="font-serif text-5xl tracking-tight text-[#242424]">
@@ -99,13 +85,11 @@ export default function AuthForm({ type }: { type: "signup" | "signin" }) {
           </h1>
 
           <h2 className="mt-6 text-3xl font-bold text-[#242424]">
-            {type === "signup" ? "Create your account" : "Welcome back"}
+            Forgot password?
           </h2>
 
           <p className="mt-3 text-sm leading-relaxed text-black/60">
-            {type === "signup"
-              ? "Enter your email. We’ll send you a verification link to continue."
-              : "Sign in to continue reading and writing on Stories."}
+            Enter your email and we’ll send you a link to reset your password.
           </p>
         </div>
 
@@ -131,51 +115,14 @@ export default function AuthForm({ type }: { type: "signup" | "signin" }) {
 
             {errors.email && (
               <p className="mt-2 text-sm text-red-500">
-                {errors.email.message as string}
+                {errors.email.message}
               </p>
             )}
           </div>
 
-          {type === "signin" && (
-            <div>
-              <div className="mb-2 block text-sm font-medium text-[#242424]">
-                Password
-              </div>
-
-              <input
-                type="password"
-                placeholder="••••••••"
-                disabled={isPending}
-                {...register("password", {
-                  required: "Password is required",
-                })}
-                className="w-full rounded-2xl border border-black/10 bg-[#FAFAFA] px-4 py-3 outline-none transition focus:border-black/20 focus:bg-white focus:ring-4 focus:ring-black/5 disabled:opacity-50"
-              />
-
-              {errors.password && (
-                <p className="mt-2 text-sm text-red-500">
-                  {errors.password.message as string}
-                </p>
-              )}
-            </div>
-          )}
-
           {error && (
             <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-              {sendVerifyEmailError
-                ? sendVerifyEmailError.message
-                : loginError?.message}
-            </div>
-          )}
-
-          {type === "signin" && (
-            <div className="flex justify-end">
-              <Link
-                href="/forgot-password"
-                className="text-sm text-black/60 transition hover:text-black"
-              >
-                Forgot password?
-              </Link>
+              {error}
             </div>
           )}
 
@@ -184,33 +131,26 @@ export default function AuthForm({ type }: { type: "signup" | "signin" }) {
             disabled={isPending}
             className="w-full rounded-2xl bg-black py-3 text-lg font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-50 disabled:hover:translate-y-0"
           >
-            {isPending
-              ? "Loading..."
-              : type === "signup"
-              ? "Send verification email"
-              : "Sign In"}
+            {isPending ? "Sending..." : "Send reset link"}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-black/60">
-          {type === "signup"
-            ? "Already have an account? "
-            : "Don't have an account? "}
-
-          <a
-            href={type === "signup" ? "/sign-in" : "/sign-up"}
+          Remember your password?{" "}
+          <Link
+            href="/sign-in"
             className="font-semibold text-black hover:underline"
           >
-            {type === "signup" ? "Sign in" : "Create one"}
-          </a>
+            Sign in
+          </Link>
         </p>
       </div>
 
-      {registerSuccess && (
+      {emailSent && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40 px-6 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-[2rem] border border-black/5 bg-white p-8 text-center shadow-2xl">
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-black text-3xl text-white">
-              ✉
+              ✓
             </div>
 
             <h2 className="mt-6 text-3xl font-bold text-[#242424]">
@@ -218,8 +158,8 @@ export default function AuthForm({ type }: { type: "signup" | "signin" }) {
             </h2>
 
             <p className="mt-3 text-sm leading-relaxed text-black/60">
-              We sent you a verification link. Open it to continue setting up
-              your Stories account.
+              We sent you a password reset link. Open it to create a new
+              password.
             </p>
 
             <div className="mt-8">

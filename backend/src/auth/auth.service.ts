@@ -7,6 +7,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 // biome-ignore lint/style/useImportType: <explanation>
 import { UsersService } from 'src/users/users.service';
@@ -183,6 +184,27 @@ export class AuthService {
     };
   }
 
+  async getMe(userId: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        id: true,
+        email: true,
+        full_name: true,
+        avatar: true,
+        created_at: true,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    return user;
+  }
+
   async login(dto: LoginDto) {
     const { email, password } = dto;
 
@@ -200,7 +222,7 @@ export class AuthService {
 
     const payload = { sub: user.id };
     const token = jwt.sign(payload, this.jwtAccessTokenSecret, {
-      expiresIn: '1h',
+      expiresIn: '7d',
     });
 
     return {

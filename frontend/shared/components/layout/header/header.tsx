@@ -1,18 +1,34 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { SubmitEvent, useState } from "react";
 
 import { toggleSideBar } from "@/features/app-settings/slice";
 
 import { useAppDispatch } from "@/store/hooks";
 
 import { AppSettingsModal } from "@/features/app-settings/components/app-settings-modal";
+import { useMe } from "@/features/auth/hooks/use-me";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function Header() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [searchText, setSearchText] = useState(searchParams.get("q") ?? "");
   const dispatch = useAppDispatch();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const { data: me } = useMe();
+
+  const isLoggedIn = !!me;
+
+  const handleSearch = (e: SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (searchText.trim().length === 0) return;
+    router.push(`/search/articles?q=${searchText}`);
+  };
 
   return (
     <>
@@ -66,12 +82,15 @@ export default function Header() {
                   d="m21 21-4.35-4.35m0 0A7.65 7.65 0 1 0 5.825 5.825a7.65 7.65 0 0 0 10.825 10.825Z"
                 />
               </svg>
-
-              <input
-                type="text"
-                placeholder="Search Medium"
-                className="w-full bg-transparent px-3 text-sm outline-none placeholder:text-black/40"
-              />
+              <form onSubmit={handleSearch} className="w-full">
+                <input
+                  type="text"
+                  placeholder="Search articles, people or topics"
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  className="w-full bg-transparent px-3 text-sm outline-none placeholder:text-black/40"
+                />
+              </form>
             </div>
           </div>
 
@@ -119,19 +138,66 @@ export default function Header() {
               Write
             </Link>
 
-            <Link
-              href="/sign-in"
-              className="text-sm text-black/70 transition hover:text-black"
-            >
-              Sign in
-            </Link>
+            {!isLoggedIn ? (
+              <>
+                <Link
+                  href="/sign-in"
+                  className="text-sm text-black/70 transition hover:text-black"
+                >
+                  Sign in
+                </Link>
 
-            <Link
-              href="/sign-up"
-              className="flex h-10 items-center justify-center rounded-full bg-black px-5 text-sm font-medium text-white transition hover:opacity-90"
-            >
-              Get started
-            </Link>
+                <Link
+                  href="/sign-up"
+                  className="flex h-10 items-center justify-center rounded-full bg-black px-5 text-sm font-medium text-white transition hover:opacity-90"
+                >
+                  Get started
+                </Link>
+              </>
+            ) : (
+              <div className="group relative flex items-center">
+                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-black text-sm font-semibold text-white transition group-hover:scale-105">
+                  {me?.avatarUrl ? (
+                    <img
+                      src={me.avatarUrl}
+                      alt={me.fullName}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    me?.fullName?.charAt(0).toUpperCase()
+                  )}
+                </div>
+
+                <div className="absolute right-0 top-full pt-2 opacity-0 invisible transition-all duration-200 group-hover:visible group-hover:opacity-100">
+                  <div className="min-w-[180px] rounded-2xl border border-black/10 bg-white p-2 shadow-xl">
+                    <Link
+                      href="/me"
+                      className="block rounded-xl px-4 py-2 text-sm text-black/70 transition hover:bg-black/5 hover:text-black"
+                    >
+                      Profile
+                    </Link>
+
+                    <Link
+                      href="/settings"
+                      className="block rounded-xl px-4 py-2 text-sm text-black/70 transition hover:bg-black/5 hover:text-black"
+                    >
+                      Settings
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        localStorage.removeItem("accessToken");
+                        window.location.reload();
+                      }}
+                      className="w-full rounded-xl px-4 py-2 text-left text-sm text-red-500 transition hover:bg-red-50"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </header>
