@@ -2,10 +2,33 @@ import { Injectable } from '@nestjs/common';
 // biome-ignore lint/style/useImportType: <explanation>
 import { PrismaService } from 'src/prisma.service';
 import type { GetRepliesQueryDto } from './dtos/get-replies-query.dto';
+import CreateCommentDto from './dtos/create-comment.dtot';
 
 @Injectable()
 export class PostCommentsService {
   constructor(private prismaService: PrismaService) {}
+
+  async create(userId: string, dto: CreateCommentDto) {
+    const { content, postId, replyToCommentId } = dto;
+
+    return await this.prismaService.postComments.create({
+      data: {
+        ...(replyToCommentId && { reply_to_comment_id: replyToCommentId }),
+        content,
+        post_id: postId,
+        user_id: userId,
+      },
+    });
+  }
+
+  async delete(userId: string, commentId: string) {
+    return await this.prismaService.postComments.delete({
+      where: {
+        id: commentId,
+        user_id: userId,
+      },
+    });
+  }
 
   async getCommentsByPostId(postId: number, page: number, limit: number) {
     const [comments, total] = await Promise.all([
