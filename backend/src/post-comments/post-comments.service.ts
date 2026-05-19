@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 // biome-ignore lint/style/useImportType: <explanation>
 import { PrismaService } from 'src/prisma.service';
 import type { GetRepliesQueryDto } from './dtos/get-replies-query.dto';
-import CreateCommentDto from './dtos/create-comment.dtot';
+import type CreateCommentDto from './dtos/create-comment.dtot';
 
 @Injectable()
 export class PostCommentsService {

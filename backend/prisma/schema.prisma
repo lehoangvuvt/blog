@@ -27,6 +27,8 @@ model User {
 
   posts        Post[]
   postComments PostComments[]
+  postLikes    PostLikes[]
+  postReposts  PostReposts[]
 }
 
 model PendingRegistration {
@@ -56,6 +58,8 @@ model Post {
 
   tags         Tag[]
   postComments PostComments[]
+  likes        PostLikes[]
+  reposts      PostReposts[]
 
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
@@ -91,4 +95,36 @@ model PostComments {
 
   @@index([post_id])
   @@index([reply_to_comment_id])
+}
+
+model PostLikes {
+  id Int @id @default(autoincrement())
+
+  post    Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  post_id Int
+
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id String
+
+  created_at DateTime @default(now())
+
+  @@unique([user_id, post_id])
+  @@index([post_id])
+  @@index([user_id])
+}
+
+model PostReposts {
+  id Int @id @default(autoincrement())
+
+  post    Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  post_id Int
+
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id String
+
+  created_at DateTime @default(now())
+
+  @@unique([user_id, post_id])
+  @@index([post_id])
+  @@index([user_id])
 }

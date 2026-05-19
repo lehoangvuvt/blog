@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Injectable, NotFoundException } from '@nestjs/common';
 // biome-ignore lint/style/useImportType: <explanation>
 import { PrismaService } from 'src/prisma.service';
@@ -9,6 +13,19 @@ import { generateSlug, sanitizedHtmlContent } from 'src/shared/utils';
 @Injectable()
 export class PostsService {
   constructor(private prismaService: PrismaService) {}
+
+  private async ensurePostExists(postId: number) {
+    const post = await this.prismaService.post.findUnique({
+      where: { id: postId },
+      select: { id: true },
+    });
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    return post;
+  }
 
   async findMany(dto: FindManyPostsDto) {
     const {
@@ -228,6 +245,119 @@ export class PostsService {
       slug: post.slug,
       tags: post.tags,
       postsByAuthor,
+    };
+  }
+
+  async like(postId: number, userId: string) {
+    await this.ensurePostExists(postId);
+
+    return this.prismaService.postLikes.upsert({
+      where: {
+        user_id_post_id: {
+          user_id: userId,
+          post_id: postId,
+        },
+      },
+      update: {},
+      create: {
+        user_id: userId,
+        post_id: postId,
+      },
+    });
+  }
+
+  async unlike(postId: number, userId: string) {
+    await this.ensurePostExists(postId);
+
+    await this.prismaService.postLikes.deleteMany({
+      where: {
+        user_id: userId,
+        post_id: postId,
+      },
+    });
+
+    return { liked: false };
+  }
+
+  async repost(postId: number, userId: string) {
+    await this.ensurePostExists(postId);
+
+    return this.prismaService.postReposts.upsert({
+      where: {
+        user_id_post_id: {
+          user_id: userId,
+          post_id: postId,
+        },
+      },
+      update: {},
+      create: {
+        user_id: userId,
+        post_id: postId,
+      },
+    });
+  }
+
+  async unRepost(postId: number, userId: string) {
+    await this.ensurePostExists(postId);
+
+    await this.prismaService.postReposts.deleteMany({
+      where: {
+        user_id: userId,
+        post_id: postId,
+      },
+    });
+
+    return { reposted: false };
+  }
+
+  async getPostStatistics(postId: number, userId?: string) {
+    await this.ensurePostExists(postId);
+
+    const [likesCount, repostsCount, commentsCount, liked, reposted] =
+      await Promise.all([
+        this.prismaService.postLikes.count({
+          where: { post_id: postId },
+        }),
+
+        this.prismaService.postReposts.count({
+          where: { post_id: postId },
+        }),
+
+        this.prismaService.postComments.count({
+          where: { post_id: postId },
+        }),
+
+        userId
+          ? this.prismaService.postLikes.findUnique({
+              where: {
+                user_id_post_id: {
+                  user_id: userId,
+                  post_id: postId,
+                },
+              },
+              select: { id: true },
+            })
+          : Promise.resolve(null),
+
+        userId
+          ? this.prismaService.postReposts.findUnique({
+              where: {
+                user_id_post_id: {
+                  user_id: userId,
+                  post_id: postId,
+                },
+              },
+              select: { id: true },
+            })
+          : Promise.resolve(null),
+      ]);
+
+    return {
+      likesCount,
+      repostsCount,
+      commentsCount,
+      liked: Boolean(liked),
+      reposted: Boolean(reposted),
     };
   }
 }

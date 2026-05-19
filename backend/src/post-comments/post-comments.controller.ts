@@ -12,7 +12,7 @@ import { PostCommentsService } from './post-comments.service';
 import type { GetRepliesQueryDto } from './dtos/get-replies-query.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
-import CreateCommentDto from './dtos/create-comment.dtot';
+import type CreateCommentDto from './dtos/create-comment.dtot';
 
 @Controller('post-comments')
 export class PostCommentsController {

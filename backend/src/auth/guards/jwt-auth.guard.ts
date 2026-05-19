@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+// biome-ignore lint/style/useImportType: <explanation>
 import {
   CanActivate,
   ExecutionContext,
@@ -32,6 +33,7 @@ export class JwtAuthGuard implements CanActivate {
     try {
       const payload = await this.jwtService.verifyAsync(token);
 
+      // biome-ignore lint/complexity/useLiteralKeys: <explanation>
       request['user'] = payload;
 
       return true;

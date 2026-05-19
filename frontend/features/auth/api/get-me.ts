@@ -11,13 +11,7 @@ export async function getMe(): Promise<User> {
   try {
     const res = await apiClient.get(
       `${process.env.NEXT_PUBLIC_BASE_API_URL}/auth/me`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
     );
-
     return res.data;
   } catch {
     throw new Error("Fail to get user info");

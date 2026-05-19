@@ -18,11 +18,12 @@ import type RegisterDto from './dtos/register.dto';
 import { ConfigService } from '@nestjs/config';
 // biome-ignore lint/style/useImportType: <explanation>
 import { EmailService } from 'src/email/email.service';
-import { CreatePendingRegistrationDto } from './dtos/create-pending-registration.dto';
+import type { CreatePendingRegistrationDto } from './dtos/create-pending-registration.dto';
+// biome-ignore lint/style/useImportType: <explanation>
 import { PrismaService } from 'src/prisma.service';
 import { createHash, randomBytes } from 'node:crypto';
 import { addMinutes } from 'date-fns';
-import LoginDto from './dtos/login.dto';
+import type LoginDto from './dtos/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -195,6 +196,8 @@ export class AuthService {
         full_name: true,
         avatar: true,
         created_at: true,
+        introduction: true,
+        slug: true,
       },
     });
 
@@ -202,7 +205,15 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
-    return user;
+    return {
+      id: user.id,
+      emai: user.email,
+      fullName: user.full_name,
+      avatar: user.avatar,
+      createdAt: user.created_at,
+      introduction: user.introduction,
+      slug: user.slug,
+    };
   }
 
   async login(dto: LoginDto) {

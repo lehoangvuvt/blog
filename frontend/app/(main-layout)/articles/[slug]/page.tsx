@@ -9,6 +9,8 @@ import HeadingNavigation, {
 } from "@/app/(main-layout)/articles/[slug]/components/headings";
 import type { PostDetails } from "@/features/posts/types";
 import { PostsBySameAuthor } from "./components/posts-by-same-author";
+import { ArticleToolbar } from "./components/article-toolbar";
+import type { Metadata } from "next";
 
 function slugify(text: string) {
   return text
@@ -72,13 +74,7 @@ function extractHeadings(html: string) {
   };
 }
 
-export default async function ArticlePage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
-
+async function getPost(slug: string) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_API_URL}/posts/${slug}`,
     {
@@ -90,7 +86,59 @@ export default async function ArticlePage({
     throw new Error("Failed to fetch post");
   }
 
-  const post: PostDetails = await res.json();
+  return res.json() as Promise<PostDetails>;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPost(slug);
+
+  const title = post.title;
+  const description = post.subTitle ?? "Read this article.";
+  const image = post.thumbnailImage ?? "/default-og-image.png";
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL}/articles/${slug}`;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title,
+      description,
+      url,
+      type: "article",
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
+    },
+  };
+}
+
+export default async function ArticlePage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+
+  const post = await getPost(slug);
 
   const sanitizedHtmlContent = DOMPurify.sanitize(post.htmlContent ?? "", {
     USE_PROFILES: { html: true },
@@ -181,6 +229,8 @@ export default async function ArticlePage({
                 )}
               </div>
             )}
+
+            <ArticleToolbar postId={post.id} />
           </header>
 
           {post.thumbnailImage && (
@@ -197,7 +247,7 @@ export default async function ArticlePage({
 
           {post.author && <PostsBySameAuthor author={post.author} posts={post.postsByAuthor} />}
 
-          <CommentsSection postId={slug} />
+          <CommentsSection postId={post.id} />
         </article>
 
         {headings.length > 0 && <HeadingNavigation headings={headings} />}

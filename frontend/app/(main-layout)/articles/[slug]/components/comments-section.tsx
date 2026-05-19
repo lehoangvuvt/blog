@@ -1,65 +1,22 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
+import { useCreatePostComment } from "@/features/posts/hooks/use-create-post-comment";
 import { MoreHorizontal, ShieldCheck } from "lucide-react";
-import { useMemo, useState } from "react";
-
-type Comment = {
-  id: string;
-  author: string;
-  content: string;
-  createdAt: string;
-  clapCount: number;
-  color: string;
-};
+import { useEffect, useMemo, useRef, useState } from "react";
+import { usePostComments } from "@/features/posts/hooks/use-post-comments";
+import { useMe } from "@/features/auth/hooks/use-me";
 
 type Props = {
-  postId: string;
-  currentUserName?: string;
+  postId: number;
 };
-
-const sampleComments: Comment[] = [
-  {
-    id: "1",
-    author: "Bebi Zulaika",
-    createdAt: "2026-04-25",
-    clapCount: 60,
-    color: "bg-purple-500",
-    content:
-      "it changes my perspective on productive. this explain why i feel tired all day long, very bussy chasing everything, yet i feel like i haven't done anything. that was sucks 😩",
-  },
-  {
-    id: "2",
-    author: "Muhammad Irfan",
-    createdAt: "2026-04-24",
-    clapCount: 32,
-    color: "bg-green-500",
-    content:
-      "Such a well-written piece! The examples really helped me understand the concept better. Will definitely apply this to my daily routine.",
-  },
-  {
-    id: "3",
-    author: "Ananya Sharma",
-    createdAt: "2026-04-23",
-    clapCount: 18,
-    color: "bg-indigo-500",
-    content:
-      "I've been struggling with this for so long and this article gave me the clarity I needed. Thank you!",
-  },
-  {
-    id: "4",
-    author: "Dewi Lestari",
-    createdAt: "2026-04-22",
-    clapCount: 12,
-    color: "bg-yellow-500",
-    content:
-      "Love the practical tips at the end. Small changes can really make a big difference.",
-  },
-];
 
 function formatCommentDate(date: string) {
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
+    hour: 'numeric',
+    minute: 'numeric',
   }).format(new Date(date));
 }
 
@@ -67,37 +24,78 @@ function getInitial(name: string) {
   return name.trim().charAt(0).toUpperCase();
 }
 
-export function CommentsSection({
-  postId,
-  currentUserName = "Hoangvule",
-}: Props) {
-  const [comments, setComments] = useState<Comment[]>(sampleComments);
+export function CommentsSection({ postId }: Props) {
+  const { data: userInfo } = useMe();
+  const { mutate: createPostComment, isPending } = useCreatePostComment();
+  const {
+    data: commentsData,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+  } = usePostComments({
+    postId,
+    limit: 10,
+  });
+
+  const comments = commentsData?.pages.flatMap((page) => page.data) ?? [];
+  const meta = commentsData?.pages[0]?.meta ?? null;
   const [content, setContent] = useState("");
 
-  const canSubmit = content.trim().length > 0;
-  const responseCount = useMemo(() => comments.length, [comments.length]);
+  const canSubmit = content.trim().length > 0 && !isPending;
+  const responseCount = useMemo(
+    () => meta?.total ?? comments.length,
+    [meta?.total, comments.length]
+  );
 
   const handleSubmit = () => {
     if (!canSubmit) return;
 
-    const newComment: Comment = {
-      id: crypto.randomUUID(),
-      author: currentUserName,
-      content: content.trim(),
-      createdAt: new Date().toISOString(),
-      clapCount: 0,
-      color: "bg-orange-600",
-    };
-
-    setComments((prev) => [newComment, ...prev]);
-    setContent("");
-
-    console.log("Comment submitted for post:", postId);
+    createPostComment(
+      {
+        content: content.trim(),
+        postId,
+      },
+      {
+        onSuccess: () => {
+          setContent("");
+          refetch();
+        },
+      }
+    );
   };
 
   const handleCancel = () => {
     setContent("");
   };
+
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const el = loadMoreRef.current;
+
+    if (!el || !hasNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const firstEntry = entries[0];
+
+        if (firstEntry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      {
+        rootMargin: "200px",
+      }
+    );
+
+    observer.observe(el);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <section className="mt-24 border-t border-black/5 pt-12 text-neutral-900">
@@ -112,10 +110,10 @@ export function CommentsSection({
       <div className="mb-14">
         <div className="mb-5 flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-600 text-xl font-medium text-white">
-            {getInitial(currentUserName)}
+            {getInitial(userInfo?.fullName ?? "")}
           </div>
 
-          <p className="text-lg font-medium">{currentUserName}</p>
+          <p className="text-lg font-medium">{userInfo?.fullName ?? ""}</p>
         </div>
 
         <div className="rounded-lg bg-neutral-50 px-6 py-5">
@@ -129,18 +127,13 @@ export function CommentsSection({
 
           <div className="mt-7 flex items-center justify-between">
             <div className="flex items-center gap-8 font-serif text-2xl font-bold text-neutral-500">
-              <button
-                type="button"
-                className="transition hover:text-black"
-                aria-label="Bold"
-              >
+              <button type="button" className="transition hover:text-black">
                 B
               </button>
 
               <button
                 type="button"
                 className="italic transition hover:text-black"
-                aria-label="Italic"
               >
                 i
               </button>
@@ -161,7 +154,7 @@ export function CommentsSection({
                 disabled={!canSubmit}
                 className="rounded-full px-5 py-2.5 text-sm font-medium transition disabled:bg-neutral-200 disabled:text-white enabled:bg-neutral-900 enabled:text-white enabled:hover:bg-black"
               >
-                Respond
+                {isPending ? "Responding..." : "Respond"}
               </button>
             </div>
           </div>
@@ -169,58 +162,84 @@ export function CommentsSection({
       </div>
 
       <div className="divide-y divide-black/10 border-t border-black/10">
-        {comments.map((comment) => (
-          <article key={comment.id} className="py-9">
-            <div className="mb-5 flex items-start justify-between">
-              <div className="flex items-center gap-4">
-                <div
-                  className={`flex h-11 w-11 items-center justify-center rounded-full ${comment.color} text-lg font-medium text-white`}
+        {isLoading && (
+          <p className="py-8 text-sm text-neutral-500">Loading responses...</p>
+        )}
+
+        {!isLoading && comments.length === 0 && (
+          <p className="py-8 text-sm text-neutral-500">
+            No responses yet. Be the first to respond.
+          </p>
+        )}
+
+        {comments.map((comment) => {
+          const authorName = comment.user.full_name || "Unknown user";
+
+          return (
+            <article key={comment.id} className="py-9">
+              <div className="mb-5 flex items-start justify-between">
+                <div className="flex items-center gap-4">
+                  {comment.user.avatar ? (
+                    <img
+                      src={comment.user.avatar}
+                      alt={authorName}
+                      className="h-11 w-11 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-neutral-900 text-lg font-medium text-white">
+                      {getInitial(authorName)}
+                    </div>
+                  )}
+
+                  <div>
+                    <p className="text-base font-medium leading-none">
+                      {authorName}
+                    </p>
+
+                    <p className="mt-1.5 text-sm text-neutral-500">
+                      {formatCommentDate(comment.created_at)}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="rounded-full p-2 text-neutral-600 transition hover:bg-neutral-100 hover:text-black"
+                  aria-label="More options"
                 >
-                  {getInitial(comment.author)}
-                </div>
-
-                <div>
-                  <p className="text-base font-medium leading-none">
-                    {comment.author}
-                  </p>
-
-                  <p className="mt-1.5 text-sm text-neutral-500">
-                    {formatCommentDate(comment.createdAt)}
-                  </p>
-                </div>
+                  <MoreHorizontal className="h-5 w-5" />
+                </button>
               </div>
 
-              <button
-                type="button"
-                className="rounded-full p-2 text-neutral-600 transition hover:bg-neutral-100 hover:text-black"
-                aria-label="More options"
-              >
-                <MoreHorizontal className="h-5 w-5" />
-              </button>
-            </div>
+              <p className="mb-7 whitespace-pre-wrap text-base leading-8 text-neutral-900">
+                {comment.content}
+              </p>
 
-            <p className="mb-7 whitespace-pre-wrap text-base leading-8 text-neutral-900">
-              {comment.content}
-            </p>
+              <div className="flex items-center gap-7 text-sm text-neutral-600">
+                <button
+                  type="button"
+                  className="underline underline-offset-2 transition hover:text-black"
+                >
+                  Reply
+                </button>
 
-            <div className="flex items-center gap-7 text-sm text-neutral-600">
-              <button
-                type="button"
-                className="flex items-center gap-2 transition hover:text-black"
-              >
-                <span className="text-xl">👏</span>
-                <span>{comment.clapCount}</span>
-              </button>
+                {comment._count.replies > 0 && (
+                  <span>{comment._count.replies} replies</span>
+                )}
+              </div>
+            </article>
+          );
+        })}
 
-              <button
-                type="button"
-                className="underline underline-offset-2 transition hover:text-black"
-              >
-                Reply
-              </button>
-            </div>
-          </article>
-        ))}
+        <div ref={loadMoreRef} className="py-6 text-center">
+          {isFetchingNextPage && (
+            <p className="text-sm text-neutral-500">Loading more responses...</p>
+          )}
+
+          {!hasNextPage && comments.length > 0 && (
+            <p className="text-sm text-neutral-400">No more responses.</p>
+          )}
+        </div>
       </div>
     </section>
   );

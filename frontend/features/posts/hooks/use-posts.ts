@@ -5,7 +5,7 @@ import type { PaginationResponse } from "@/shared/types/types";
 
 export const usePosts = (
   params?: Omit<GetPostsParams, "page">,
-  enabled: boolean = true
+  enabled = true
 ) => {
   return useInfiniteQuery<
     PaginationResponse<Post>,

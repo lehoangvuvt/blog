@@ -34,6 +34,7 @@ export type Post = {
 };
 
 export type PostDetails = {
+  id: number;
   title: string;
   subTitle?: string;
   htmlContent?: string;
@@ -57,4 +58,45 @@ export type PostDetails = {
 export type Tag = {
   id: string;
   name: string;
+};
+
+export type CreatePostCommentPayload = {
+  postId: number;
+  content: string;
+  replyToCommentId?: string;
+};
+
+export type PostComment = {
+  id: string;
+  content: string;
+  created_at: string;
+  user: {
+    id: string;
+    full_name: string;
+    avatar: string | null;
+  };
+  replies: PostComment[];
+  _count: {
+    replies: number;
+  };
+};
+
+export type GetPostCommentsResponse = {
+  data: PostComment[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasMore: boolean;
+    nextPage: number | null;
+  };
+};
+
+export type GetPostStasisticsResponse = {
+  likesCount: number;
+  repostsCount: number;
+  commentsCount: number;
+  liked: boolean;
+  reposted: boolean;
 };
