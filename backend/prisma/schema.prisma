@@ -28,14 +28,17 @@ model User {
   linkedin_link String?
   website_link  String?
 
+  background_image String?
+
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
 
-  posts         Post[]
-  postComments  PostComments[]
-  postLikes     PostLikes[]
-  postReposts   PostReposts[]
-  postBookmarks PostBookmarks[]
+  posts           Post[]
+  postComments    PostComments[]
+  postLikes       PostLikes[]
+  postReposts     PostReposts[]
+  postBookmarks   PostBookmarks[]
+  postCollections PostCollections[]
 }
 
 model PendingRegistration {
@@ -69,8 +72,9 @@ model Post {
   reposts      PostReposts[]
   bookmarks    PostBookmarks[]
 
-  created_at DateTime  @default(now())
-  updated_at DateTime? @updatedAt
+  created_at          DateTime              @default(now())
+  updated_at          DateTime?             @updatedAt
+  postCollectionItems PostCollectionItems[]
 }
 
 model Tag {
@@ -155,4 +159,35 @@ model PostBookmarks {
   @@unique([user_id, post_id])
   @@index([post_id])
   @@index([user_id])
+}
+
+model PostCollections {
+  id              String  @id @default(uuid())
+  name            String
+  slug            String  @unique
+  description     String  @db.VarChar(200)
+  thumbnail_image String?
+
+  creator    User?   @relation(fields: [creator_id], references: [id])
+  creator_id String?
+
+  created_at          DateTime              @default(now())
+  updated_at          DateTime?             @updatedAt
+  postCollectionItems PostCollectionItems[]
+}
+
+model PostCollectionItems {
+  id Int @id @default(autoincrement())
+
+  post    Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  post_id Int
+
+  collection    PostCollections @relation(fields: [collection_id], references: [id], onDelete: Cascade)
+  collection_id String
+
+  created_at DateTime @default(now())
+
+  @@unique([post_id, collection_id])
+  @@index([post_id])
+  @@index([collection_id])
 }

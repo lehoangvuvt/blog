@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   BadRequestException,
   Injectable,
@@ -5,7 +6,9 @@ import {
 } from '@nestjs/common';
 import { Prisma, type User } from 'generated/prisma/client';
 import type { FindManyPostsDto } from 'src/posts/dtos/find-many-posts.dto';
+// biome-ignore lint/style/useImportType: <explanation>
 import { PostsService } from 'src/posts/posts.service';
+// biome-ignore lint/style/useImportType: <explanation>
 import { PrismaService } from 'src/prisma.service';
 import { generateSlug } from 'src/shared/utils';
 
@@ -76,6 +79,10 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
+    const postsCount = await this.prisma.post.count({
+      where: { authorId: user.id },
+    });
+
     return {
       id: user.id,
       slug: user.slug,
@@ -83,6 +90,11 @@ export class UsersService {
       introduction: user.introduction,
       fullName: user.full_name,
       createdAt: user.created_at,
+      backgroundImage: user.background_image,
+      statistics: {
+        postsCount,
+        followersCount: 10000,
+      },
       social: {
         facebook: user.facebook_link,
         x: user.x_link,

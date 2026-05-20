@@ -117,7 +117,7 @@ export default function Home() {
                   const articleLink = getArticleLink(post.slug);
                   const authorName = post.author?.fullName ?? "Unknown author";
                   const authorSlug = post.author?.slug;
-                  const authorLink = authorSlug ? `/users/${authorSlug}` : "#";
+                  const authorLink = authorSlug ? `/${authorSlug}` : "#";
 
                   return (
                     <PostItem.Container key={post.id}>

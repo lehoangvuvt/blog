@@ -5,6 +5,11 @@ export type GetUserInfoResponse = {
   introduction: string | null;
   fullName: string;
   createdAt: string;
+  backgroundImage: string | null;
+  statistics: {
+    postsCount: number;
+    followersCount: number;
+  };
   social: {
     facebook: string | null;
     x: string | null;
