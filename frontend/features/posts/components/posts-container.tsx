@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef } from "react";
 
 type PostsContainerProps = {
@@ -22,13 +24,14 @@ export default function PostsContainer({
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          onLoadMore();
-        }
+        if (!entry.isIntersecting) return;
+        if (!hasMore || isLoading) return;
+
+        onLoadMore();
       },
       {
         root: null,
-        rootMargin: "300px",
+        rootMargin: "240px",
         threshold: 0,
       }
     );
@@ -39,16 +42,22 @@ export default function PostsContainer({
   }, [hasMore, isLoading, onLoadMore]);
 
   return (
-    <section className="mx-auto w-full max-w-3xl px-6">
-      <div>{children}</div>
+    <section className="mx-auto w-full max-w-2xl px-5 md:px-6">
+      <div className="divide-y divide-black/10 dark:divide-white/10">
+        {children}
+      </div>
 
-      <div ref={loaderRef} className="py-8 text-center">
+      <div ref={loaderRef} className="py-10 text-center">
         {isLoading && (
-          <p className="text-sm text-black/50">Loading more stories...</p>
+          <p className="text-sm text-neutral-500 dark:text-zinc-400">
+            Loading more posts...
+          </p>
         )}
 
         {!hasMore && (
-          <p className="text-sm text-black/40">You have reached the end.</p>
+          <p className="text-sm text-neutral-400 dark:text-zinc-500">
+            You’re all caught up.
+          </p>
         )}
       </div>
     </section>

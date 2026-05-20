@@ -22,13 +22,20 @@ model User {
   introduction String? @db.VarChar(200)
   is_active    Boolean @default(false)
 
+  facebook_link String?
+  x_link        String?
+  youtube_link  String?
+  linkedin_link String?
+  website_link  String?
+
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
 
-  posts        Post[]
-  postComments PostComments[]
-  postLikes    PostLikes[]
-  postReposts  PostReposts[]
+  posts         Post[]
+  postComments  PostComments[]
+  postLikes     PostLikes[]
+  postReposts   PostReposts[]
+  postBookmarks PostBookmarks[]
 }
 
 model PendingRegistration {
@@ -60,19 +67,24 @@ model Post {
   postComments PostComments[]
   likes        PostLikes[]
   reposts      PostReposts[]
+  bookmarks    PostBookmarks[]
 
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
 }
 
 model Tag {
-  id   String @id @default(uuid())
-  name String @unique
+  id   String  @id @default(uuid())
+  name String  @unique
+  slug String? @unique
 
   posts Post[]
 
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
+
+  @@index([name])
+  @@index([slug])
 }
 
 model PostComments {
@@ -114,6 +126,22 @@ model PostLikes {
 }
 
 model PostReposts {
+  id Int @id @default(autoincrement())
+
+  post    Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  post_id Int
+
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id String
+
+  created_at DateTime @default(now())
+
+  @@unique([user_id, post_id])
+  @@index([post_id])
+  @@index([user_id])
+}
+
+model PostBookmarks {
   id Int @id @default(autoincrement())
 
   post    Post @relation(fields: [post_id], references: [id], onDelete: Cascade)

@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, NotFoundException } from '@nestjs/common';
 // biome-ignore lint/style/useImportType: <explanation>
 import { PrismaService } from 'src/prisma.service';
@@ -65,7 +63,7 @@ export class PostsService {
       ...(tag?.trim() && {
         tags: {
           some: {
-            name: tag.trim().toLowerCase(),
+            slug: tag,
           },
         },
       }),
@@ -91,6 +89,7 @@ export class PostsService {
             select: {
               id: true,
               name: true,
+              slug: true,
             },
           },
           author: {
@@ -167,6 +166,7 @@ export class PostsService {
             },
             create: {
               name: tag.trim().toLowerCase(),
+              slug: generateSlug(tag, false),
             },
           })),
         },
@@ -192,6 +192,7 @@ export class PostsService {
           select: {
             id: true,
             name: true,
+            slug: true,
           },
         },
       },

@@ -37,13 +37,13 @@ export default function HeadingNavigation({
         }
       },
       {
-        rootMargin: "-20% 0px -65% 0px",
+        rootMargin: "-18% 0px -70% 0px",
         threshold: 0.1,
       }
     );
 
-    for (const headingEle of headingElements) {
-      observer.observe(headingEle);
+    for (const headingElement of headingElements) {
+      observer.observe(headingElement);
     }
 
     return () => observer.disconnect();
@@ -51,12 +51,10 @@ export default function HeadingNavigation({
 
   return (
     <aside className="hidden xl:block">
-      <div className="sticky top-24 max-h-[calc(100vh-6rem)] overflow-y-auto border-l border-black/5 pl-5 pr-2">
-        <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-neutral-400">
-          On this page
-        </p>
+      <div className="sticky top-28 max-h-[calc(100vh-7rem)] overflow-y-auto pl-1 pr-2">
+        <p className="mb-4 text-sm text-neutral-400">In this article</p>
 
-        <nav className="space-y-1">
+        <nav className="space-y-1 border-l border-black/10">
           {headings.map((heading) => {
             const isActive = activeId === heading.id;
 
@@ -65,21 +63,21 @@ export default function HeadingNavigation({
                 key={heading.id}
                 href={`#${heading.id}`}
                 className={`
-              relative block rounded-md py-1 text-sm leading-6 transition-all duration-300
-              ${
-                isActive
-                  ? "translate-x-1 font-medium text-black"
-                  : "text-neutral-500 hover:text-black"
-              }
-              ${heading.level === 3 ? "pl-4" : ""}
-              ${heading.level >= 4 ? "pl-8" : ""}
-            `}
+                  relative block py-1.5 pr-2 text-sm leading-6 transition-colors
+                  ${
+                    isActive
+                      ? "font-medium text-neutral-950"
+                      : "text-neutral-500 hover:text-neutral-900"
+                  }
+                  ${heading.level === 3 ? "pl-5" : "pl-4"}
+                  ${heading.level >= 4 ? "pl-8" : ""}
+                `}
               >
                 {isActive && (
-                  <span className="absolute top-0 left-[-21px] h-full w-[2px] rounded-full bg-black" />
+                  <span className="absolute left-[-1px] top-1/2 h-5 w-px -translate-y-1/2 bg-neutral-950" />
                 )}
 
-                {heading.text}
+                <span className="line-clamp-2">{heading.text}</span>
               </a>
             );
           })}

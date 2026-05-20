@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma, type User } from 'generated/prisma/client';
 import type { FindManyPostsDto } from 'src/posts/dtos/find-many-posts.dto';
 import { PostsService } from 'src/posts/posts.service';
@@ -64,5 +68,28 @@ export class UsersService {
   async findUserPosts(dto: FindManyPostsDto) {
     const posts = await this.postsService.findMany(dto);
     return posts;
+  }
+
+  async getUserInfoBySlug(slug: string) {
+    const user = await this.prisma.user.findFirst({ where: { slug } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return {
+      id: user.id,
+      slug: user.slug,
+      avatar: user.avatar,
+      introduction: user.introduction,
+      fullName: user.full_name,
+      createdAt: user.created_at,
+      social: {
+        facebook: user.facebook_link,
+        x: user.x_link,
+        linkedin: user.linkedin_link,
+        website: user.website_link,
+        youtube: user.youtube_link,
+      },
+    };
   }
 }

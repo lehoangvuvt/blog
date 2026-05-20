@@ -1,13 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
+import Link from "next/link";
 import { useAppSelector } from "@/store/hooks";
 import {
   selectFont,
   selectFontSize,
   selectTheme,
 } from "@/features/app-settings/selectors";
-import Link from "next/link";
 
 function usePostThemeClasses() {
   const theme = useAppSelector(selectTheme);
@@ -16,13 +16,19 @@ function usePostThemeClasses() {
   const isDark = theme === "dark";
 
   return {
-    isDark,
+    fontClass:
+      font === "serif"
+        ? "font-serif"
+        : font === "monospace"
+        ? "font-mono"
+        : "font-sans",
+
     titleSize:
       fontSize === "small"
-        ? "text-lg"
+        ? "text-xl"
         : fontSize === "large"
-        ? "text-2xl"
-        : "text-xl",
+        ? "text-3xl"
+        : "text-2xl",
 
     subtitleSize:
       fontSize === "small"
@@ -31,31 +37,11 @@ function usePostThemeClasses() {
         ? "text-lg"
         : "text-base",
 
-    metaSize:
-      fontSize === "small"
-        ? "text-xs"
-        : fontSize === "large"
-        ? "text-base"
-        : "text-sm",
-
-    fontClass:
-      font === "serif"
-        ? "font-serif"
-        : font === "monospace"
-        ? "font-mono"
-        : "font-sans",
-    sizeClass:
-      fontSize === "small"
-        ? "text-sm"
-        : fontSize === "large"
-        ? "text-lg"
-        : "text-base",
-
     borderClass: isDark ? "border-white/10" : "border-black/10",
-    titleClass: isDark ? "text-white" : "text-[#242424]",
-    mutedClass: isDark ? "text-zinc-400" : "text-black/60",
-    softMutedClass: isDark ? "text-zinc-500" : "text-black/40",
-    thumbnailBgClass: isDark ? "bg-white/10" : "bg-black/5",
+    titleClass: isDark ? "text-zinc-100" : "text-neutral-950",
+    mutedClass: isDark ? "text-zinc-400" : "text-neutral-600",
+    softMutedClass: isDark ? "text-zinc-500" : "text-neutral-400",
+    imageBgClass: isDark ? "bg-white/5" : "bg-black/[0.04]",
     skeletonClass: isDark ? "bg-white/10" : "bg-black/10",
     skeletonSoftClass: isDark ? "bg-white/5" : "bg-black/5",
   };
@@ -67,15 +53,19 @@ export const PostItem = {
 
     return (
       <article
-        className={`group border-b py-8 transition-colors ${styles.borderClass} ${styles.fontClass} ${styles.sizeClass}`}
+        className={`
+          border-b py-8
+          ${styles.borderClass}
+          ${styles.fontClass}
+        `}
       >
-        <div className="flex gap-6">{children}</div>
+        <div className="grid gap-5 md:grid-cols-[1fr_112px]">{children}</div>
       </article>
     );
   },
 
   Content({ children }: { children: React.ReactNode }) {
-    return <div className="min-w-0 flex-1">{children}</div>;
+    return <div className="min-w-0">{children}</div>;
   },
 
   Header({ children }: { children: React.ReactNode }) {
@@ -83,7 +73,7 @@ export const PostItem = {
 
     return (
       <div
-        className={`mb-3 flex items-center gap-2 ${styles.metaSize} ${styles.mutedClass}`}
+        className={`mb-3 flex flex-wrap items-center gap-2 text-sm ${styles.mutedClass}`}
       >
         {children}
       </div>
@@ -96,7 +86,7 @@ export const PostItem = {
     return (
       <Link
         href={link}
-        className={`font-medium ${styles.titleClass} hover:underline cursor-pointer`}
+        className={`font-medium hover:underline ${styles.titleClass}`}
       >
         {children}
       </Link>
@@ -105,7 +95,6 @@ export const PostItem = {
 
   Dot() {
     const styles = usePostThemeClasses();
-
     return <span className={styles.softMutedClass}>·</span>;
   },
 
@@ -119,7 +108,13 @@ export const PostItem = {
     return (
       <Link
         href={link}
-        className={`line-clamp-2 cursor-pointer font-semibold tracking-tight hover:underline ${styles.titleSize} ${styles.titleClass}`}
+        className={`
+          block max-w-2xl line-clamp-2
+          font-serif font-semibold leading-snug
+          tracking-[-0.02em] hover:underline
+          ${styles.titleSize}
+          ${styles.titleClass}
+        `}
       >
         {children}
       </Link>
@@ -131,28 +126,56 @@ export const PostItem = {
 
     return (
       <p
-        className={`mt-2 line-clamp-2 leading-relaxed ${styles.subtitleSize} ${styles.mutedClass}`}
+        className={`
+          mt-2 max-w-2xl line-clamp-2 leading-relaxed
+          ${styles.subtitleSize}
+          ${styles.mutedClass}
+        `}
       >
         {children}
       </p>
     );
   },
 
-  Thumbnail({ src, alt }: { src: string; alt: string }) {
+  Footer({ children }: { children?: React.ReactNode }) {
     const styles = usePostThemeClasses();
-
-    if (!src) return null;
 
     return (
       <div
-        className={`h-24 w-32 shrink-0 overflow-hidden md:h-32 md:w-44 ${styles.thumbnailBgClass}`}
+        className={`mt-4 flex items-center gap-2 text-sm ${styles.softMutedClass}`}
       >
-        <img
-          src={src}
-          alt={alt}
-          className="h-full w-full object-cover transition duration-300"
-        />
+        {children}
       </div>
+    );
+  },
+
+  Avatar({ src, alt }: { src?: string; alt: string }) {
+    if (!src) return null;
+
+    return (
+      <img src={src} alt={alt} className="h-5 w-5 rounded-full object-cover" />
+    );
+  },
+
+  Thumbnail({ src, alt, link }: { src?: string; alt: string; link?: string }) {
+    const styles = usePostThemeClasses();
+
+    if (!src) return <div className="hidden md:block" />;
+
+    const image = (
+      <div
+        className={`aspect-square overflow-hidden rounded-md ${styles.imageBgClass}`}
+      >
+        <img src={src} alt={alt} className="h-full w-full object-cover" />
+      </div>
+    );
+
+    if (!link) return image;
+
+    return (
+      <Link href={link} className="hidden md:block">
+        {image}
+      </Link>
     );
   },
 
@@ -160,38 +183,33 @@ export const PostItem = {
     const styles = usePostThemeClasses();
 
     return (
-      <article
-        className={`animate-pulse border-b py-8 ${styles.borderClass} ${styles.fontClass} ${styles.sizeClass}`}
-      >
-        <div className="flex gap-6 w-full">
-          <div className="min-w-0 flex-1">
+      <article className={`animate-pulse border-b py-8 ${styles.borderClass}`}>
+        <div className="grid gap-5 md:grid-cols-[1fr_112px]">
+          <div>
             <div className="mb-3 flex items-center gap-2">
-              <div
-                className={`h-4 w-4xl rounded-full ${styles.skeletonClass}`}
-              />
+              <div className={`h-5 w-5 rounded-full ${styles.skeletonClass}`} />
+              <div className={`h-4 w-24 rounded ${styles.skeletonClass}`} />
               <div className={`h-1 w-1 rounded-full ${styles.skeletonClass}`} />
-              <div
-                className={`h-4 w-20 rounded-full ${styles.skeletonClass}`}
-              />
+              <div className={`h-4 w-20 rounded ${styles.skeletonClass}`} />
             </div>
 
             <div className="space-y-2">
-              <div className={`h-6 w-[85%] rounded ${styles.skeletonClass}`} />
-              <div className={`h-6 w-[60%] rounded ${styles.skeletonClass}`} />
+              <div className={`h-7 w-[85%] rounded ${styles.skeletonClass}`} />
+              <div className={`h-7 w-[55%] rounded ${styles.skeletonClass}`} />
             </div>
 
-            <div className="mt-4 space-y-2">
+            <div className="mt-3 space-y-2">
               <div
                 className={`h-4 w-full rounded ${styles.skeletonSoftClass}`}
               />
               <div
-                className={`h-4 w-[90%] rounded ${styles.skeletonSoftClass}`}
+                className={`h-4 w-[75%] rounded ${styles.skeletonSoftClass}`}
               />
             </div>
           </div>
 
           <div
-            className={`h-24 w-32 shrink-0 rounded md:h-32 md:w-44 ${styles.skeletonClass}`}
+            className={`hidden aspect-square rounded-md md:block ${styles.skeletonClass}`}
           />
         </div>
       </article>

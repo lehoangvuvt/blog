@@ -6,6 +6,7 @@ import { PostCommentsModule } from 'src/post-comments/post-comments.module';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from 'src/auth/guards/optional-jwt-guard';
 
 @Module({
   controllers: [PostsController],
@@ -22,6 +23,6 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
       }),
     }),
   ],
-  providers: [PostsService, PrismaService, JwtAuthGuard],
+  providers: [PostsService, PrismaService, JwtAuthGuard, OptionalJwtAuthGuard],
 })
 export class PostsModule {}

@@ -16,13 +16,17 @@ export default function AuthForm({ type }: { type: "signup" | "signin" }) {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<IAuthFormInput>({
     defaultValues: {
       email: "",
       password: "",
       fullName: "",
+      agreeTerms: false,
     },
   });
+
+  const agreedTerms = watch("agreeTerms");
 
   const {
     mutate: sendVerifyEmail,
@@ -179,9 +183,40 @@ export default function AuthForm({ type }: { type: "signup" | "signin" }) {
             </div>
           )}
 
+          {type === "signup" && (
+            <div>
+              <label className="flex items-start gap-3 text-sm leading-relaxed text-black/70">
+                <input
+                  type="checkbox"
+                  disabled={isPending}
+                  {...register("agreeTerms")}
+                  className="mt-1 h-4 w-4 rounded border-black/20 text-black focus:ring-black"
+                />
+
+                <span>
+                  I agree to the{" "}
+                  <Link
+                    href="/terms"
+                    className="font-medium text-black underline underline-offset-2"
+                  >
+                    Terms of Use
+                  </Link>{" "}
+                  and{" "}
+                  <Link
+                    href="/privacy"
+                    className="font-medium text-black underline underline-offset-2"
+                  >
+                    Privacy Policy
+                  </Link>
+                  .
+                </span>
+              </label>
+            </div>
+          )}
+
           <button
             type="submit"
-            disabled={isPending}
+            disabled={isPending || (type === "signup" && !agreedTerms)}
             className="w-full rounded-2xl bg-black py-3 text-lg font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-50 disabled:hover:translate-y-0"
           >
             {isPending

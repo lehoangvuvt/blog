@@ -18,6 +18,7 @@ import type { GetRepliesQueryDto } from 'src/post-comments/dtos/get-replies-quer
 import { PostCommentsService } from 'src/post-comments/post-comments.service';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from 'src/auth/guards/optional-jwt-guard';
 
 @Controller('posts')
 export class PostsController {
@@ -102,7 +103,9 @@ export class PostsController {
     return this.postsService.unRepost(postId, user.sub);
   }
 
-  @Get(':postId/statistics') async getPostStatistics(
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get(':postId/statistics')
+  async getPostStatistics(
     @Param('postId', ParseIntPipe) postId: number,
     @CurrentUser() user?: { sub: string },
   ) {

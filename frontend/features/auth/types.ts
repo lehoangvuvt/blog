@@ -1,8 +1,9 @@
-type IAuthFormInput = {
+interface IAuthFormInput {
   email: string;
   password?: string;
   fullName?: string;
-};
+  agreeTerms?: boolean;
+}
 
 type RegisterPayload = {
   token: string;

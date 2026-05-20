@@ -1,0 +1,15 @@
+export type GetUserInfoResponse = {
+  id: string;
+  slug: string;
+  avatar: string | null;
+  introduction: string | null;
+  fullName: string;
+  createdAt: string;
+  social: {
+    facebook: string | null;
+    x: string | null;
+    linkedin: string | null;
+    website: string | null;
+    youtube: string | null;
+  };
+};

@@ -32,9 +32,11 @@ export default function MainLayout({
       <Sidebar />
 
       <main
-        className={`pt-10 transition-all duration-300 ease-in-out ${
-          isOpenSideBar ? "pl-60" : "pl-0"
-        }`}
+        className={`
+        pt-10 transition-all duration-300 ease-in-out
+        pl-0
+        ${isOpenSideBar ? "md:pl-60" : "md:pl-0"}
+      `}
       >
         <div className="p-6">{children}</div>
       </main>

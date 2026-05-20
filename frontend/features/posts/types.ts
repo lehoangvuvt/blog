@@ -1,3 +1,5 @@
+import type { Tag } from "@/features/tags/types";
+
 export type CreatePostInput = {
   title: string;
   jsonContent: string;
@@ -53,11 +55,6 @@ export type PostDetails = {
     subTitle?: string | null;
     thumbnailImage?: string | null;
   }[];
-};
-
-export type Tag = {
-  id: string;
-  name: string;
 };
 
 export type CreatePostCommentPayload = {

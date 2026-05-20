@@ -1,7 +1,7 @@
 import DOMPurify from 'isomorphic-dompurify';
 import { nanoid } from 'nanoid';
 
-export function generateSlug(text: string): string {
+export function generateSlug(text: string, withSuffix: boolean = true): string {
   const slug = text
     .normalize('NFD')
     // biome-ignore lint/suspicious/noMisleadingCharacterClass: <explanation>
@@ -14,6 +14,10 @@ export function generateSlug(text: string): string {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');
+
+  if (!withSuffix) {
+    return slug;
+  }
 
   return `${slug}-${nanoid(6)}`;
 }

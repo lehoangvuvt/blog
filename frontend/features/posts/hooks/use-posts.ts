@@ -1,36 +1,29 @@
-import { useInfiniteQuery, type InfiniteData } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { getPosts } from "@/features/posts/api/get-posts";
-import type { GetPostsParams, Post } from "@/features/posts/types";
-import type { PaginationResponse } from "@/shared/types/types";
+import type { GetPostsParams } from "@/features/posts/types";
 
-export const usePosts = (
-  params?: Omit<GetPostsParams, "page">,
-  enabled = true
-) => {
-  return useInfiniteQuery<
-    PaginationResponse<Post>,
-    Error,
-    InfiniteData<PaginationResponse<Post>>,
-    readonly unknown[],
-    number
-  >({
-    queryKey: ["posts", "infinite", params],
+export function usePosts(params: Omit<GetPostsParams, "page">) {
+  return useInfiniteQuery({
+    queryKey: [
+      "posts",
+      params.limit,
+      params.published,
+      params.sortBy,
+      params.tag ?? null,
+    ],
+
+    queryFn: ({ pageParam = 1 }) =>
+      getPosts({
+        ...params,
+        page: pageParam as number,
+      }),
 
     initialPageParam: 1,
 
-    enabled: !!enabled,
+    getNextPageParam: (lastPage) => lastPage.meta.nextPage,
 
-    queryFn: ({ pageParam }) => {
-      return getPosts({
-        ...params,
-        page: pageParam,
-      });
-    },
-
-    getNextPageParam: (lastPage) => {
-      return lastPage.meta.hasMore
-        ? lastPage.meta.nextPage ?? undefined
-        : undefined;
-    },
+    staleTime: 1000 * 60,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
-};
+}

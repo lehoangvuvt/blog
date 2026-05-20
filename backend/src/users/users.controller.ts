@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 // biome-ignore lint/style/useImportType: <explanation>
 import { UsersService } from './users.service';
 import type { FindManyPostsDto } from 'src/posts/dtos/find-many-posts.dto';
@@ -11,6 +11,11 @@ export class UsersController {
   async findMany() {
     const users = await this.usersService.findMany();
     return { users };
+  }
+
+  @Get('/:slug')
+  async getUserInfoBySlug(@Param('slug') slug: string) {
+    return await this.usersService.getUserInfoBySlug(slug);
   }
 
   @Get('/:userId/posts')
