@@ -147,7 +147,7 @@ export default function Header() {
                 <div className="invisible absolute right-0 top-full pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100">
                   <div className="w-48 rounded-xl border border-black/10 bg-white p-1 shadow-lg">
                     <Link
-                      href="/me"
+                      href={`/${me.slug}`}
                       className="block rounded-lg px-3 py-2 text-sm text-black/65 hover:bg-black/[0.04] hover:text-black"
                     >
                       Profile

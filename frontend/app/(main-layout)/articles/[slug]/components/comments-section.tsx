@@ -9,6 +9,7 @@ import { useMe } from "@/features/auth/hooks/use-me";
 
 type Props = {
   postId: number;
+  variant?: "page" | "drawer";
 };
 
 function formatCommentDate(date: string) {
@@ -24,7 +25,7 @@ function getInitial(name: string) {
   return name.trim().charAt(0).toUpperCase() || "?";
 }
 
-export function CommentsSection({ postId }: Props) {
+export function CommentsSection({ postId, variant = "page" }: Props) {
   const { data: userInfo } = useMe();
   const { mutate: createPostComment, isPending } = useCreatePostComment();
 
@@ -93,16 +94,30 @@ export function CommentsSection({ postId }: Props) {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
-    <section className="mt-24 border-t border-black/10 pt-10 text-neutral-950">
-      <div className="mb-10">
-        <h2 className="font-serif text-3xl font-semibold tracking-tight">
-          Responses
-        </h2>
+    <section
+      className={
+        variant === "drawer"
+          ? "pt-6 text-neutral-950"
+          : "mt-24 border-t border-black/10 pt-10 text-neutral-950"
+      }
+    >
+      {variant === "page" && (
+        <div className="mb-10">
+          <h2 className="font-serif text-3xl font-semibold tracking-tight">
+            Responses
+          </h2>
 
-        <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-sm text-neutral-500">
+            {responseCount} {responseCount === 1 ? "response" : "responses"}
+          </p>
+        </div>
+      )}
+
+      {variant === "drawer" && (
+        <p className="mb-5 text-sm text-neutral-500">
           {responseCount} {responseCount === 1 ? "response" : "responses"}
         </p>
-      </div>
+      )}
 
       <div className="mb-12 rounded-xl border border-black/10 bg-white p-4">
         <div className="mb-4 flex items-center gap-3">

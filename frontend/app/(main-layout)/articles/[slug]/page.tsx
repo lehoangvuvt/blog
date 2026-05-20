@@ -283,10 +283,6 @@ export default async function ArticlePage({
               />
             </div>
           )}
-
-          <div className="mt-24">
-            <CommentsSection postId={post.id} />
-          </div>
         </article>
 
         {headings.length > 0 && (

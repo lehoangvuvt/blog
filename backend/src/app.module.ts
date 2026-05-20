@@ -9,6 +9,7 @@ import { PostsModule } from './posts/posts.module';
 import { PostCommentsModule } from './post-comments/post-comments.module';
 import { EmailModule } from './email/email.module';
 import { TagsModule } from './tags/tags.module';
+import { PostCollectionsModule } from './post-collections/post-collections.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { TagsModule } from './tags/tags.module';
     PostCommentsModule,
     EmailModule,
     TagsModule,
+    PostCollectionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

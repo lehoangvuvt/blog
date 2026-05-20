@@ -1,10 +1,10 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
-  Check,
+  FolderPlus,
   Heart,
-  Link2,
   MessageCircle,
   Repeat2,
   Share2,
@@ -16,14 +16,25 @@ import { useLikePost } from "@/features/posts/hooks/use-like-post";
 import { useUnlikePost } from "@/features/posts/hooks/use-unlike-post";
 import { useRepost } from "@/features/posts/hooks/use-repost";
 import { useUnRepost } from "@/features/posts/hooks/use-un-repost";
+import AddToCollectionModal from "./add-to-collection-modal";
+import ShareModal from "./share-modal";
+import { useMe } from "@/features/auth/hooks/use-me";
+import SignInModal from "@/features/auth/components/sign-in-modal";
+import { CommentsSection } from "./comments-section";
 
 type Props = {
   postId: number;
 };
 
 export function ArticleToolbar({ postId }: Props) {
+  const { data: myInfo } = useMe();
+
+  const [showCommentsDrawer, setShowCommentsDrawer] = useState(false);
+  const [animateCommentsDrawer, setAnimateCommentsDrawer] = useState(false);
+
   const [openShareModal, setOpenShareModal] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [openCollectionModal, setOpenCollectionModal] = useState(false);
+  const [openLoginModal, setOpenLoginModal] = useState(false);
 
   const { mutate: likePost } = useLikePost();
   const { mutate: unlikePost } = useUnlikePost();
@@ -36,31 +47,32 @@ export function ArticleToolbar({ postId }: Props) {
     refetch,
   } = usePostStatistics(postId);
 
-  const currentUrl = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    return window.location.href;
-  }, []);
-
-  const encodedUrl = encodeURIComponent(currentUrl);
-
-  const shareLinks = {
-    facebook: `https://www.facebook.com/sharer/sharer.php?display=popup&u=${encodedUrl}`,
-    x: `https://twitter.com/intent/tweet?url=${encodedUrl}`,
-  };
-
-  const handleCopyLink = async () => {
-    if (!currentUrl) return;
-
-    await navigator.clipboard.writeText(currentUrl);
-
-    setCopied(true);
-
-    window.setTimeout(() => {
-      setCopied(false);
-    }, 1800);
-  };
-
   if (isLoadingStatistics || !postStatistics) return null;
+
+  const requireAuth = (callback: () => void) => {
+    if (!myInfo) {
+      setOpenLoginModal(true);
+      return;
+    }
+
+    callback();
+  };
+
+  const openComments = () => {
+    setShowCommentsDrawer(true);
+
+    requestAnimationFrame(() => {
+      setAnimateCommentsDrawer(true);
+    });
+  };
+
+  const closeComments = () => {
+    setAnimateCommentsDrawer(false);
+
+    setTimeout(() => {
+      setShowCommentsDrawer(false);
+    }, 300);
+  };
 
   return (
     <>
@@ -68,17 +80,19 @@ export function ArticleToolbar({ postId }: Props) {
         <div className="flex items-center gap-5">
           <button
             type="button"
-            onClick={() => {
-              if (postStatistics.liked) {
-                unlikePost(postId, {
-                  onSuccess: () => refetch(),
-                });
-              } else {
-                likePost(postId, {
-                  onSuccess: () => refetch(),
-                });
-              }
-            }}
+            onClick={() =>
+              requireAuth(() => {
+                if (postStatistics.liked) {
+                  unlikePost(postId, {
+                    onSuccess: () => refetch(),
+                  });
+                } else {
+                  likePost(postId, {
+                    onSuccess: () => refetch(),
+                  });
+                }
+              })
+            }
             className="flex items-center gap-2 transition hover:text-neutral-950"
           >
             <Heart
@@ -90,6 +104,7 @@ export function ArticleToolbar({ postId }: Props) {
 
           <button
             type="button"
+            onClick={openComments}
             className="flex items-center gap-2 transition hover:text-neutral-950"
           >
             <MessageCircle className="h-4 w-4" />
@@ -98,17 +113,19 @@ export function ArticleToolbar({ postId }: Props) {
 
           <button
             type="button"
-            onClick={() => {
-              if (postStatistics.reposted) {
-                unRepost(postId, {
-                  onSuccess: () => refetch(),
-                });
-              } else {
-                repost(postId, {
-                  onSuccess: () => refetch(),
-                });
-              }
-            }}
+            onClick={() =>
+              requireAuth(() => {
+                if (postStatistics.reposted) {
+                  unRepost(postId, {
+                    onSuccess: () => refetch(),
+                  });
+                } else {
+                  repost(postId, {
+                    onSuccess: () => refetch(),
+                  });
+                }
+              })
+            }
             className="flex items-center gap-2 transition hover:text-neutral-950"
           >
             <Repeat2
@@ -116,6 +133,19 @@ export function ArticleToolbar({ postId }: Props) {
               fill={postStatistics.reposted ? "currentColor" : "none"}
             />
             <span>{postStatistics.repostsCount ?? 0}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              requireAuth(() => {
+                setOpenCollectionModal(true);
+              })
+            }
+            className="flex items-center gap-2 transition hover:text-neutral-950"
+          >
+            <FolderPlus className="h-4 w-4" />
+            <span className="hidden sm:inline">Collection</span>
           </button>
         </div>
 
@@ -129,81 +159,54 @@ export function ArticleToolbar({ postId }: Props) {
         </button>
       </div>
 
+      {openCollectionModal && (
+        <AddToCollectionModal
+          onClose={() => setOpenCollectionModal(false)}
+          postId={postId}
+        />
+      )}
+
       {openShareModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 px-4">
-          <div className="w-full max-w-md rounded-2xl border border-black/10 bg-white p-6 shadow-xl">
-            <div className="flex items-start justify-between gap-6">
-              <div>
-                <h3 className="font-serif text-2xl font-semibold tracking-tight text-black">
-                  Share this article
-                </h3>
+        <ShareModal onClose={() => setOpenShareModal(false)} />
+      )}
 
-                <p className="mt-1 text-sm text-neutral-500">
-                  Copy the link or share it elsewhere.
-                </p>
-              </div>
+      <SignInModal
+        open={openLoginModal}
+        onClose={() => setOpenLoginModal(false)}
+      />
 
-              <button
-                type="button"
-                onClick={() => setOpenShareModal(false)}
-                className="rounded-full p-1.5 text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-900"
-                aria-label="Close share modal"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="mt-7 grid grid-cols-2 gap-3">
-              <a
-                href={shareLinks.facebook}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-xl border border-black/10 px-4 py-3 text-sm text-neutral-700 transition hover:border-black/20 hover:bg-black/[0.02] hover:text-black"
-              >
-                Facebook
-              </a>
-
-              <a
-                href={shareLinks.x}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-xl border border-black/10 px-4 py-3 text-sm text-neutral-700 transition hover:border-black/20 hover:bg-black/[0.02] hover:text-black"
-              >
-                X
-              </a>
-            </div>
-
-            <div className="mt-5 flex items-center gap-2 rounded-xl border border-black/10 bg-neutral-50 p-2">
-              <div className="min-w-0 flex-1 truncate px-2 text-sm text-neutral-500">
-                {currentUrl}
-              </div>
-
-              <button
-                type="button"
-                onClick={handleCopyLink}
-                className="inline-flex items-center gap-2 rounded-lg bg-neutral-950 px-3 py-2 text-sm font-medium text-white transition hover:bg-neutral-700"
-              >
-                {copied ? (
-                  <>
-                    <Check className="h-4 w-4" />
-                    Copied
-                  </>
-                ) : (
-                  <>
-                    <Link2 className="h-4 w-4" />
-                    Copy
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-
+      {showCommentsDrawer && (
+        <div className="fixed inset-0 z-[999]">
           <button
             type="button"
-            onClick={() => setOpenShareModal(false)}
-            className="absolute inset-0 -z-10"
-            aria-label="Close share modal"
+            onClick={closeComments}
+            className={`absolute inset-0 bg-black/30 backdrop-blur-[2px] transition-opacity duration-300 ${
+              animateCommentsDrawer ? "opacity-100" : "opacity-0"
+            }`}
+            aria-label="Close comments"
           />
+
+          <aside
+            className={`absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto bg-white shadow-2xl will-change-transform transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+              animateCommentsDrawer ? "translate-x-0" : "translate-x-full"
+            }`}
+          >
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-black/10 bg-white px-5 py-4">
+              <h2 className="font-serif text-2xl font-semibold">Responses</h2>
+
+              <button
+                type="button"
+                onClick={closeComments}
+                className="rounded-full p-2 text-neutral-500 transition hover:bg-black/5 hover:text-black"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="px-5 pb-10">
+              <CommentsSection postId={postId} variant="drawer" />
+            </div>
+          </aside>
         </div>
       )}
     </>
