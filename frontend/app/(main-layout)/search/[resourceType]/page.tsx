@@ -3,7 +3,7 @@
 
 import MainLayout from "@/shared/components/layout/main-layout/main-layout";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import LoadingPage from "@/app/loading";
+import Loading from "@/shared/components/loading";
 import { usePosts } from "@/features/posts/hooks/use-posts";
 import { PostItem } from "@/features/posts/components/post-item";
 
@@ -57,7 +57,7 @@ export default function SearchPage() {
         </div>
 
         <div className="divide-y divide-neutral-200">
-          {isLoading && <LoadingPage />}
+          {isLoading && <Loading />}
 
           {!isLoading &&
             params.resourceType === "articles" &&

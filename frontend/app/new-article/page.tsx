@@ -11,7 +11,7 @@ import {
 } from "@/features/files/api/upload.api";
 import { useMe } from "@/features/auth/hooks/use-me";
 import { useRouter } from "next/navigation";
-import LoadingPage from "../loading";
+import Loading from "@/shared/components/loading";
 import ForbiddenPage from "../forbbiden";
 
 export default function NewArticlePage() {
@@ -176,7 +176,7 @@ export default function NewArticlePage() {
     setThumbnailPreview(publicUrl);
   };
 
-  if (!mounted || isLoadingMe) return <LoadingPage />;
+  if (!mounted || isLoadingMe) return <Loading />;
 
   if (!me) {
     return <ForbiddenPage />;

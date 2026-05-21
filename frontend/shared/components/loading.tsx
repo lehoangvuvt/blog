@@ -1,4 +1,4 @@
-export default function LoadingPage() {
+export default function Loading() {
   return (
     <main className="min-h-screen text-[#242424] animate-pulse">
       <div className="mx-auto max-w-3xl px-6 py-14">
@@ -32,7 +32,7 @@ export default function LoadingPage() {
         <div className="mt-14 space-y-5">
           {Array.from({ length: 14 }).map((_, i) => (
             <div
-              key={i}
+              key={`loading-article-${i + 1}`}
               className={`h-4 rounded-full bg-black/5 ${
                 i % 4 === 0 ? "w-[75%]" : i % 3 === 0 ? "w-[90%]" : "w-full"
               }`}
