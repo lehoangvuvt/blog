@@ -43,10 +43,10 @@ export default function UserArticlesPage() {
   const params = useParams();
   const userSlug = params.userSlug as string;
 
-  const { data: userInfo, isLoading: isLoadingUserInfo } =
+  const { data: userInfo, isLoading: isLoadingUserInfo, refetch: refetchUserInfo } =
     useUserInfo(userSlug);
 
-  const { data: myInfo, isLoading: isLoadingMe } = useMe();
+  const { data: myInfo, isLoading: isLoadingMe, refetch: refetchMe } = useMe();
 
   const displayName = userInfo?.fullName ?? "Untitled writer";
   const introduction = userInfo?.introduction ?? "-";
@@ -69,6 +69,8 @@ export default function UserArticlesPage() {
 
   const { mutate: followAUser } = useFollowAUser();
   const { mutate: unfollowAUser } = useUnfollowAUser();
+
+  const isFollowed = isMyProfile ? false : myInfo?.followings.some((following) => following.id === userInfo?.id);
 
   return (
     <MainLayout>
@@ -188,10 +190,26 @@ export default function UserArticlesPage() {
                       className="rounded-full bg-[#ff6719] cursor-pointer px-5 py-2 text-sm font-medium text-white transition hover:brightness-95"
                       onClick={() => {
                         if (!userInfo) return;
-                        followAUser(userInfo.id)
+
+                        if (isFollowed) {
+                          unfollowAUser(userInfo.id, {
+                            onSuccess: () => {
+                              refetchUserInfo();
+                              refetchMe();
+                            }
+                          })
+                          return;
+                        }
+
+                        followAUser(userInfo.id, {
+                          onSuccess: () => {
+                            refetchMe();
+                            refetchUserInfo();
+                          }
+                        })
                       }}
                     >
-                      Follow
+                      {isFollowed ? "Unfollow" : "Follow"}
                     </button>
                   )}
                 </div>

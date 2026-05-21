@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import MainLayout from "@/shared/components/layout/main-layout/main-layout";
 import PostsContainer from "@/features/posts/components/posts-container";
 import { PostItem } from "@/features/posts/components/post-item";
@@ -19,6 +20,10 @@ const allTag: Tag = {
 };
 
 export default function Home() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const { data: tagsData } = useTags({
     limit: 20,
   });
@@ -30,7 +35,26 @@ export default function Home() {
     return [allTag, ...tags];
   }, [tagsData]);
 
-  const [selectedTopic, setSelectedTopic] = useState(allTag);
+  const selectedTagSlug = searchParams.get("tag") ?? allTag.slug;
+
+  const selectedTopic = useMemo(() => {
+    if (selectedTagSlug === allTag.slug) return allTag;
+
+    return {
+      id: selectedTagSlug,
+      name: selectedTagSlug.replaceAll("-", " "),
+      slug: selectedTagSlug,
+    };
+  }, [selectedTagSlug]);
+
+  const handleSelectTopic = (topic: Tag) => {
+    if (topic.slug === allTag.slug) {
+      router.push(pathname, { scroll: false });
+      return;
+    }
+
+    router.push(`${pathname}?tag=${topic.slug}`, { scroll: false });
+  };
 
   const [emblaRef] = useEmblaCarousel({
     dragFree: true,
@@ -57,9 +81,16 @@ export default function Home() {
   } = usePosts(postsParams);
 
   const { data: trendingWeeklyPosts, isLoading: isLoadingWeeklyPosts } =
-    useTrendingPosts("weekly", { limit: 5, tag: selectedTopic.slug !== allTag.slug ? selectedTopic.slug : undefined });
+    useTrendingPosts("weekly", {
+      limit: 5,
+      tag: selectedTopic.slug !== allTag.slug ? selectedTopic.slug : undefined,
+    });
+
   const { data: trendingMonthlyPosts, isLoading: isLoadingMonthlyPosts } =
-    useTrendingPosts("monthly", { limit: 5, tag: selectedTopic.slug !== allTag.slug ? selectedTopic.slug : undefined });
+    useTrendingPosts("monthly", {
+      limit: 5,
+      tag: selectedTopic.slug !== allTag.slug ? selectedTopic.slug : undefined,
+    });
 
   const posts = useMemo(() => {
     return data?.pages.flatMap((page) => page.data) ?? [];
@@ -71,7 +102,7 @@ export default function Home() {
         <div className="sticky top-16 z-10 mt-5 border-b border-black/5 bg-white/95 backdrop-blur">
           <div
             ref={emblaRef}
-            className="mx-auto max-w-7xl overflow-hidden px-5 py-3 cursor-grab"
+            className="mx-auto max-w-7xl cursor-grab overflow-hidden px-5 py-3"
           >
             <div className="flex gap-2">
               {topics.map((topic) => {
@@ -81,8 +112,8 @@ export default function Home() {
                   <button
                     key={topic.id}
                     type="button"
-                    onClick={() => setSelectedTopic(topic)}
-                    className={`shrink-0 rounded-full px-4 py-2 text-sm capitalize transition cursor-pointer ${isActive
+                    onClick={() => handleSelectTopic(topic)}
+                    className={`shrink-0 cursor-pointer rounded-full px-4 py-2 text-sm capitalize transition ${isActive
                       ? "bg-black text-white"
                       : "text-neutral-600 hover:bg-black/5 hover:text-black"
                       }`}
@@ -107,7 +138,7 @@ export default function Home() {
             >
               {isLoadingPosts &&
                 Array.from({ length: 5 }).map((_, index) => (
-                  <PostItem.Skeleton key={`initial-skeleton-${index}`} />
+                  <PostItem.Skeleton key={`initial-skeleton-${index + 1}`} />
                 ))}
 
               <div className="divide-y divide-black/10">
@@ -171,7 +202,7 @@ export default function Home() {
 
               {isFetchingNextPage &&
                 Array.from({ length: 3 }).map((_, index) => (
-                  <PostItem.Skeleton key={`next-page-skeleton-${index}`} />
+                  <PostItem.Skeleton key={`next-page-skeleton-${index + 1}`} />
                 ))}
             </PostsContainer>
           </section>
@@ -187,7 +218,7 @@ export default function Home() {
                   {isLoadingWeeklyPosts
                     ? Array.from({ length: 4 }).map((_, index) => (
                       <SidebarPostSkeleton
-                        key={`trending-skeleton-${index}`}
+                        key={`trending-skeleton-${index + 1}`}
                       />
                     ))
                     : trendingWeeklyPosts?.map((post, index) => (
@@ -223,7 +254,7 @@ export default function Home() {
                   {isLoadingMonthlyPosts
                     ? Array.from({ length: 4 }).map((_, index) => (
                       <SidebarPostSkeleton
-                        key={`trending-skeleton-${index}`}
+                        key={`monthly-skeleton-${index + 1}`}
                       />
                     ))
                     : trendingMonthlyPosts?.map((post, index) => (

@@ -87,6 +87,8 @@ export class UsersService {
       where: { authorId: user.id },
     });
 
+    const followersCount = await this.getUserFollowers(user.id);
+
     return {
       id: user.id,
       slug: user.slug,
@@ -97,7 +99,7 @@ export class UsersService {
       backgroundImage: user.background_image,
       statistics: {
         postsCount,
-        followersCount: 10000,
+        followersCount: followersCount.length || 0,
       },
       social: {
         facebook: user.facebook_link,

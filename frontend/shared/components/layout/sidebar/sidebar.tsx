@@ -10,7 +10,6 @@ import { useMe } from "@/features/auth/hooks/use-me";
 const sidebarItems = [
   { label: "Explore", href: "/", needAuth: false },
   { label: "Following", href: "/following", needAuth: true },
-  { label: "History", href: "/history", needAuth: true },
 ];
 
 export default function Sidebar() {

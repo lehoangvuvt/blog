@@ -56,4 +56,16 @@ export class UsersController {
   ) {
     return await this.usersService.followUser(user.sub, targetUserId);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':targetUserId/follow')
+  async unfollowAUser(
+    @CurrentUser()
+    user: {
+      sub: string;
+    },
+    @Param('targetUserId') targetUserId: string,
+  ) {
+    return await this.usersService.unfollowUser(user.sub, targetUserId);
+  }
 }
