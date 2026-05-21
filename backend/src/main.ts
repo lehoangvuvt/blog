@@ -13,7 +13,11 @@ async function bootstrap() {
   app.use(urlencoded({ extended: true, limit: '10mb' }));
 
   app.enableCors({
-    origin: ['http://localhost:3002', 'http://localhost:3000'],
+    origin: [
+      'http://localhost:3002',
+      'http://localhost:3000',
+      'https://blog-nine-gilt-50.vercel.app',
+    ],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
