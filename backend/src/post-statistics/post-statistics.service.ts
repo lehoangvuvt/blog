@@ -25,6 +25,16 @@ export class PostStatisticsService {
     return post;
   }
 
+  private getSixHourBucket(date = new Date()) {
+    const bucket = new Date(date);
+    bucket.setMinutes(0, 0, 0);
+
+    const hour = bucket.getHours();
+    bucket.setHours(Math.floor(hour / 6) * 6);
+
+    return bucket;
+  }
+
   private getStartOfDay(date = new Date()) {
     const d = new Date(date);
     d.setHours(0, 0, 0, 0);
@@ -189,5 +199,52 @@ export class PostStatisticsService {
 
   async getTrendingPostsMonthly(limit = 10) {
     return this.getTrendingPosts('monthly', limit);
+  }
+
+  async increaseView(postId: number, ipAddress: string, userAgent?: string) {
+    await this.ensurePostExists(postId);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const bucket = this.getSixHourBucket();
+
+    try {
+      await this.prismaService.$transaction([
+        this.prismaService.postViewLog.create({
+          data: {
+            post_id: postId,
+            ip_address: ipAddress,
+            user_agent: userAgent ?? '',
+            bucket,
+          },
+        }),
+
+        this.prismaService.postStatistics.upsert({
+          where: { post_id: postId },
+          update: { views_count: { increment: 1 } },
+          create: { post_id: postId, views_count: 1 },
+        }),
+
+        this.prismaService.postMetricDaily.upsert({
+          where: {
+            post_id_date: {
+              post_id: postId,
+              date: today,
+            },
+          },
+          update: { views_count: { increment: 1 } },
+          create: {
+            post_id: postId,
+            date: today,
+            views_count: 1,
+          },
+        }),
+      ]);
+
+      return { counted: true };
+    } catch {
+      return { counted: false };
+    }
   }
 }

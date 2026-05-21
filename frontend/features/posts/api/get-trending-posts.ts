@@ -9,7 +9,7 @@ export const getTrendingPosts = async (
   limit = 10
 ) => {
   const response = await apiClient.get(
-    `/post-statistics/trending/${timeRange}?limit${limit}`
+    `/post-statistics/trending/${timeRange}?limit=${limit}`
   );
   return response.data as GetTrendingPostsResponse;
 };

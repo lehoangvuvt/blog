@@ -49,7 +49,7 @@ export default function CollectionBookReader() {
         setIsLoading(true);
 
         const response = await fetch(
-          `http://localhost:3001/post-collections/${slug}`
+          `${process.env.NEXT_PUBLIC_BASE_API_URL}/post-collections/${slug}`
         );
 
         if (!response.ok) {

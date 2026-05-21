@@ -57,9 +57,9 @@ export default function Home() {
   } = usePosts(postsParams);
 
   const { data: trendingWeeklyPosts, isLoading: isLoadingWeeklyPosts } =
-    useTrendingPosts("weekly");
+    useTrendingPosts("weekly", { limit: 5 });
   const { data: trendingMonthlyPosts, isLoading: isLoadingMonthlyPosts } =
-    useTrendingPosts("monthly");
+    useTrendingPosts("monthly", { limit: 5 });
 
   const posts = useMemo(() => {
     return data?.pages.flatMap((page) => page.data) ?? [];

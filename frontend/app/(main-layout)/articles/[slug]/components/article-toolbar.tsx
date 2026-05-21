@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import {
+  Eye,
   FolderPlus,
   Heart,
   MessageCircle,
@@ -78,6 +79,11 @@ export function ArticleToolbar({ postId }: Props) {
     <>
       <div className="mt-8 flex items-center justify-between border-y border-black/10 py-3 text-sm text-neutral-500">
         <div className="flex items-center gap-5">
+          <div className="flex items-center gap-2">
+            <Eye className="h-4 w-4" />
+            <span>{postStatistics.viewsCount ?? 0}</span>
+          </div>
+
           <button
             type="button"
             onClick={() =>

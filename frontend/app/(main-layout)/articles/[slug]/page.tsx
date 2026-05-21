@@ -6,7 +6,6 @@ import Link from "next/link";
 import MainLayout from "@/shared/components/layout/main-layout/main-layout";
 
 import { ArticleContent } from "@/app/(main-layout)/articles/[slug]/components/article-content";
-import { CommentsSection } from "@/app/(main-layout)/articles/[slug]/components/comments-section";
 import HeadingNavigation, {
   type Heading,
 } from "@/app/(main-layout)/articles/[slug]/components/headings";
@@ -16,6 +15,7 @@ import type { PostDetails } from "@/features/posts/types";
 import { PostsBySameAuthor } from "./components/posts-by-same-author";
 import { ArticleToolbar } from "./components/article-toolbar";
 import { BackButton } from "@/shared/components/back-button";
+import ViewHandler from "./components/view-handler";
 
 function slugify(text: string) {
   return text
@@ -169,6 +169,7 @@ export default async function ArticlePage({
 
   return (
     <MainLayout>
+      <ViewHandler postId={post.id} />
       <main className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-20 px-5 py-14 xl:grid-cols-[minmax(0,1fr)_220px]">
         <article className="mx-auto w-full max-w-3xl">
           <header className="mb-14">

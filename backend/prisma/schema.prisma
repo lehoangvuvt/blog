@@ -253,3 +253,16 @@ model PostDailyUserInteraction {
 
   @@unique([post_id, user_id, date])
 }
+
+model PostViewLog {
+  id Int @id @default(autoincrement())
+
+  post_id    Int
+  ip_address String
+  user_agent String?
+  bucket     DateTime
+
+  viewed_at DateTime @default(now())
+
+  @@unique([post_id, ip_address, user_agent, bucket])
+}
