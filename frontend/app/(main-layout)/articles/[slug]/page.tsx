@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtml from "sanitize-html";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -162,10 +162,30 @@ export default async function ArticlePage({
 
   const post = await getPost(slug);
 
-  const sanitizedHtmlContent = DOMPurify.sanitize(post.htmlContent ?? "", {
-    USE_PROFILES: {
-      html: true,
+  const sanitizedHtmlContent = sanitizeHtml(post.htmlContent ?? "", {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+      "img",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "span",
+      "pre",
+      "code",
+    ]),
+    allowedAttributes: {
+      ...sanitizeHtml.defaults.allowedAttributes,
+      img: ["src", "alt", "title", "width", "height", "loading"],
+      a: ["href", "name", "target", "rel"],
+      h1: ["id"],
+      h2: ["id"],
+      h3: ["id"],
+      h4: ["id"],
+      span: ["class"],
+      code: ["class"],
+      pre: ["class"],
     },
+    allowedSchemes: ["http", "https", "mailto"],
   });
 
   const readingTime = getReadingTime(sanitizedHtmlContent);
