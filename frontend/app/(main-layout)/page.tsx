@@ -38,22 +38,27 @@ export default function Home() {
   const selectedTagSlug = searchParams.get("tag") ?? allTag.slug;
 
   const selectedTopic = useMemo(() => {
-    if (selectedTagSlug === allTag.slug) return allTag;
-
-    return {
+    return topics.find((topic) => topic.slug === selectedTagSlug) ?? {
       id: selectedTagSlug,
       name: selectedTagSlug.replaceAll("-", " "),
       slug: selectedTagSlug,
     };
-  }, [selectedTagSlug]);
+  }, [topics, selectedTagSlug]);
 
   const handleSelectTopic = (topic: Tag) => {
+    const params = new URLSearchParams(searchParams.toString());
+
     if (topic.slug === allTag.slug) {
-      router.push(pathname, { scroll: false });
-      return;
+      params.delete("tag");
+    } else {
+      params.set("tag", topic.slug);
     }
 
-    router.push(`${pathname}?tag=${topic.slug}`, { scroll: false });
+    const query = params.toString();
+
+    router.push(query ? `${pathname}?${query}` : pathname, {
+      scroll: false,
+    });
   };
 
   const [emblaRef] = useEmblaCarousel({
@@ -62,14 +67,16 @@ export default function Home() {
     align: "start",
   });
 
+  const activeTag = selectedTagSlug !== allTag.slug ? selectedTagSlug : undefined;
+
   const postsParams = useMemo(
     () => ({
       limit: 8,
       published: true,
       sortBy: "latest" as const,
-      ...(selectedTopic.id !== allTag.id && { tag: selectedTopic.slug }),
+      ...(selectedTagSlug !== allTag.slug && { tag: selectedTagSlug }),
     }),
-    [selectedTopic.id, selectedTopic.slug]
+    [selectedTagSlug]
   );
 
   const {
@@ -83,13 +90,13 @@ export default function Home() {
   const { data: trendingWeeklyPosts, isLoading: isLoadingWeeklyPosts } =
     useTrendingPosts("weekly", {
       limit: 5,
-      tag: selectedTopic.slug !== allTag.slug ? selectedTopic.slug : undefined,
+      tag: activeTag,
     });
 
   const { data: trendingMonthlyPosts, isLoading: isLoadingMonthlyPosts } =
     useTrendingPosts("monthly", {
       limit: 5,
-      tag: selectedTopic.slug !== allTag.slug ? selectedTopic.slug : undefined,
+      tag: activeTag,
     });
 
   const posts = useMemo(() => {
