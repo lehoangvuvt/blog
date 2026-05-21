@@ -1,4 +1,6 @@
-import { Injectable } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import { Injectable, NotFoundException } from '@nestjs/common';
 // biome-ignore lint/style/useImportType: <explanation>
 import { PrismaService } from 'src/prisma.service';
 import type { GetRepliesQueryDto } from './dtos/get-replies-query.dto';
@@ -8,25 +10,126 @@ import type CreateCommentDto from './dtos/create-comment.dtot';
 export class PostCommentsService {
   constructor(private prismaService: PrismaService) {}
 
+  private async ensurePostExists(postId: number) {
+    const post = await this.prismaService.post.findUnique({
+      where: { id: postId },
+      select: { id: true },
+    });
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    return post;
+  }
+
   async create(userId: string, dto: CreateCommentDto) {
     const { content, postId, replyToCommentId } = dto;
 
-    return await this.prismaService.postComments.create({
-      data: {
-        ...(replyToCommentId && { reply_to_comment_id: replyToCommentId }),
-        content,
-        post_id: postId,
-        user_id: userId,
-      },
+    await this.ensurePostExists(postId);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return await this.prismaService.$transaction(async (tx) => {
+      const comment = await tx.postComments.create({
+        data: {
+          ...(replyToCommentId && {
+            reply_to_comment_id: replyToCommentId,
+          }),
+          content,
+          post_id: postId,
+          user_id: userId,
+        },
+        include: {
+          user: true,
+        },
+      });
+
+      await tx.postStatistics.upsert({
+        where: { post_id: postId },
+        update: {
+          comments_count: { increment: 1 },
+        },
+        create: {
+          post_id: postId,
+          comments_count: 1,
+        },
+      });
+
+      await tx.postMetricDaily.upsert({
+        where: {
+          post_id_date: {
+            post_id: postId,
+            date: today,
+          },
+        },
+        update: {
+          comments_count: { increment: 1 },
+        },
+        create: {
+          post_id: postId,
+          date: today,
+          comments_count: 1,
+        },
+      });
+
+      return comment;
     });
   }
 
   async delete(userId: string, commentId: string) {
-    return await this.prismaService.postComments.delete({
-      where: {
-        id: commentId,
-        user_id: userId,
-      },
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return await this.prismaService.$transaction(async (tx) => {
+      const existingComment = await tx.postComments.findFirst({
+        where: {
+          id: commentId,
+          user_id: userId,
+          is_deleted: false,
+        },
+      });
+
+      if (!existingComment) {
+        throw new NotFoundException('Comment not found');
+      }
+
+      await tx.postComments.update({
+        where: {
+          id: commentId,
+        },
+        data: {
+          is_deleted: true,
+          deleted_at: new Date(),
+          content: '',
+        },
+      });
+
+      await tx.postStatistics.update({
+        where: {
+          post_id: existingComment.post_id,
+        },
+        data: {
+          comments_count: { decrement: 1 },
+        },
+      });
+
+      await tx.postMetricDaily.update({
+        where: {
+          post_id_date: {
+            post_id: existingComment.post_id,
+            date: today,
+          },
+        },
+        data: {
+          comments_count: { decrement: 1 },
+        },
+      });
+
+      return {
+        deleted: true,
+      };
     });
   }
 

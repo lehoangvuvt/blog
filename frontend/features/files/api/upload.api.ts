@@ -1,4 +1,5 @@
 import { apiClient } from "@/shared/api/client";
+import axios from "axios";
 
 export const getUploadPresignedUrl = async (
   fileName: string,
@@ -12,7 +13,7 @@ export const getUploadPresignedUrl = async (
 };
 
 export const uploadFile = async (file: File, presignedUrl: string) => {
-  await apiClient.put(presignedUrl, file, {
+  await axios.put(presignedUrl, file, {
     headers: {
       "Content-Type": file.type,
     },

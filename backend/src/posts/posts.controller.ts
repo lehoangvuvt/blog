@@ -50,9 +50,16 @@ export class PostsController {
     );
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('')
-  async create(@Body() body: CreatePostDto) {
-    return await this.postsService.create(body);
+  async create(
+    @Body() body: CreatePostDto,
+    @CurrentUser()
+    user: {
+      sub: string;
+    },
+  ) {
+    return await this.postsService.create(user.sub, body);
   }
 
   @UseGuards(JwtAuthGuard)

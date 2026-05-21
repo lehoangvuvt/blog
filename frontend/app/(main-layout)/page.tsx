@@ -10,6 +10,7 @@ import type { Tag } from "@/features/tags/types";
 import useEmblaCarousel from "embla-carousel-react";
 import { SidebarPostSkeleton } from "@/shared/components/sidebar-post-skeleton";
 import { formatPostDate, getArticleLink } from "@/shared/utils";
+import useTrendingPosts from "@/features/posts/hooks/use-trending-posts";
 
 const allTag: Tag = {
   id: "0",
@@ -52,19 +53,17 @@ export default function Home() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    isLoading,
-    isFetching,
+    isLoading: isLoadingPosts,
   } = usePosts(postsParams);
+
+  const { data: trendingWeeklyPosts, isLoading: isLoadingWeeklyPosts } =
+    useTrendingPosts("weekly");
+  const { data: trendingMonthlyPosts, isLoading: isLoadingMonthlyPosts } =
+    useTrendingPosts("monthly");
 
   const posts = useMemo(() => {
     return data?.pages.flatMap((page) => page.data) ?? [];
   }, [data]);
-
-  const showInitialSkeleton = isLoading && posts.length === 0;
-  const isBusy = isLoading || isFetching || isFetchingNextPage;
-
-  const trendingThisWeek = posts.slice(0, 4);
-  const monthlyReads = posts.slice(4, 7);
 
   return (
     <MainLayout>
@@ -101,13 +100,13 @@ export default function Home() {
           <section>
             <PostsContainer
               hasMore={Boolean(hasNextPage)}
-              isLoading={isBusy}
+              isLoading={isLoadingPosts}
               onLoadMore={() => {
-                if (isBusy || !hasNextPage) return;
+                if (!hasNextPage) return;
                 fetchNextPage();
               }}
             >
-              {showInitialSkeleton &&
+              {isLoadingPosts &&
                 Array.from({ length: 5 }).map((_, index) => (
                   <PostItem.Skeleton key={`initial-skeleton-${index}`} />
                 ))}
@@ -162,7 +161,7 @@ export default function Home() {
                 })}
               </div>
 
-              {!showInitialSkeleton && posts.length === 0 && (
+              {!isLoadingPosts && posts.length === 0 && (
                 <div className="py-20 text-center">
                   <h2 className="text-2xl font-bold">No articles found</h2>
                   <p className="mt-2 text-sm text-neutral-500">
@@ -186,16 +185,16 @@ export default function Home() {
                 </h3>
 
                 <div className="mt-6 space-y-7">
-                  {showInitialSkeleton
+                  {isLoadingWeeklyPosts
                     ? Array.from({ length: 4 }).map((_, index) => (
                         <SidebarPostSkeleton
                           key={`trending-skeleton-${index}`}
                         />
                       ))
-                    : trendingThisWeek.map((post, index) => (
+                    : trendingWeeklyPosts?.map((post, index) => (
                         <a
-                          key={post.id}
-                          href={getArticleLink(post.slug)}
+                          key={post.postId}
+                          href={getArticleLink(post.post.slug)}
                           className="group flex gap-4"
                         >
                           <span className="text-sm font-medium text-neutral-300">
@@ -204,11 +203,11 @@ export default function Home() {
 
                           <div>
                             <h4 className="text-[15px] leading-6 font-semibold transition group-hover:text-neutral-600">
-                              {post.title}
+                              {post.post.title}
                             </h4>
 
                             <p className="mt-1 text-sm text-neutral-500">
-                              {post.author?.fullName ?? "Unknown author"}
+                              {post.post.author?.fullName ?? "Unknown author"}
                             </p>
                           </div>
                         </a>
@@ -222,16 +221,16 @@ export default function Home() {
                 </h3>
 
                 <div className="mt-6 space-y-7">
-                  {showInitialSkeleton
+                  {isLoadingMonthlyPosts
                     ? Array.from({ length: 4 }).map((_, index) => (
                         <SidebarPostSkeleton
                           key={`trending-skeleton-${index}`}
                         />
                       ))
-                    : monthlyReads.map((post, index) => (
+                    : trendingMonthlyPosts?.map((post, index) => (
                         <a
-                          key={post.id}
-                          href={getArticleLink(post.slug)}
+                          key={post.post.id}
+                          href={getArticleLink(post.post.slug)}
                           className="group flex gap-4"
                         >
                           <span className="text-sm font-medium text-neutral-300">
@@ -240,11 +239,11 @@ export default function Home() {
 
                           <div>
                             <h4 className="text-[15px] leading-6 font-semibold transition group-hover:text-neutral-600">
-                              {post.title}
+                              {post.post.title}
                             </h4>
 
                             <p className="mt-1 text-sm text-neutral-500">
-                              {post.author?.fullName ?? "Unknown author"}
+                              {post.post.author?.fullName ?? "Unknown author"}
                             </p>
                           </div>
                         </a>

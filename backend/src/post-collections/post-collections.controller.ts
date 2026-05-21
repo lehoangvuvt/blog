@@ -80,4 +80,9 @@ export class PostCollectionsController {
       collectionId,
     );
   }
+
+  @Get('/:slug')
+  async getCollectionDetails(@Param('slug') slug: string) {
+    return await this.postCollectionsService.getCollectionDetails(slug);
+  }
 }

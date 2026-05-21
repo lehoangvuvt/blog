@@ -90,10 +90,29 @@ export type GetPostCommentsResponse = {
   };
 };
 
-export type GetPostStasisticsResponse = {
+export type PostStatistics = {
   likesCount: number;
   repostsCount: number;
   commentsCount: number;
+  viewsCount: number;
+};
+
+export type GetPostStasisticsResponse = {
   liked: boolean;
   reposted: boolean;
-};
+} & PostStatistics;
+
+export type PostWithTagItem = {
+  tags: Tag[];
+} & Post;
+
+export type TrendingPostItem = {
+  postId: number;
+  score: number;
+  post: PostWithTagItem;
+} & PostStatistics;
+
+export type GetTrendingPostsResponse = TrendingPostItem[];
+
+export const trendingTimeRanges = ["daily", "weekly", "monthly"] as const;
+export type TrendingTimeRange = (typeof trendingTimeRanges)[number];

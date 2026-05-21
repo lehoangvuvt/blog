@@ -66,15 +66,20 @@ model Post {
   author          User?    @relation(fields: [authorId], references: [id])
   authorId        String?
 
-  tags         Tag[]
-  postComments PostComments[]
-  likes        PostLikes[]
-  reposts      PostReposts[]
-  bookmarks    PostBookmarks[]
+  is_deleted Boolean   @default(false)
+  deleted_at DateTime?
 
-  created_at          DateTime              @default(now())
-  updated_at          DateTime?             @updatedAt
+  tags                Tag[]
+  postComments        PostComments[]
+  likes               PostLikes[]
+  reposts             PostReposts[]
+  bookmarks           PostBookmarks[]
   postCollectionItems PostCollectionItems[]
+  postStatistics      PostStatistics?
+  postMetricDailies   PostMetricDaily[]
+
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
 }
 
 model Tag {
@@ -105,6 +110,9 @@ model PostComments {
   reply_to_comment_id String?
 
   replies PostComments[] @relation("CommentReplies")
+
+  is_deleted Boolean   @default(false)
+  deleted_at DateTime?
 
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
@@ -190,4 +198,58 @@ model PostCollectionItems {
   @@unique([post_id, collection_id])
   @@index([post_id])
   @@index([collection_id])
+}
+
+model PostStatistics {
+  id Int @id @default(autoincrement())
+
+  views_count    Int @default(0)
+  reposts_count  Int @default(0)
+  likes_count    Int @default(0)
+  comments_count Int @default(0)
+
+  post    Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  post_id Int  @unique
+
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+
+  @@index([post_id])
+}
+
+model PostMetricDaily {
+  id Int @id @default(autoincrement())
+
+  post    Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  post_id Int
+
+  date DateTime
+
+  views_count    Int @default(0)
+  likes_count    Int @default(0)
+  reposts_count  Int @default(0)
+  comments_count Int @default(0)
+
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+
+  @@unique([post_id, date])
+  @@index([date])
+  @@index([post_id, date])
+}
+
+model PostDailyUserInteraction {
+  id Int @id @default(autoincrement())
+
+  post_id Int
+  user_id String
+  date    DateTime
+
+  liked    Boolean @default(false)
+  reposted Boolean @default(false)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([post_id, user_id, date])
 }

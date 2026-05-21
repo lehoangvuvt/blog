@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable, NotFoundException } from '@nestjs/common';
 // biome-ignore lint/style/useImportType: <explanation>
 import { PrismaService } from 'src/prisma.service';
@@ -137,7 +140,7 @@ export class PostsService {
     };
   }
 
-  async create(dto: CreatePostDto) {
+  async create(userId: string, dto: CreatePostDto) {
     const {
       jsonContent,
       htmlContent,
@@ -154,7 +157,7 @@ export class PostsService {
         json_content: jsonContent,
         html_content: sanitizedHtmlContent(htmlContent),
         ...(thumbnailImage && { thumbnail_image: thumbnailImage }),
-        authorId: 'f3781824-de4a-4433-910d-9cc426608bbf',
+        authorId: userId,
         slug: generateSlug(title),
         published,
         tags: {
@@ -250,63 +253,324 @@ export class PostsService {
   async like(postId: number, userId: string) {
     await this.ensurePostExists(postId);
 
-    return this.prismaService.postLikes.upsert({
-      where: {
-        user_id_post_id: {
-          user_id: userId,
-          post_id: postId,
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return await this.prismaService.$transaction(async (tx) => {
+      const existingLike = await tx.postLikes.findUnique({
+        where: {
+          user_id_post_id: {
+            user_id: userId,
+            post_id: postId,
+          },
         },
-      },
-      update: {},
-      create: {
-        user_id: userId,
-        post_id: postId,
-      },
+      });
+
+      if (existingLike) return existingLike;
+
+      const like = await tx.postLikes.create({
+        data: { user_id: userId, post_id: postId },
+      });
+
+      await tx.postStatistics.upsert({
+        where: { post_id: postId },
+        update: { likes_count: { increment: 1 } },
+        create: { post_id: postId, likes_count: 1 },
+      });
+
+      const interaction = await tx.postDailyUserInteraction.upsert({
+        where: {
+          post_id_user_id_date: {
+            post_id: postId,
+            user_id: userId,
+            date: today,
+          },
+        },
+        update: {},
+        create: {
+          post_id: postId,
+          user_id: userId,
+          date: today,
+          liked: false,
+        },
+      });
+
+      if (!interaction.liked) {
+        await tx.postMetricDaily.upsert({
+          where: {
+            post_id_date: {
+              post_id: postId,
+              date: today,
+            },
+          },
+          update: {
+            likes_count: { increment: 1 },
+          },
+          create: {
+            post_id: postId,
+            date: today,
+            likes_count: 1,
+          },
+        });
+
+        await tx.postDailyUserInteraction.update({
+          where: {
+            post_id_user_id_date: {
+              post_id: postId,
+              user_id: userId,
+              date: today,
+            },
+          },
+          data: {
+            liked: true,
+          },
+        });
+      }
+
+      return like;
     });
   }
 
   async unlike(postId: number, userId: string) {
     await this.ensurePostExists(postId);
 
-    await this.prismaService.postLikes.deleteMany({
-      where: {
-        user_id: userId,
-        post_id: postId,
-      },
-    });
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    return { liked: false };
+    return await this.prismaService.$transaction(async (tx) => {
+      const existingLike = await tx.postLikes.findUnique({
+        where: {
+          user_id_post_id: {
+            user_id: userId,
+            post_id: postId,
+          },
+        },
+      });
+
+      if (!existingLike) return { liked: false };
+
+      await tx.postLikes.delete({
+        where: {
+          user_id_post_id: {
+            user_id: userId,
+            post_id: postId,
+          },
+        },
+      });
+
+      await tx.postStatistics.update({
+        where: { post_id: postId },
+        data: { likes_count: { decrement: 1 } },
+      });
+
+      const interaction = await tx.postDailyUserInteraction.upsert({
+        where: {
+          post_id_user_id_date: {
+            post_id: postId,
+            user_id: userId,
+            date: today,
+          },
+        },
+        update: {},
+        create: {
+          post_id: postId,
+          user_id: userId,
+          date: today,
+          liked: false,
+        },
+      });
+
+      if (interaction.liked) {
+        await tx.postMetricDaily.update({
+          where: {
+            post_id_date: {
+              post_id: postId,
+              date: today,
+            },
+          },
+          data: {
+            likes_count: { decrement: 1 },
+          },
+        });
+
+        await tx.postDailyUserInteraction.update({
+          where: {
+            post_id_user_id_date: {
+              post_id: postId,
+              user_id: userId,
+              date: today,
+            },
+          },
+          data: {
+            liked: false,
+          },
+        });
+      }
+
+      return { liked: false };
+    });
   }
 
   async repost(postId: number, userId: string) {
     await this.ensurePostExists(postId);
 
-    return this.prismaService.postReposts.upsert({
-      where: {
-        user_id_post_id: {
-          user_id: userId,
-          post_id: postId,
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return await this.prismaService.$transaction(async (tx) => {
+      const existingRepost = await tx.postReposts.findUnique({
+        where: {
+          user_id_post_id: {
+            user_id: userId,
+            post_id: postId,
+          },
         },
-      },
-      update: {},
-      create: {
-        user_id: userId,
-        post_id: postId,
-      },
+      });
+
+      if (existingRepost) return existingRepost;
+
+      const repost = await tx.postReposts.create({
+        data: { user_id: userId, post_id: postId },
+      });
+
+      await tx.postStatistics.upsert({
+        where: { post_id: postId },
+        update: { reposts_count: { increment: 1 } },
+        create: { post_id: postId, reposts_count: 1 },
+      });
+
+      const interaction = await tx.postDailyUserInteraction.upsert({
+        where: {
+          post_id_user_id_date: {
+            post_id: postId,
+            user_id: userId,
+            date: today,
+          },
+        },
+        update: {},
+        create: {
+          post_id: postId,
+          user_id: userId,
+          date: today,
+        },
+      });
+
+      if (!interaction.reposted) {
+        await tx.postMetricDaily.upsert({
+          where: {
+            post_id_date: {
+              post_id: postId,
+              date: today,
+            },
+          },
+          update: {
+            reposts_count: { increment: 1 },
+          },
+          create: {
+            post_id: postId,
+            date: today,
+            reposts_count: 1,
+          },
+        });
+
+        await tx.postDailyUserInteraction.update({
+          where: {
+            post_id_user_id_date: {
+              post_id: postId,
+              user_id: userId,
+              date: today,
+            },
+          },
+          data: {
+            reposted: true,
+          },
+        });
+      }
+
+      return repost;
     });
   }
 
   async unRepost(postId: number, userId: string) {
     await this.ensurePostExists(postId);
 
-    await this.prismaService.postReposts.deleteMany({
-      where: {
-        user_id: userId,
-        post_id: postId,
-      },
-    });
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    return { reposted: false };
+    return await this.prismaService.$transaction(async (tx) => {
+      const existingRepost = await tx.postReposts.findUnique({
+        where: {
+          user_id_post_id: {
+            user_id: userId,
+            post_id: postId,
+          },
+        },
+      });
+
+      if (!existingRepost) return { reposted: false };
+
+      await tx.postReposts.delete({
+        where: {
+          user_id_post_id: {
+            user_id: userId,
+            post_id: postId,
+          },
+        },
+      });
+
+      await tx.postStatistics.update({
+        where: { post_id: postId },
+        data: {
+          reposts_count: { decrement: 1 },
+        },
+      });
+
+      const interaction = await tx.postDailyUserInteraction.upsert({
+        where: {
+          post_id_user_id_date: {
+            post_id: postId,
+            user_id: userId,
+            date: today,
+          },
+        },
+        update: {},
+        create: {
+          post_id: postId,
+          user_id: userId,
+          date: today,
+          reposted: false,
+        },
+      });
+
+      if (interaction.reposted) {
+        await tx.postMetricDaily.update({
+          where: {
+            post_id_date: {
+              post_id: postId,
+              date: today,
+            },
+          },
+          data: {
+            reposts_count: { decrement: 1 },
+          },
+        });
+
+        await tx.postDailyUserInteraction.update({
+          where: {
+            post_id_user_id_date: {
+              post_id: postId,
+              user_id: userId,
+              date: today,
+            },
+          },
+          data: {
+            reposted: false,
+          },
+        });
+      }
+
+      return { reposted: false };
+    });
   }
 
   async getPostStatistics(postId: number, userId?: string) {

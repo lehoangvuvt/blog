@@ -10,6 +10,7 @@ import { PostCommentsModule } from './post-comments/post-comments.module';
 import { EmailModule } from './email/email.module';
 import { TagsModule } from './tags/tags.module';
 import { PostCollectionsModule } from './post-collections/post-collections.module';
+import { PostStatisticsModule } from './post-statistics/post-statistics.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { PostCollectionsModule } from './post-collections/post-collections.modul
     EmailModule,
     TagsModule,
     PostCollectionsModule,
+    PostStatisticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

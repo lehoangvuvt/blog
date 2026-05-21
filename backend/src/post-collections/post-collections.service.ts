@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   ForbiddenException,
   Injectable,
@@ -44,6 +46,56 @@ export class PostCollectionsService {
         id: collectionId,
       },
     });
+  }
+
+  async getCollectionDetails(slug: string) {
+    const c = await this.prismaService.postCollections.findFirst({
+      where: {
+        slug,
+      },
+      include: {
+        postCollectionItems: {
+          select: {
+            post: {
+              select: {
+                id: true,
+                author: true,
+                title: true,
+                sub_title: true,
+                thumbnail_image: true,
+                created_at: true,
+                slug: true,
+                html_content: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!c) {
+      throw new NotFoundException('Collection not found');
+    }
+
+    return {
+      id: c.id,
+      slug: c.slug,
+      name: c.name,
+      description: c.description,
+      createdAt: c.created_at,
+      posts: c.postCollectionItems.map((item) => {
+        return {
+          id: item.post.id,
+          title: item.post.title,
+          subTitle: item.post.sub_title,
+          thumbnailImage: item.post.thumbnail_image,
+          author: item.post.author,
+          postedDate: item.post.created_at,
+          slug: item.post.slug,
+          htmlContent: item.post.html_content,
+        };
+      }),
+    };
   }
 
   async addPostToCollection(
