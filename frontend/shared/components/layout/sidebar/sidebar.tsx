@@ -5,16 +5,24 @@ import { usePathname } from "next/navigation";
 
 import { selectSideBarStatus } from "@/features/app-settings/selectors";
 import { useAppSelector } from "@/store/hooks";
+import { useMe } from "@/features/auth/hooks/use-me";
 
 const sidebarItems = [
-  { label: "Explore", href: "/" },
-  { label: "Following", href: "/following" },
-  { label: "History", href: "/history" },
+  { label: "Explore", href: "/", needAuth: false },
+  { label: "Following", href: "/following", needAuth: true },
+  { label: "History", href: "/history", needAuth: true },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const isOpenSideBar = useAppSelector(selectSideBarStatus);
+  const { data: me, isLoading, isFetching } = useMe();
+  const isAuthenticating = isLoading || isFetching;
+  const isLoggedIn = Boolean(me);
+
+  if(isAuthenticating) {
+    return null;
+  }
 
   return (
     <>
@@ -48,6 +56,10 @@ export default function Sidebar() {
 
           <nav className="space-y-1">
             {sidebarItems.map((item) => {
+              if (item.needAuth && !isLoggedIn) {
+                return null;
+              }
+
               const isActive =
                 item.href === "/"
                   ? pathname === "/"
