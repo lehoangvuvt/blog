@@ -16,6 +16,7 @@ import { PostsBySameAuthor } from "./components/posts-by-same-author";
 import { ArticleToolbar } from "./components/article-toolbar";
 import { BackButton } from "@/shared/components/back-button";
 import ViewHandler from "./components/view-handler";
+import { notFound } from "next/navigation";
 
 function slugify(text: string) {
   return text
@@ -89,14 +90,18 @@ async function getPost(slug: string) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_API_URL}/posts/${slug}`,
     {
-      next: {
-        revalidate: 60,
-      },
+      next: { revalidate: 60 },
     }
   );
 
+  if (res.status === 404) {
+    notFound();
+  }
+
   if (!res.ok) {
-    throw new Error("Failed to fetch post");
+    const text = await res.text();
+    console.error('Failed to fetch post:', res.status, text);
+    throw new Error(`Failed to fetch post: ${res.status}`);
   }
 
   return res.json() as Promise<PostDetails>;
@@ -204,8 +209,8 @@ export default async function ArticlePage({
                         {`${post.author.email
                           .charAt(0)
                           .toUpperCase()}${post.author.email
-                          .charAt(1)
-                          .toUpperCase()}`}
+                            .charAt(1)
+                            .toUpperCase()}`}
                       </div>
                     )}
 
