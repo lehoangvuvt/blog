@@ -122,7 +122,7 @@ export async function generateMetadata({
 
   const image = post.thumbnailImage ?? "/default-og-image.png";
 
-  const url = `${process.env.NEXT_PUBLIC_SITE_URL}/articles/${slug}`;
+  const url = `https://blog-nine-gilt-50.vercel.app/articles/${slug}`;
 
   return {
     title,
