@@ -17,4 +17,16 @@ export type GetUserInfoResponse = {
     website: string | null;
     youtube: string | null;
   };
+  followers: PublicUserInfo[];
+  followings: PublicUserInfo[];
 };
+
+export type PublicUserInfo = {
+  id: string;
+  slug: string;
+  email: string;
+  fullName: string;
+  avatar: string;
+  introduction: string;
+  createdAt: string;
+}

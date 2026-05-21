@@ -31,6 +31,7 @@ export class PostsService {
       search,
       tag,
       authorId,
+      authorIds,
       published,
       page = 1,
       limit = 10,
@@ -39,10 +40,32 @@ export class PostsService {
 
     const safePage = Math.max(Number(page), 1);
     const safeLimit = Math.min(Math.max(Number(limit), 1), 50);
+    const normalizedAuthorIds: string[] = Array.isArray(authorIds)
+      ? authorIds
+          .map(String)
+          .map((id) => id.trim())
+          .filter(Boolean)
+      : typeof authorIds === 'string'
+        ? authorIds
+            .split(',')
+            .map((id) => id.trim())
+            .filter(Boolean)
+        : [];
+
+    const uniqueAuthorIds = [...new Set(normalizedAuthorIds)];
 
     const where: Prisma.PostWhereInput = {
       ...(typeof published === 'boolean' && { published }),
-      ...(authorId && { authorId }),
+
+      ...(uniqueAuthorIds.length > 0
+        ? {
+            authorId: {
+              in: uniqueAuthorIds,
+            },
+          }
+        : authorId
+          ? { authorId }
+          : {}),
 
       ...(search?.trim() && {
         OR: [
@@ -64,7 +87,7 @@ export class PostsService {
       ...(tag?.trim() && {
         tags: {
           some: {
-            slug: tag,
+            slug: tag.trim(),
           },
         },
       }),

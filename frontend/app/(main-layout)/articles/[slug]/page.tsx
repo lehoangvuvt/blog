@@ -211,7 +211,7 @@ export default async function ArticlePage({
 
                     <div>
                       <Link
-                        href={`/@${post.author.slug}`}
+                        href={`/${post.author.slug}`}
                         className="text-[15px] font-medium text-black hover:underline"
                       >
                         {post.author.slug}

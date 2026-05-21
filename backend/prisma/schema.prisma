@@ -39,6 +39,9 @@ model User {
   postReposts     PostReposts[]
   postBookmarks   PostBookmarks[]
   postCollections PostCollections[]
+
+  userFollowers  UserFollow[] @relation("UserFollowers")
+  userFollowings UserFollow[] @relation("UserFollowings")
 }
 
 model PendingRegistration {
@@ -265,4 +268,18 @@ model PostViewLog {
   viewed_at DateTime @default(now())
 
   @@unique([post_id, ip_address, user_agent, bucket])
+}
+
+model UserFollow {
+  id Int @id @default(autoincrement())  
+
+  follower    User   @relation("UserFollowers", fields: [follower_id], references: [id], onDelete: Cascade)
+  follower_id String
+
+  following    User   @relation("UserFollowings", fields: [following_id], references: [id], onDelete: Cascade)
+  following_id String
+
+  created_at DateTime @default(now())
+  
+  @@unique([follower_id, following_id])
 }

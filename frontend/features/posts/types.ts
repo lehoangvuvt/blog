@@ -13,11 +13,16 @@ export type CreatePostInput = {
 export type GetPostsParams = {
   search?: string;
   tag?: string;
+
   authorId?: string;
+  authorIds?: string[];
+
   published?: boolean;
+
   page?: number;
   limit?: number;
-  sortBy?: "latest" | "oldest";
+
+  sortBy?: "latest" | "oldest" | "popular";
 };
 
 export type Post = {

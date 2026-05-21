@@ -9,7 +9,6 @@ import { useAppSelector } from "@/store/hooks";
 const sidebarItems = [
   { label: "Explore", href: "/" },
   { label: "Following", href: "/following" },
-  { label: "Bookmarks", href: "/bookmarks" },
   { label: "History", href: "/history" },
 ];
 

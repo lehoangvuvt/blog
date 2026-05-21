@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { type FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { toggleSideBar } from "@/features/app-settings/slice";
@@ -18,7 +18,8 @@ export default function Header() {
   const [searchText, setSearchText] = useState(searchParams.get("q") ?? "");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  const { data: me } = useMe();
+  const { data: me, isLoading, isFetching } = useMe();
+  const isCheckingAuth = isLoading || isFetching;
   const isLoggedIn = !!me;
 
   const handleSearch = (e: FormEvent<HTMLFormElement>) => {
@@ -41,6 +42,7 @@ export default function Header() {
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-black/60 transition hover:bg-black/[0.04] hover:text-black"
               aria-label="Toggle sidebar"
             >
+              {/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -68,6 +70,7 @@ export default function Header() {
               onSubmit={handleSearch}
               className="hidden w-full max-w-sm items-center rounded-full bg-black/[0.04] px-4 md:flex"
             >
+              {/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -111,69 +114,71 @@ export default function Header() {
               </Link>
             )}
 
-            {!isLoggedIn ? (
-              <>
-                <Link
-                  href="/sign-in"
-                  className="text-sm text-black/55 transition hover:text-black"
-                >
-                  Sign in
-                </Link>
+            {isCheckingAuth ? (
+              <div className="h-8 w-8 animate-pulse rounded-full bg-black/10" />) :
+              !isLoggedIn ? (
+                <>
+                  <Link
+                    href="/sign-in"
+                    className="text-sm text-black/55 transition hover:text-black"
+                  >
+                    Sign in
+                  </Link>
 
-                <Link
-                  href="/sign-up"
-                  className="rounded-full bg-black px-4 py-2 text-sm font-medium text-white transition hover:bg-black/80"
-                >
-                  Start writing
-                </Link>
-              </>
-            ) : (
-              <div className="group relative flex items-center">
-                <button
-                  type="button"
-                  className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-black text-xs font-medium text-white"
-                >
-                  {me.avatarUrl ? (
-                    <img
-                      src={me.avatarUrl}
-                      alt={me.fullName}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    me.fullName?.charAt(0).toUpperCase()
-                  )}
-                </button>
+                  <Link
+                    href="/sign-up"
+                    className="rounded-full bg-black px-4 py-2 text-sm font-medium text-white transition hover:bg-black/80"
+                  >
+                    Start writing
+                  </Link>
+                </>
+              ) : (
+                <div className="group relative flex items-center">
+                  <button
+                    type="button"
+                    className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-black text-xs font-medium text-white"
+                  >
+                    {me.avatarUrl ? (
+                      <img
+                        src={me.avatarUrl}
+                        alt={me.fullName}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      me.fullName?.charAt(0).toUpperCase()
+                    )}
+                  </button>
 
-                <div className="invisible absolute right-0 top-full pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100">
-                  <div className="w-48 rounded-xl border border-black/10 bg-white p-1 shadow-lg">
-                    <Link
-                      href={`/${me.slug}`}
-                      className="block rounded-lg px-3 py-2 text-sm text-black/65 hover:bg-black/[0.04] hover:text-black"
-                    >
-                      Profile
-                    </Link>
+                  <div className="invisible absolute right-0 top-full pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100">
+                    <div className="w-48 rounded-xl border border-black/10 bg-white p-1 shadow-lg">
+                      <Link
+                        href={`/${me.slug}`}
+                        className="block rounded-lg px-3 py-2 text-sm text-black/65 hover:bg-black/[0.04] hover:text-black"
+                      >
+                        Profile
+                      </Link>
 
-                    <Link
-                      href="/settings"
-                      className="block rounded-lg px-3 py-2 text-sm text-black/65 hover:bg-black/[0.04] hover:text-black"
-                    >
-                      Settings
-                    </Link>
+                      <Link
+                        href="/settings"
+                        className="block rounded-lg px-3 py-2 text-sm text-black/65 hover:bg-black/[0.04] hover:text-black"
+                      >
+                        Settings
+                      </Link>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        localStorage.removeItem("accessToken");
-                        window.location.reload();
-                      }}
-                      className="w-full rounded-lg px-3 py-2 text-left text-sm text-red-500 hover:bg-red-50"
-                    >
-                      Sign out
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          localStorage.removeItem("accessToken");
+                          window.location.reload();
+                        }}
+                        className="w-full rounded-lg px-3 py-2 text-left text-sm text-red-500 hover:bg-red-50"
+                      >
+                        Sign out
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
           </nav>
         </div>
       </header>

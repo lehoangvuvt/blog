@@ -1,3 +1,5 @@
+import type { PublicUserInfo } from "@/features/users/types";
+
 interface IAuthFormInput {
   email: string;
   password?: string;
@@ -41,6 +43,8 @@ type User = {
   fullName: string;
   avatarUrl?: string | null;
   slug: string;
+  followers: PublicUserInfo[];
+  followings: PublicUserInfo[];
 };
 
 export type {

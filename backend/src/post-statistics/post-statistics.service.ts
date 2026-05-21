@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable, NotFoundException } from '@nestjs/common';
+// biome-ignore lint/style/useImportType: <explanation>
 import { PrismaService } from 'src/prisma.service';
 
 type TrendingRange = 'daily' | 'weekly' | 'monthly';
@@ -106,7 +107,7 @@ export class PostStatisticsService {
     };
   }
 
-  async getTrendingPosts(range: TrendingRange, limit = 10) {
+  async getTrendingPosts(range: TrendingRange, limit = 10, tag?: string) {
     const { start, end } = this.getDateRange(range);
 
     const metrics = await this.prismaService.postMetricDaily.groupBy({
@@ -116,7 +117,18 @@ export class PostStatisticsService {
           gte: start,
           lte: end,
         },
+
+        ...(tag && {
+          post: {
+            tags: {
+              some: {
+                slug: tag,
+              },
+            },
+          },
+        }),
       },
+
       _sum: {
         views_count: true,
         likes_count: true,
@@ -154,14 +166,17 @@ export class PostStatisticsService {
           in: postIds,
         },
       },
+
       include: {
         author: true,
+
         postStatistics: true,
+
         tags: {
           select: {
+            id: true,
             slug: true,
             name: true,
-            id: true,
           },
         },
       },
@@ -171,34 +186,47 @@ export class PostStatisticsService {
 
     return ranked.map((item) => ({
       ...item,
+
       post: {
         id: postMap.get(item.postId)?.id,
+
         title: postMap.get(item.postId)?.title,
+
         subTitle: postMap.get(item.postId)?.sub_title,
+
         thumbnailImage: postMap.get(item.postId)?.thumbnail_image,
-        tags: postMap.get(item.postId)?.tags,
+
         slug: postMap.get(item.postId)?.slug,
+
         postedDate: postMap.get(item.postId)?.created_at,
+
+        tags: postMap.get(item.postId)?.tags,
+
+        statistics: postMap.get(item.postId)?.postStatistics,
+
         author: {
           slug: postMap.get(item.postId)?.author?.slug,
+
           avatar: postMap.get(item.postId)?.author?.avatar,
+
           fullName: postMap.get(item.postId)?.author?.full_name,
+
           email: postMap.get(item.postId)?.author?.email,
         },
       },
     }));
   }
 
-  async getTrendingPostsDaily(limit = 10) {
-    return this.getTrendingPosts('daily', limit);
+  async getTrendingPostsDaily(limit = 10, tag?: string) {
+    return this.getTrendingPosts('daily', limit, tag);
   }
 
-  async getTrendingPostsWeekly(limit = 10) {
-    return this.getTrendingPosts('weekly', limit);
+  async getTrendingPostsWeekly(limit = 10, tag?: string) {
+    return this.getTrendingPosts('weekly', limit, tag);
   }
 
-  async getTrendingPostsMonthly(limit = 10) {
-    return this.getTrendingPosts('monthly', limit);
+  async getTrendingPostsMonthly(limit = 10, tag?: string) {
+    return this.getTrendingPosts('monthly', limit, tag);
   }
 
   async increaseView(postId: number, ipAddress: string, userAgent?: string) {

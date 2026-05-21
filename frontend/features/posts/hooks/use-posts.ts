@@ -2,15 +2,24 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { getPosts } from "@/features/posts/api/get-posts";
 import type { GetPostsParams } from "@/features/posts/types";
 
-export function usePosts(params: Omit<GetPostsParams, "page">, enabled = true) {
+export function usePosts(
+  params: Omit<GetPostsParams, "page">,
+  enabled = true,
+) {
   return useInfiniteQuery({
     queryKey: [
       "posts",
-      params.limit,
-      params.published,
-      params.authorId ?? null,
-      params.sortBy,
+
+      params.search ?? null,
       params.tag ?? null,
+
+      params.authorId ?? null,
+
+      params.authorIds?.join(",") ?? null,
+
+      params.published ?? null,
+      params.sortBy ?? "latest",
+      params.limit ?? 10,
     ],
 
     queryFn: ({ pageParam = 1 }) =>
@@ -21,7 +30,7 @@ export function usePosts(params: Omit<GetPostsParams, "page">, enabled = true) {
 
     initialPageParam: 1,
 
-    enabled: !!enabled,
+    enabled,
 
     getNextPageParam: (lastPage) => lastPage.meta.nextPage,
 

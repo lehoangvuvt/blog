@@ -1,6 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, type User } from 'generated/prisma/client';
@@ -102,5 +107,236 @@ export class UsersService {
         youtube: user.youtube_link,
       },
     };
+  }
+
+  async getUserRepostedPostsBySlug(slug: string) {
+    const user = await this.prisma.user.findFirst({ where: { slug } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const posts = await this.prisma.postReposts.findMany({
+      where: { user_id: user.id },
+      include: {
+        post: {
+          select: {
+            id: true,
+            title: true,
+            sub_title: true,
+            thumbnail_image: true,
+            slug: true,
+            created_at: true,
+            author: {
+              select: {
+                slug: true,
+                avatar: true,
+                full_name: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return posts.map((repost) => {
+      return {
+        id: repost.post.id,
+        title: repost.post.title,
+        subTitle: repost.post.sub_title,
+        thumbnailImage: repost.post.thumbnail_image,
+        slug: repost.post.slug,
+        postedDate: repost.post.created_at,
+        author: {
+          slug: repost.post.author?.slug,
+          avatar: repost.post.author?.avatar,
+          fullName: repost.post.author?.full_name,
+          email: repost.post.author?.email,
+        },
+      };
+    });
+  }
+
+  async getUserLikedPostsBySlug(slug: string) {
+    const user = await this.prisma.user.findFirst({ where: { slug } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const posts = await this.prisma.postLikes.findMany({
+      where: { user_id: user.id },
+      include: {
+        post: {
+          select: {
+            id: true,
+            title: true,
+            sub_title: true,
+            thumbnail_image: true,
+            slug: true,
+            created_at: true,
+            author: {
+              select: {
+                slug: true,
+                avatar: true,
+                full_name: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return posts.map((repost) => {
+      return {
+        id: repost.post.id,
+        title: repost.post.title,
+        subTitle: repost.post.sub_title,
+        thumbnailImage: repost.post.thumbnail_image,
+        slug: repost.post.slug,
+        postedDate: repost.post.created_at,
+        author: {
+          slug: repost.post.author?.slug,
+          avatar: repost.post.author?.avatar,
+          fullName: repost.post.author?.full_name,
+          email: repost.post.author?.email,
+        },
+      };
+    });
+  }
+
+  async followUser(currentUserId: string, targetUserId: string) {
+    if (currentUserId === targetUserId) {
+      throw new BadRequestException('You cannot follow yourself');
+    }
+
+    const targetUser = await this.prisma.user.findUnique({
+      where: {
+        id: targetUserId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!targetUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    try {
+      await this.prisma.userFollow.create({
+        data: {
+          follower_id: currentUserId,
+          following_id: targetUserId,
+        },
+      });
+
+      return {
+        success: true,
+        following: true,
+      };
+    } catch (err) {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2002'
+      ) {
+        throw new BadRequestException('You are already following this user');
+      }
+
+      throw new InternalServerErrorException('Failed to follow user');
+    }
+  }
+
+  async unfollowUser(currentUserId: string, targetUserId: string) {
+    if (currentUserId === targetUserId) {
+      throw new BadRequestException('You cannot unfollow yourself');
+    }
+
+    try {
+      await this.prisma.userFollow.delete({
+        where: {
+          follower_id_following_id: {
+            follower_id: currentUserId,
+            following_id: targetUserId,
+          },
+        },
+      });
+
+      return {
+        success: true,
+        following: false,
+      };
+    } catch (err) {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2025'
+      ) {
+        throw new BadRequestException('You are not following this user');
+      }
+
+      throw new InternalServerErrorException('Failed to unfollow user');
+    }
+  }
+
+  async getUserFollowings(userId: string) {
+    const followings = await this.prisma.userFollow.findMany({
+      where: { follower_id: userId },
+      include: {
+        following: {
+          select: {
+            id: true,
+            full_name: true,
+            slug: true,
+            avatar: true,
+            email: true,
+            created_at: true,
+            introduction: true,
+          },
+        },
+      },
+    });
+
+    return followings.map((f) => {
+      return {
+        id: f.following.id,
+        fullName: f.following.full_name,
+        slug: f.following.slug,
+        avatar: f.following.avatar,
+        email: f.following.email,
+        createdAt: f.following.created_at,
+        introduction: f.following.introduction,
+      };
+    });
+  }
+
+  async getUserFollowers(userId: string) {
+    const followers = await this.prisma.userFollow.findMany({
+      where: { following_id: userId },
+      include: {
+        follower: {
+          select: {
+            id: true,
+            full_name: true,
+            slug: true,
+            avatar: true,
+            email: true,
+            created_at: true,
+            introduction: true,
+          },
+        },
+      },
+    });
+
+    return followers.map((f) => {
+      return {
+        id: f.follower.id,
+        fullName: f.follower.full_name,
+        slug: f.follower.slug,
+        avatar: f.follower.avatar,
+        email: f.follower.email,
+        createdAt: f.follower.created_at,
+        introduction: f.follower.introduction,
+      };
+    });
   }
 }

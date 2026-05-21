@@ -1,5 +1,14 @@
 import { Transform, Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 
 export class FindManyPostsDto {
   @IsOptional()
@@ -15,7 +24,27 @@ export class FindManyPostsDto {
   authorId?: string;
 
   @IsOptional()
-  @IsString()
+  @Transform(({ value }) => {
+    if (!value) return undefined;
+
+    if (Array.isArray(value)) {
+      return value
+        .flatMap((item) => String(item).split(','))
+        .map((id) => id.trim())
+        .filter(Boolean);
+    }
+
+    return String(value)
+      .split(',')
+      .map((id) => id.trim())
+      .filter(Boolean);
+  })
+  @IsArray()
+  @IsString({ each: true })
+  authorIds?: string[] | string;
+
+  @IsOptional()
+  @IsIn(['latest', 'oldest', 'popular'])
   sortBy?: 'latest' | 'oldest' | 'popular';
 
   @IsOptional()
@@ -32,6 +61,10 @@ export class FindManyPostsDto {
   limit: number = 10;
 
   @IsOptional()
-  @Transform(({ value }) => value === 'true')
+  @Transform(({ value }) => {
+    if (value === undefined) return undefined;
+    return value === true || value === 'true';
+  })
+  @IsBoolean()
   published?: boolean;
 }

@@ -12,10 +12,11 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+// biome-ignore lint/style/useImportType: <explanation>
 import { PostStatisticsService } from './post-statistics.service';
 import { OptionalJwtAuthGuard } from 'src/auth/guards/optional-jwt-guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { isIP } from 'net';
 
 @Controller('post-statistics')
@@ -33,23 +34,35 @@ export class PostStatisticsController {
 
   @Get('trending/daily')
   async getTrendingPostsDaily(
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe)
+    limit: number,
+
+    @Query('tag')
+    tag?: string,
   ) {
-    return this.postStatisticsService.getTrendingPostsDaily(limit);
+    return this.postStatisticsService.getTrendingPostsDaily(limit, tag);
   }
 
   @Get('trending/weekly')
   async getTrendingPostsWeekly(
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe)
+    limit: number,
+
+    @Query('tag')
+    tag?: string,
   ) {
-    return this.postStatisticsService.getTrendingPostsWeekly(limit);
+    return this.postStatisticsService.getTrendingPostsWeekly(limit, tag);
   }
 
   @Get('trending/monthly')
   async getTrendingPostsMonthly(
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe)
+    limit: number,
+
+    @Query('tag')
+    tag?: string,
   ) {
-    return this.postStatisticsService.getTrendingPostsMonthly(limit);
+    return this.postStatisticsService.getTrendingPostsMonthly(limit, tag);
   }
 
   @Post(':postId/view')

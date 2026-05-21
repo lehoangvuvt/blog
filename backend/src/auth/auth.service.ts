@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   BadRequestException,
   ConflictException,
@@ -201,6 +202,9 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
+    const followers = await this.usersService.getUserFollowers(userId);
+    const followings = await this.usersService.getUserFollowings(userId);
+
     return {
       id: user.id,
       emai: user.email,
@@ -209,6 +213,8 @@ export class AuthService {
       createdAt: user.created_at,
       introduction: user.introduction,
       slug: user.slug,
+      followers,
+      followings,
     };
   }
 

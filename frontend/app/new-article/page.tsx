@@ -10,8 +10,7 @@ import {
   uploadFile,
 } from "@/features/files/api/upload.api";
 import { useMe } from "@/features/auth/hooks/use-me";
-import { useRouter, forbidden } from "next/navigation";
-import Forbidden from "../forbbiden";
+import { useRouter } from "next/navigation";
 import LoadingPage from "../loading";
 import ForbiddenPage from "../forbbiden";
 
@@ -22,7 +21,6 @@ export default function NewArticlePage() {
   const [scrollY, setScrollY] = useState(0);
 
   const [tags, setTags] = useState<string[]>(["Journal", "Ideas"]);
-  const [tagInput, setTagInput] = useState("");
 
   const [title, setTitle] = useState("");
   const TITLE_LIMIT = 100;
@@ -578,7 +576,7 @@ export default function NewArticlePage() {
                 ? "Your article is now live."
                 : publishStatus === "publishing"
                 ? "Please wait while we create your post."
-                : "Add or adjust tags before publishing"}
+                : "Add or adjust topics before publishing"}
             </p>
 
             {publishStatus === "publishing" && (
@@ -650,7 +648,7 @@ export default function NewArticlePage() {
                         addPublishTag();
                       }
                     }}
-                    placeholder="Add tag..."
+                    placeholder="Add a topic for this article..."
                     className={`flex-1 rounded-lg border px-3 py-2 text-sm outline-none disabled:opacity-40 ${
                       darkMode
                         ? "border-white/10 bg-white/5"
