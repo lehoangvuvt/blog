@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import MainLayout from "@/shared/components/layout/main-layout/main-layout";
 import PostsContainer from "@/features/posts/components/posts-container";
 import { PostItem } from "@/features/posts/components/post-item";
@@ -10,11 +10,19 @@ import { useTags } from "@/features/tags/hooks/use-tags";
 import { formatTimeAgo } from "@/shared/utils";
 import useFollowTag from "@/features/tags/hooks/use-follow-tag";
 import useUnfollowTag from "@/features/tags/hooks/use-unfollow-tag";
+import { useParams, useRouter } from "next/navigation";
+import NotificationPopover from "@/shared/components/notification-popover";
+import useNotification from "@/hooks/use-notification";
 
-type Tab = "articles" | "topics";
+type Tab = "writters" | "topics";
 
 export default function FollowingPage() {
-  const [activeTab, setActiveTab] = useState<Tab>("articles");
+  const { close, open, notifications } = useNotification();
+  const router = useRouter();
+
+  const params = useParams();
+
+  const [activeTab, setActiveTab] = useState<Tab>(params.tabType === "writters" ? "writters" : "topics");
 
   const { data: me, isLoading: isLoadingMe } = useMe();
 
@@ -33,19 +41,25 @@ export default function FollowingPage() {
         sortBy: "latest",
         authorIds: followingIds,
       },
-      activeTab === "articles" && followingIds.length > 0
+      activeTab === "writters" && followingIds.length > 0
     );
 
   const shouldFetchFollowedTags =
     activeTab === "topics" && followedTagIds.length > 0;
 
   const { data: followedTagsData, isLoading: isLoadingFollowedTags } = useTags(
-    {
-      ids: followedTagIds,
-      limit: Math.max(followedTagIds.length, 1),
-    },
     shouldFetchFollowedTags
+      ? {
+        ids: followedTagIds,
+        limit: followedTagIds.length,
+      }
+      : undefined,
+    shouldFetchFollowedTags,
   );
+
+  const followedTopics = shouldFetchFollowedTags
+    ? followedTagsData?.pages.flatMap((page) => page.data) ?? []
+    : [];
 
   const { data: recommendedTagsData, isLoading: isLoadingRecommendedTags } =
     useTags(
@@ -57,16 +71,13 @@ export default function FollowingPage() {
 
   const posts = data?.pages.flatMap((page) => page.data) ?? [];
 
-  const followedTopics =
-    followedTagsData?.pages.flatMap((page) => page.data) ?? [];
-
   const recommendedTopics =
     recommendedTagsData?.pages
       .flatMap((page) => page.data)
       .filter((tag) => !followedTagIds.includes(tag.id)) ?? [];
 
   const showInitialSkeleton =
-    activeTab === "articles" &&
+    activeTab === "writters" &&
     (isLoadingMe || isLoading) &&
     posts.length === 0;
 
@@ -81,8 +92,13 @@ export default function FollowingPage() {
   const { mutate: followTag } = useFollowTag();
   const { mutate: unfollowTag } = useUnfollowTag();
 
+  useEffect(() => {
+    router.replace(`/following/${activeTab}`);
+  }, [activeTab, router]);
+
   return (
     <MainLayout>
+      <NotificationPopover onClose={close} notifications={notifications} />
       <main className="min-h-screen bg-white text-black">
         <section className="mx-auto w-full max-w-2xl px-5 pt-14 md:px-6">
           <header className="border-b border-black/10 pb-6">
@@ -97,13 +113,13 @@ export default function FollowingPage() {
             <div className="mt-8 flex gap-6 overflow-x-auto">
               <button
                 type="button"
-                onClick={() => setActiveTab("articles")}
-                className={`border-b pb-3 text-sm font-medium whitespace-nowrap transition ${activeTab === "articles"
+                onClick={() => setActiveTab("writters")}
+                className={`border-b pb-3 text-sm font-medium whitespace-nowrap transition ${activeTab === "writters"
                   ? "border-black text-black"
                   : "border-transparent text-black/45 hover:text-black"
                   }`}
               >
-                Articles
+                Writters
               </button>
 
               <button
@@ -120,7 +136,7 @@ export default function FollowingPage() {
           </header>
         </section>
 
-        {activeTab === "articles" && (
+        {activeTab === "writters" && (
           <PostsContainer
             hasMore={!hasNoFollowings && !!hasNextPage}
             isLoading={isFetchingNextPage}
@@ -238,7 +254,10 @@ export default function FollowingPage() {
 
                     <button
                       type="button"
-                      onClick={() => unfollowTag(topic)}
+                      onClick={() => unfollowTag(topic, {
+                        onSuccess: () => open("Tag unfollowed successfully", "success"),
+                        onError: () => open("Failed to unfollow tag", "error"),
+                      })}
                       className="group ml-6 shrink-0 rounded-full border border-black bg-black px-5 py-2 text-sm font-medium text-white transition hover:bg-white"
                     >
                       <span className="relative block h-5 overflow-hidden">
@@ -310,7 +329,10 @@ export default function FollowingPage() {
 
                       <button
                         type="button"
-                        onClick={() => followTag(topic)}
+                        onClick={() => followTag(topic, {
+                          onSuccess: () => open("Tag followed successfully", "success"),
+                          onError: () => open("Failed to follow tag", "error"),
+                        })}
                         className="group ml-6 shrink-0 rounded-full border border-neutral-300 bg-white px-5 py-2 text-sm font-medium text-neutral-700 transition-all duration-200 hover:border-neutral-900 hover:bg-neutral-900"
                       >
                         <span className="relative block h-5 overflow-hidden">

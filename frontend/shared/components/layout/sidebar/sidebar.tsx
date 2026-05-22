@@ -11,7 +11,7 @@ import { useMe } from "@/features/auth/hooks/use-me";
 
 const sidebarItems = [
   { label: "Explore", href: "/", needAuth: false },
-  { label: "Following", href: "/following", needAuth: true },
+  { label: "Following", href: "/following/writters", needAuth: true },
   { label: "Saved", href: "/saved-posts", needAuth: true },
 ];
 
@@ -39,7 +39,8 @@ export default function Sidebar() {
 
   return (
     <>
-      <div
+      <button
+        type="button"
         onClick={() => dispatch(setSideBarState({ isOpen: false }))}
         className={`
           fixed inset-0 top-16 z-30 bg-black/20 transition-opacity duration-300 md:hidden

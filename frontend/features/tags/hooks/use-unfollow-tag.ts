@@ -22,7 +22,9 @@ export default function useUnfollowTag() {
 
         return {
           ...old,
-          followedTagIds: old.followedTagIds.filter((id) => id !== tagToUnfollow.id),
+          followedTagIds: old.followedTagIds.filter(
+            (id) => id !== tagToUnfollow.id,
+          ),
         };
       });
 
