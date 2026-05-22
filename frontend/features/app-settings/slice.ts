@@ -24,9 +24,17 @@ const appSettingsSlice = createSlice({
     toggleSideBar: (state) => {
       state.isOpenSideBar = !state.isOpenSideBar;
     },
+    setSideBarState: (state, action: PayloadAction<{ isOpen: boolean }>) => {
+      state.isOpenSideBar = action.payload.isOpen;
+    },
   },
 });
 
-export const { setTheme, setFont, setFontSize, toggleSideBar } =
-  appSettingsSlice.actions;
+export const {
+  setTheme,
+  setFont,
+  setFontSize,
+  toggleSideBar,
+  setSideBarState,
+} = appSettingsSlice.actions;
 export default appSettingsSlice.reducer;

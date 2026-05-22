@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import {
+  Bookmark,
   Eye,
   FolderPlus,
   Heart,
@@ -22,6 +23,8 @@ import ShareModal from "./share-modal";
 import { useMe } from "@/features/auth/hooks/use-me";
 import SignInModal from "@/features/auth/components/sign-in-modal";
 import { CommentsSection } from "./comments-section";
+import useSavePost from "@/features/posts/hooks/use-save-post";
+import useUnsavePost from "@/features/posts/hooks/use-unsave-post";
 
 type Props = {
   postId: number;
@@ -29,6 +32,8 @@ type Props = {
 
 export function ArticleToolbar({ postId }: Props) {
   const { data: myInfo } = useMe();
+  const savedPostIds = myInfo?.savedPostIds ?? [];
+  const isSaved = savedPostIds.includes(postId);
 
   const [showCommentsDrawer, setShowCommentsDrawer] = useState(false);
   const [animateCommentsDrawer, setAnimateCommentsDrawer] = useState(false);
@@ -41,6 +46,8 @@ export function ArticleToolbar({ postId }: Props) {
   const { mutate: unlikePost } = useUnlikePost();
   const { mutate: repost } = useRepost();
   const { mutate: unRepost } = useUnRepost();
+  const { mutate: savePost } = useSavePost();
+  const { mutate: unsavePost } = useUnsavePost();
 
   const {
     data: postStatistics,
@@ -79,13 +86,19 @@ export function ArticleToolbar({ postId }: Props) {
     <>
       <div className="mt-8 flex items-center justify-between border-y border-black/10 py-3 text-sm text-neutral-500">
         <div className="flex items-center gap-5">
-          <div className="flex items-center gap-2">
+          <div
+            title="Views"
+            aria-label="Post views"
+            className="flex items-center gap-2"
+          >
             <Eye className="h-4 w-4" />
             <span>{postStatistics.viewsCount ?? 0}</span>
           </div>
 
           <button
             type="button"
+            title={postStatistics.liked ? "Unlike" : "Like"}
+            aria-label={postStatistics.liked ? "Unlike post" : "Like post"}
             onClick={() =>
               requireAuth(() => {
                 if (postStatistics.liked) {
@@ -110,6 +123,8 @@ export function ArticleToolbar({ postId }: Props) {
 
           <button
             type="button"
+            title="Comments"
+            aria-label="Open comments"
             onClick={openComments}
             className="flex items-center gap-2 transition hover:text-neutral-950"
           >
@@ -119,6 +134,10 @@ export function ArticleToolbar({ postId }: Props) {
 
           <button
             type="button"
+            title={postStatistics.reposted ? "Undo repost" : "Repost"}
+            aria-label={
+              postStatistics.reposted ? "Undo repost" : "Repost article"
+            }
             onClick={() =>
               requireAuth(() => {
                 if (postStatistics.reposted) {
@@ -143,6 +162,29 @@ export function ArticleToolbar({ postId }: Props) {
 
           <button
             type="button"
+            title={isSaved ? "Unsave" : "Save"}
+            aria-label={isSaved ? "Unsave post" : "Save post"}
+            onClick={() =>
+              requireAuth(() => {
+                if (isSaved) {
+                  unsavePost(postId);
+                } else {
+                  savePost(postId);
+                }
+              })
+            }
+            className="flex items-center gap-2 transition hover:text-neutral-950"
+          >
+            <Bookmark
+              className="h-4 w-4"
+              fill={isSaved ? "currentColor" : "none"}
+            />
+          </button>
+
+          <button
+            type="button"
+            title="Add to collection"
+            aria-label="Add to collection"
             onClick={() =>
               requireAuth(() => {
                 setOpenCollectionModal(true);
@@ -151,17 +193,17 @@ export function ArticleToolbar({ postId }: Props) {
             className="flex items-center gap-2 transition hover:text-neutral-950"
           >
             <FolderPlus className="h-4 w-4" />
-            <span className="hidden sm:inline">Collection</span>
           </button>
         </div>
 
         <button
           type="button"
+          title="Share"
+          aria-label="Share post"
           onClick={() => setOpenShareModal(true)}
           className="flex items-center gap-2 transition hover:text-neutral-950"
         >
           <Share2 className="h-4 w-4" />
-          <span className="hidden sm:inline">Share</span>
         </button>
       </div>
 
@@ -202,6 +244,8 @@ export function ArticleToolbar({ postId }: Props) {
 
               <button
                 type="button"
+                title="Close"
+                aria-label="Close comments"
                 onClick={closeComments}
                 className="rounded-full p-2 text-neutral-500 transition hover:bg-black/5 hover:text-black"
               >

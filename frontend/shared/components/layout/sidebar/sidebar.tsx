@@ -1,46 +1,61 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { selectSideBarStatus } from "@/features/app-settings/selectors";
-import { useAppSelector } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setSideBarState } from "@/features/app-settings/slice"; // adjust path
 import { useMe } from "@/features/auth/hooks/use-me";
 
 const sidebarItems = [
   { label: "Explore", href: "/", needAuth: false },
   { label: "Following", href: "/following", needAuth: true },
+  { label: "Saved", href: "/saved-posts", needAuth: true },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const dispatch = useAppDispatch();
+
   const isOpenSideBar = useAppSelector(selectSideBarStatus);
   const { data: me, isLoading, isFetching } = useMe();
+
   const isAuthenticating = isLoading || isFetching;
   const isLoggedIn = Boolean(me);
 
-  if(isAuthenticating) {
+  useEffect(() => {
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+
+    if (isMobile) {
+      dispatch(setSideBarState({ isOpen: false }));
+    }
+  }, [dispatch]);
+
+  if (isAuthenticating) {
     return null;
   }
 
   return (
     <>
       <div
+        onClick={() => dispatch(setSideBarState({ isOpen: false }))}
         className={`
-          fixed inset-0 top-16 z-5 transition-opacity duration-300 md:hidden
+          fixed inset-0 top-16 z-30 bg-black/20 transition-opacity duration-300 md:hidden
           ${isOpenSideBar ? "opacity-100" : "pointer-events-none opacity-0"}
         `}
       />
 
       <aside
         className={`
-          fixed top-16 bottom-0 left-0 z-40
-          w-[82vw] max-w-80 border-r border-black/[0.07] bg-[#fdfcf9]
-          transition-transform duration-300 ease-out
-          md:w-64 md:max-w-none
+        fixed top-16 bottom-0 left-0 z-40
+        w-[72vw] max-w-72 border-r border-black/[0.07] bg-[#fdfcf9]
+        transition-transform duration-300 ease-out
+        md:w-64 md:max-w-none
 
-          ${isOpenSideBar ? "translate-x-0" : "-translate-x-full"}
-        `}
+        ${isOpenSideBar ? "translate-x-0" : "-translate-x-full"}
+      `}
       >
         <div className="flex h-full flex-col px-5 py-7">
           <div className="mb-8 px-1">
@@ -55,9 +70,7 @@ export default function Sidebar() {
 
           <nav className="space-y-1">
             {sidebarItems.map((item) => {
-              if (item.needAuth && !isLoggedIn) {
-                return null;
-              }
+              if (item.needAuth && !isLoggedIn) return null;
 
               const isActive =
                 item.href === "/"

@@ -10,9 +10,9 @@ export async function getMe(): Promise<User> {
 
   try {
     const res = await apiClient.get(
-      `${process.env.NEXT_PUBLIC_BASE_API_URL}/auth/me`,
+      `${process.env.NEXT_PUBLIC_BASE_API_URL}/auth/me`
     );
-    return res.data;
+    return res.data as User;
   } catch {
     throw new Error("Fail to get user info");
   }

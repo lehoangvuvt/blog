@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
   Body,
   Controller,
@@ -117,5 +118,23 @@ export class PostsController {
     @CurrentUser() user?: { sub: string },
   ) {
     return this.postsService.getPostStatistics(postId, user?.sub);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':postId/save')
+  async savePost(
+    @CurrentUser() user: { sub: string },
+    @Param('postId', ParseIntPipe) postId: number,
+  ) {
+    return await this.postsService.savePost(user.sub, postId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':postId/save')
+  async unsavePost(
+    @CurrentUser() user: { sub: string },
+    @Param('postId', ParseIntPipe) postId: number,
+  ) {
+    return await this.postsService.unsavePost(user.sub, postId);
   }
 }

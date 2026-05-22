@@ -21,6 +21,10 @@ export type GetUserInfoResponse = {
   followings: PublicUserInfo[];
 };
 
+export type GetMeResponse = {
+  savedPostIds: number[];
+} & GetUserInfoResponse;
+
 export type PublicUserInfo = {
   id: string;
   slug: string;
@@ -29,4 +33,4 @@ export type PublicUserInfo = {
   avatar: string;
   introduction: string;
   createdAt: string;
-}
+};

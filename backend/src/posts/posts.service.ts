@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -645,5 +646,48 @@ export class PostsService {
       liked: Boolean(liked),
       reposted: Boolean(reposted),
     };
+  }
+
+  async savePost(userId: string, postId: number) {
+    const post = await this.ensurePostExists(postId);
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    return this.prismaService.userSavedPosts.upsert({
+      where: {
+        user_id_post_id: {
+          user_id: userId,
+          post_id: postId,
+        },
+      },
+      update: {},
+      create: {
+        user_id: userId,
+        post_id: postId,
+      },
+    });
+  }
+
+  async unsavePost(userId: string, postId: number) {
+    const post = await this.ensurePostExists(postId);
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    try {
+      return await this.prismaService.userSavedPosts.delete({
+        where: {
+          user_id_post_id: {
+            user_id: userId,
+            post_id: postId,
+          },
+        },
+      });
+    } catch {
+      throw new NotFoundException('You have not saved this post yet');
+    }
   }
 }

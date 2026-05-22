@@ -46,6 +46,17 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('/me/saved-posts')
+  async getCurrentUserSavedPosts(
+    @CurrentUser()
+    user: {
+      sub: string;
+    },
+  ) {
+    return await this.usersService.getUserSavedPosts(user.sub);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post(':targetUserId/follow')
   async followAUser(
     @CurrentUser()

@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   BadRequestException,
@@ -204,6 +207,8 @@ export class AuthService {
 
     const followers = await this.usersService.getUserFollowers(userId);
     const followings = await this.usersService.getUserFollowings(userId);
+    const savedPosts = await this.usersService.getUserSavedPosts(userId);
+    const savedPostIds = savedPosts.map((p) => p.id);
 
     return {
       id: user.id,
@@ -215,6 +220,7 @@ export class AuthService {
       slug: user.slug,
       followers,
       followings,
+      savedPostIds,
     };
   }
 

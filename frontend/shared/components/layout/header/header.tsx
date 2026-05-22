@@ -18,17 +18,18 @@ export default function Header() {
 
   const [searchText, setSearchText] = useState(searchParams.get("q") ?? "");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const searchContainerRef = useRef<HTMLFormElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   const { data: me, isLoading, isFetching } = useMe();
   const isCheckingAuth = isLoading || isFetching;
   const isLoggedIn = !!me;
 
   const RECENT_SEARCHES_KEY = "recentSearches";
-
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-
-  const searchContainerRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
@@ -37,11 +38,17 @@ export default function Header() {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+
       if (
         searchContainerRef.current &&
-        !searchContainerRef.current.contains(event.target as Node)
+        !searchContainerRef.current.contains(target)
       ) {
         setIsSearchFocused(false);
+      }
+
+      if (profileRef.current && !profileRef.current.contains(target)) {
+        setIsProfileOpen(false);
       }
     };
 
@@ -56,7 +63,7 @@ export default function Header() {
     const next = [
       query,
       ...recentSearches.filter(
-        (item) => item.toLowerCase() !== query.toLowerCase(),
+        (item) => item.toLowerCase() !== query.toLowerCase()
       ),
     ].slice(0, 5);
 
@@ -93,7 +100,6 @@ export default function Header() {
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-black/60 transition hover:bg-black/[0.04] hover:text-black"
               aria-label="Toggle sidebar"
             >
-              {/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -122,7 +128,6 @@ export default function Header() {
               onSubmit={handleSearch}
               className="relative hidden w-full max-w-sm items-center rounded-full bg-black/[0.04] px-4 md:flex"
             >
-              {/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -148,7 +153,7 @@ export default function Header() {
               />
 
               {isSearchFocused && recentSearches.length > 0 && (
-                <div className="absolute left-0 top-11 w-full rounded-2xl border border-black/10 bg-white p-2 shadow-xl">
+                <div className="absolute left-0 top-11 z-50 w-full rounded-2xl border border-black/10 bg-white p-2 shadow-xl">
                   <div className="px-3 py-2 text-xs font-medium uppercase tracking-wide text-black/40">
                     Recent searches
                   </div>
@@ -165,7 +170,9 @@ export default function Header() {
                           setSearchText(item);
                           saveRecentSearch(item);
                           setIsSearchFocused(false);
-                          router.push(`/search/articles?q=${encodeURIComponent(item)}`);
+                          router.push(
+                            `/search/articles?q=${encodeURIComponent(item)}`
+                          );
                         }}
                         className="flex-1 px-3 py-2 text-left text-sm text-black/70"
                       >
@@ -206,44 +213,48 @@ export default function Header() {
             )}
 
             {isCheckingAuth ? (
-              <div className="h-8 w-8 animate-pulse rounded-full bg-black/10" />) :
-              !isLoggedIn ? (
-                <>
-                  <Link
-                    href="/sign-in"
-                    className="text-sm text-black/55 transition hover:text-black"
-                  >
-                    Sign in
-                  </Link>
+              <div className="h-8 w-8 animate-pulse rounded-full bg-black/10" />
+            ) : !isLoggedIn ? (
+              <>
+                <Link
+                  href="/sign-in"
+                  className="text-sm text-black/55 transition hover:text-black"
+                >
+                  Sign in
+                </Link>
 
-                  <Link
-                    href="/sign-up"
-                    className="rounded-full bg-black px-4 py-2 text-sm font-medium text-white transition hover:bg-black/80"
-                  >
-                    Start writing
-                  </Link>
-                </>
-              ) : (
-                <div className="group relative flex items-center">
-                  <button
-                    type="button"
-                    className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-black text-xs font-medium text-white"
-                  >
-                    {me.avatarUrl ? (
-                      <img
-                        src={me.avatarUrl}
-                        alt={me.fullName}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      me.fullName?.charAt(0).toUpperCase()
-                    )}
-                  </button>
+                <Link
+                  href="/sign-up"
+                  className="rounded-full bg-black px-4 py-2 text-sm font-medium text-white transition hover:bg-black/80"
+                >
+                  Start writing
+                </Link>
+              </>
+            ) : (
+              <div ref={profileRef} className="relative flex items-center">
+                <button
+                  type="button"
+                  onClick={() => setIsProfileOpen((prev) => !prev)}
+                  className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-black text-xs font-medium text-white"
+                  aria-label="Open profile menu"
+                >
+                  {me.avatarUrl ? (
+                    <img
+                      src={me.avatarUrl}
+                      alt={me.fullName}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    me.fullName?.charAt(0).toUpperCase()
+                  )}
+                </button>
 
-                  <div className="invisible absolute right-0 top-full pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100">
+                {isProfileOpen && (
+                  <div className="absolute right-0 top-full z-50 mt-3">
                     <div className="w-48 rounded-xl border border-black/10 bg-white p-1 shadow-lg">
                       <Link
                         href={`/${me.slug}`}
+                        onClick={() => setIsProfileOpen(false)}
                         className="block rounded-lg px-3 py-2 text-sm text-black/65 hover:bg-black/[0.04] hover:text-black"
                       >
                         Profile
@@ -251,6 +262,7 @@ export default function Header() {
 
                       <Link
                         href="/settings"
+                        onClick={() => setIsProfileOpen(false)}
                         className="block rounded-lg px-3 py-2 text-sm text-black/65 hover:bg-black/[0.04] hover:text-black"
                       >
                         Settings
@@ -268,8 +280,9 @@ export default function Header() {
                       </button>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+            )}
           </nav>
         </div>
       </header>

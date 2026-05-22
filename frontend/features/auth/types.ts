@@ -45,6 +45,7 @@ type User = {
   slug: string;
   followers: PublicUserInfo[];
   followings: PublicUserInfo[];
+  savedPostIds: number[];
 };
 
 export type {

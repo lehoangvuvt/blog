@@ -37,8 +37,8 @@ model User {
   postComments    PostComments[]
   postLikes       PostLikes[]
   postReposts     PostReposts[]
-  postBookmarks   PostBookmarks[]
   postCollections PostCollections[]
+  savedPosts      UserSavedPosts[]
 
   userFollowers  UserFollow[] @relation("UserFollowers")
   userFollowings UserFollow[] @relation("UserFollowings")
@@ -76,10 +76,10 @@ model Post {
   postComments        PostComments[]
   likes               PostLikes[]
   reposts             PostReposts[]
-  bookmarks           PostBookmarks[]
   postCollectionItems PostCollectionItems[]
   postStatistics      PostStatistics?
   postMetricDailies   PostMetricDaily[]
+  savedByUsers        UserSavedPosts[]
 
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
@@ -156,20 +156,20 @@ model PostReposts {
   @@index([user_id])
 }
 
-model PostBookmarks {
+model UserSavedPosts {
   id Int @id @default(autoincrement())
-
-  post    Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
-  post_id Int
 
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id String
 
+  post    Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  post_id Int
+
   created_at DateTime @default(now())
 
   @@unique([user_id, post_id])
-  @@index([post_id])
   @@index([user_id])
+  @@index([post_id])
 }
 
 model PostCollections {
@@ -271,7 +271,7 @@ model PostViewLog {
 }
 
 model UserFollow {
-  id Int @id @default(autoincrement())  
+  id Int @id @default(autoincrement())
 
   follower    User   @relation("UserFollowers", fields: [follower_id], references: [id], onDelete: Cascade)
   follower_id String
@@ -280,6 +280,6 @@ model UserFollow {
   following_id String
 
   created_at DateTime @default(now())
-  
+
   @@unique([follower_id, following_id])
 }

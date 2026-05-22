@@ -121,3 +121,12 @@ export type GetTrendingPostsResponse = TrendingPostItem[];
 
 export const trendingTimeRanges = ["daily", "weekly", "monthly"] as const;
 export type TrendingTimeRange = (typeof trendingTimeRanges)[number];
+
+export type MeQueryData = {
+  savedPostIds?: number[];
+  [key: string]: unknown;
+};
+
+export type MutationContext = {
+  previousMe?: MeQueryData;
+};

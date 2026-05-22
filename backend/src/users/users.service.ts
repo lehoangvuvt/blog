@@ -341,4 +341,47 @@ export class UsersService {
       };
     });
   }
+
+  async getUserSavedPosts(userId: string) {
+    const posts = await this.prisma.userSavedPosts.findMany({
+      where: {
+        user_id: userId,
+      },
+      include: {
+        post: {
+          select: {
+            id: true,
+            slug: true,
+            title: true,
+            thumbnail_image: true,
+            created_at: true,
+            sub_title: true,
+            author: true,
+          },
+        },
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+
+    return posts.map((p) => {
+      const post = p.post;
+      return {
+        id: post.id,
+        slug: post.slug,
+        title: post.title,
+        subTitle: post.sub_title,
+        thumbnailImage: post.thumbnail_image,
+        postedDate: post.created_at,
+        author: {
+          id: post.author?.id,
+          fullName: post.author?.full_name,
+          slug: post.author?.slug,
+          avatar: post.author?.avatar,
+          email: post.author?.email,
+        },
+      };
+    });
+  }
 }
