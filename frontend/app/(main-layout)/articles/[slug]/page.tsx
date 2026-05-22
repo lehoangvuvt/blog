@@ -299,7 +299,9 @@ export default async function ArticlePage({
             </div>
           )}
 
-          <ArticleContent html={htmlWithIds} />
+          <div className="relative overflow-visible">
+            <ArticleContent html={htmlWithIds} />
+          </div>
 
           {post.author && (
             <div className="mt-24">

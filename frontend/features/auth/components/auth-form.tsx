@@ -130,7 +130,7 @@ export default function AuthForm({ type }: { type: "signup" | "signin" }) {
                   message: "Invalid email address",
                 },
               })}
-              className="w-full rounded-2xl border border-black/10 bg-[#FAFAFA] px-4 py-3 outline-none transition focus:border-black/20 focus:bg-white focus:ring-4 focus:ring-black/5 disabled:opacity-50"
+              className="w-full text-black rounded-2xl border border-black/10 bg-[#FAFAFA] px-4 py-3 outline-none transition focus:border-black/20 focus:bg-white focus:ring-4 focus:ring-black/5 disabled:opacity-50"
             />
 
             {errors.email && (
@@ -153,7 +153,7 @@ export default function AuthForm({ type }: { type: "signup" | "signin" }) {
                 {...register("password", {
                   required: "Password is required",
                 })}
-                className="w-full rounded-2xl border border-black/10 bg-[#FAFAFA] px-4 py-3 outline-none transition focus:border-black/20 focus:bg-white focus:ring-4 focus:ring-black/5 disabled:opacity-50"
+                className="w-full rounded-2xl text-black border border-black/10 bg-[#FAFAFA] px-4 py-3 outline-none transition focus:border-black/20 focus:bg-white focus:ring-4 focus:ring-black/5 disabled:opacity-50"
               />
 
               {errors.password && (

@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
-import { Inter, Literata } from "next/font/google";
+import { Plus_Jakarta_Sans, Source_Serif_4 } from "next/font/google";
+
 import { Providers } from "./providers";
 import "./globals.css";
 import { Suspense } from "react";
 
-const inter = Inter({
+const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
   subsets: ["latin", "vietnamese"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const literata = Literata({
+const sourceSerif = Source_Serif_4({
   variable: "--font-serif",
   subsets: ["latin", "vietnamese"],
   weight: ["400", "500", "600", "700"],
@@ -30,7 +32,7 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${inter.variable} ${literata.variable} h-full antialiased`}
+      className={`${plusJakarta.variable} ${sourceSerif.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-neutral-900 font-sans">
         <Suspense>

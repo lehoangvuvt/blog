@@ -2,12 +2,15 @@ export type GetTagsParams = {
   search?: string;
   page?: number;
   limit?: number;
+  ids?: string[];
 };
 
 export type Tag = {
   id: string;
   name: string;
   slug: string;
+  postsCount: number;
+  authorsCount: number;
 };
 
 export type GetTagsResponse = {

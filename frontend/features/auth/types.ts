@@ -46,6 +46,7 @@ type User = {
   followers: PublicUserInfo[];
   followings: PublicUserInfo[];
   savedPostIds: number[];
+  followedTagIds: string[];
 };
 
 export type {

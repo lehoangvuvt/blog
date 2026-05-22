@@ -42,6 +42,7 @@ model User {
 
   userFollowers  UserFollow[] @relation("UserFollowers")
   userFollowings UserFollow[] @relation("UserFollowings")
+  followedTags   TagFollow[]
 }
 
 model PendingRegistration {
@@ -92,8 +93,9 @@ model Tag {
 
   posts Post[]
 
-  created_at DateTime  @default(now())
-  updated_at DateTime? @updatedAt
+  created_at DateTime    @default(now())
+  updated_at DateTime?   @updatedAt
+  followers  TagFollow[]
 
   @@index([name])
   @@index([slug])
@@ -282,4 +284,20 @@ model UserFollow {
   created_at DateTime @default(now())
 
   @@unique([follower_id, following_id])
+}
+
+model TagFollow {
+  id Int @id @default(autoincrement())
+
+  tag    Tag    @relation(fields: [tag_id], references: [id], onDelete: Cascade)
+  tag_id String
+
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id String
+
+  created_at DateTime @default(now())
+
+  @@unique([tag_id, user_id])
+  @@index([user_id])
+  @@index([tag_id])
 }

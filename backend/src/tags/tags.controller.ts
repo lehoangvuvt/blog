@@ -1,11 +1,15 @@
 import {
   Controller,
   DefaultValuePipe,
+  Delete,
   Get,
+  Param,
   ParseIntPipe,
+  Post,
   Query,
 } from '@nestjs/common';
 import { TagsService } from './tags.service';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 
 @Controller('tags')
 export class TagsController {
@@ -21,7 +25,23 @@ export class TagsController {
 
     @Query('search')
     search?: string,
+
+    @Query('ids')
+    ids?: string,
   ) {
-    return await this.tagsService.findMany(page, limit, search);
+    return await this.tagsService.findMany(page, limit, search, ids);
+  }
+
+  @Post(':tagId/follow')
+  followTag(@CurrentUser('id') userId: string, @Param('tagId') tagId: string) {
+    return this.tagsService.followTag(userId, tagId);
+  }
+
+  @Delete(':tagId/follow')
+  unfollowTag(
+    @CurrentUser('id') userId: string,
+    @Param('tagId') tagId: string,
+  ) {
+    return this.tagsService.unfollowTag(userId, tagId);
   }
 }

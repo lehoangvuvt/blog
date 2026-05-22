@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   BadRequestException,
@@ -209,6 +209,14 @@ export class AuthService {
     const followings = await this.usersService.getUserFollowings(userId);
     const savedPosts = await this.usersService.getUserSavedPosts(userId);
     const savedPostIds = savedPosts.map((p) => p.id);
+    const followedTagIds = await this.prismaService.tagFollow.findMany({
+      where: {
+        user_id: userId,
+      },
+      select: {
+        tag_id: true,
+      },
+    });
 
     return {
       id: user.id,
@@ -221,6 +229,7 @@ export class AuthService {
       followers,
       followings,
       savedPostIds,
+      followedTagIds: followedTagIds.map((tag) => tag.tag_id),
     };
   }
 
