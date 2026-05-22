@@ -17,6 +17,7 @@ import { ArticleToolbar } from "./components/article-toolbar";
 import { BackButton } from "@/shared/components/back-button";
 import ViewHandler from "./components/view-handler";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 
 function slugify(text: string) {
   return text
@@ -229,8 +230,8 @@ export default async function ArticlePage({
                         {`${post.author.email
                           .charAt(0)
                           .toUpperCase()}${post.author.email
-                          .charAt(1)
-                          .toUpperCase()}`}
+                            .charAt(1)
+                            .toUpperCase()}`}
                       </div>
                     )}
 
@@ -291,11 +292,16 @@ export default async function ArticlePage({
 
           {post.thumbnailImage && (
             <div className="mb-14 overflow-hidden rounded-2xl bg-black/[0.03]">
-              <img
-                src={post.thumbnailImage}
-                alt={post.title}
-                className="w-full object-cover"
-              />
+              <div className="relative aspect-video w-full">
+                <Image
+                  src={post.thumbnailImage}
+                  alt={post.title}
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="(max-width: 768px) 100vw, 1200px"
+                />
+              </div>
             </div>
           )}
 

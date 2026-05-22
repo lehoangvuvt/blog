@@ -8,6 +8,8 @@ import { usePosts } from "@/features/posts/hooks/use-posts";
 import { useMe } from "@/features/auth/hooks/use-me";
 import { useTags } from "@/features/tags/hooks/use-tags";
 import { formatTimeAgo } from "@/shared/utils";
+import useFollowTag from "@/features/tags/hooks/use-follow-tag";
+import useUnfollowTag from "@/features/tags/hooks/use-unfollow-tag";
 
 type Tab = "articles" | "topics";
 
@@ -76,6 +78,9 @@ export default function FollowingPage() {
     followedTagIds.length > 0 &&
     isLoadingFollowedTags;
 
+  const { mutate: followTag } = useFollowTag();
+  const { mutate: unfollowTag } = useUnfollowTag();
+
   return (
     <MainLayout>
       <main className="min-h-screen bg-white text-black">
@@ -93,11 +98,10 @@ export default function FollowingPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab("articles")}
-                className={`border-b pb-3 text-sm font-medium whitespace-nowrap transition ${
-                  activeTab === "articles"
-                    ? "border-black text-black"
-                    : "border-transparent text-black/45 hover:text-black"
-                }`}
+                className={`border-b pb-3 text-sm font-medium whitespace-nowrap transition ${activeTab === "articles"
+                  ? "border-black text-black"
+                  : "border-transparent text-black/45 hover:text-black"
+                  }`}
               >
                 Articles
               </button>
@@ -105,11 +109,10 @@ export default function FollowingPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab("topics")}
-                className={`border-b pb-3 text-sm font-medium whitespace-nowrap transition ${
-                  activeTab === "topics"
-                    ? "border-black text-black"
-                    : "border-transparent text-black/45 hover:text-black"
-                }`}
+                className={`border-b pb-3 text-sm font-medium whitespace-nowrap transition ${activeTab === "topics"
+                  ? "border-black text-black"
+                  : "border-transparent text-black/45 hover:text-black"
+                  }`}
               >
                 Topics
               </button>
@@ -218,9 +221,8 @@ export default function FollowingPage() {
             ) : followedTopics.length > 0 ? (
               <div className="divide-y divide-black/10">
                 {followedTopics.map((topic) => (
-                  <button
+                  <div
                     key={topic.id}
-                    type="button"
                     className="flex w-full items-center justify-between py-5 text-left"
                   >
                     <div className="min-w-0">
@@ -236,11 +238,20 @@ export default function FollowingPage() {
 
                     <button
                       type="button"
-                      className="ml-6 shrink-0 rounded-full border border-black px-5 py-2 text-sm font-medium text-black transition hover:bg-black hover:text-white"
+                      onClick={() => unfollowTag(topic)}
+                      className="group ml-6 shrink-0 rounded-full border border-black bg-black px-5 py-2 text-sm font-medium text-white transition hover:bg-white"
                     >
-                      Following
+                      <span className="relative block h-5 overflow-hidden">
+                        <span className="block transition-transform duration-200 group-hover:-translate-y-full">
+                          Following
+                        </span>
+
+                        <span className="absolute left-0 top-0 block translate-y-full text-black transition-transform duration-200 group-hover:translate-y-0">
+                          Unfollow
+                        </span>
+                      </span>
                     </button>
-                  </button>
+                  </div>
                 ))}
               </div>
             ) : (
@@ -299,9 +310,18 @@ export default function FollowingPage() {
 
                       <button
                         type="button"
-                        className="ml-6 shrink-0 rounded-full border border-black px-5 py-2 text-sm font-medium text-black transition hover:bg-black hover:text-white"
+                        onClick={() => followTag(topic)}
+                        className="group ml-6 shrink-0 rounded-full border border-neutral-300 bg-white px-5 py-2 text-sm font-medium text-neutral-700 transition-all duration-200 hover:border-neutral-900 hover:bg-neutral-900"
                       >
-                        Follow
+                        <span className="relative block h-5 overflow-hidden">
+                          <span className="block transition-transform duration-200 group-hover:-translate-y-full">
+                            Follow
+                          </span>
+
+                          <span className="absolute left-0 top-0 block translate-y-full text-white transition-transform duration-200 group-hover:translate-y-0">
+                            Follow
+                          </span>
+                        </span>
                       </button>
                     </div>
                   ))}

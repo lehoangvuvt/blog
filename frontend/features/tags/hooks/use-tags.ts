@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { getTags } from "@/features/tags/api/get-tags";
 import type { GetTagsParams, GetTagsResponse } from "@/features/tags/types";
 
@@ -20,5 +20,7 @@ export function useTags(params?: Omit<GetTagsParams, "page">, enabled = true) {
     },
 
     enabled,
+
+    placeholderData: keepPreviousData,
   });
 }

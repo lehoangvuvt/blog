@@ -19,8 +19,8 @@ export default function AuthForm({ type }: { type: "signup" | "signin" }) {
     watch,
   } = useForm<IAuthFormInput>({
     defaultValues: {
-      email: "",
-      password: "",
+      email: "hoangvule.183@gmail.com",
+      password: "12345",
       fullName: "",
       agreeTerms: false,
     },

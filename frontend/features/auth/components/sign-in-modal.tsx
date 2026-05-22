@@ -5,7 +5,6 @@
 import Link from "next/link";
 import { X } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
 import type { IAuthFormInput } from "@/features/auth/types";
 import { useLogin } from "@/features/auth/hooks/use-login";
 
@@ -15,26 +14,26 @@ type Props = {
 };
 
 export default function SignInModal({ open, onClose }: Props) {
-  const router = useRouter();
-
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<IAuthFormInput>({
     defaultValues: {
-      email: "",
-      password: "",
+      email: "hoangvule.183@gmail.com",
+      password: "12345",
     },
   });
 
   const { mutate: loginMutation, isPending, error } = useLogin();
 
   const onSubmit = (data: IAuthFormInput) => {
+    if(!data.email || !data.password) return;
+
     loginMutation(
       {
         email: data.email,
-        password: data.password!,
+        password: data.password,
       },
       {
         onSuccess: (response) => {
@@ -75,6 +74,7 @@ export default function SignInModal({ open, onClose }: Props) {
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-7 space-y-5">
           <div>
+            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
             <label className="mb-2 block text-sm font-medium text-[#242424]">
               Email
             </label>
@@ -101,6 +101,7 @@ export default function SignInModal({ open, onClose }: Props) {
           </div>
 
           <div>
+            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
             <label className="mb-2 block text-sm font-medium text-[#242424]">
               Password
             </label>

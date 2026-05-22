@@ -11,6 +11,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import { SidebarPostSkeleton } from "@/shared/components/sidebar-post-skeleton";
 import { formatPostDate, getArticleLink } from "@/shared/utils";
 import useTrendingPosts from "@/features/posts/hooks/use-trending-posts";
+import { useMe } from "@/features/auth/hooks/use-me";
 
 const allTag: Tag = {
   id: "0",
@@ -21,16 +22,21 @@ const allTag: Tag = {
 };
 
 export default function Home() {
-  const { data: tagsData } = useTags({
-    limit: 20,
-  });
+  const { data: me } = useMe();
+  const followedTagIds = useMemo(() => me?.followedTagIds ?? [], [me]);
 
-  const topics = useMemo(() => {
-    const tags =
-      tagsData?.pages.flatMap((page) => page.data.map((tag) => tag)) ?? [];
+  const shouldFetchFollowedTags = followedTagIds.length > 0;
 
-    return [allTag, ...tags];
-  }, [tagsData]);
+  const { data: followedTagsData, isLoading: isLoadingFollowedTags } = useTags(
+    {
+      ids: followedTagIds,
+      limit: Math.max(followedTagIds.length, 1),
+    },
+    shouldFetchFollowedTags
+  );
+
+  const followedTopics =
+    followedTagsData?.pages.flatMap((page) => page.data) ? [allTag, ...followedTagsData.pages.flatMap((page) => page.data)] : [allTag];
 
   const [selectedTopic, setSelectedTopic] = useState(allTag);
 
@@ -82,7 +88,7 @@ export default function Home() {
             className="mx-auto max-w-7xl overflow-hidden px-5 py-3 cursor-grab"
           >
             <div className="flex gap-2">
-              {topics.map((topic) => {
+              {!isLoadingFollowedTags && followedTopics.map((topic) => {
                 const isActive = selectedTopic.slug === topic.slug;
 
                 return (
@@ -90,11 +96,10 @@ export default function Home() {
                     key={topic.id}
                     type="button"
                     onClick={() => setSelectedTopic(topic)}
-                    className={`shrink-0 rounded-full px-4 py-2 text-sm capitalize transition cursor-pointer ${
-                      isActive
-                        ? "bg-black text-white"
-                        : "text-neutral-600 hover:bg-black/5 hover:text-black"
-                    }`}
+                    className={`shrink-0 rounded-full px-4 py-2 text-sm capitalize transition cursor-pointer ${isActive
+                      ? "bg-black text-white"
+                      : "text-neutral-600 hover:bg-black/5 hover:text-black"
+                      }`}
                   >
                     {topic.name}
                   </button>
@@ -195,31 +200,31 @@ export default function Home() {
                 <div className="mt-6 space-y-7">
                   {isLoadingWeeklyPosts
                     ? Array.from({ length: 4 }).map((_, index) => (
-                        <SidebarPostSkeleton
-                          key={`trending-skeleton-${index + 1}`}
-                        />
-                      ))
+                      <SidebarPostSkeleton
+                        key={`trending-skeleton-${index + 1}`}
+                      />
+                    ))
                     : trendingWeeklyPosts?.map((post, index) => (
-                        <a
-                          key={post.postId}
-                          href={getArticleLink(post.post.slug)}
-                          className="group flex gap-4"
-                        >
-                          <span className="text-sm font-medium text-neutral-300">
-                            {String(index + 1).padStart(2, "0")}
-                          </span>
+                      <a
+                        key={post.postId}
+                        href={getArticleLink(post.post.slug)}
+                        className="group flex gap-4"
+                      >
+                        <span className="text-sm font-medium text-neutral-300">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
 
-                          <div>
-                            <h4 className="text-[15px] leading-6 font-semibold transition group-hover:text-neutral-600">
-                              {post.post.title}
-                            </h4>
+                        <div>
+                          <h4 className="text-[15px] leading-6 font-semibold transition group-hover:text-neutral-600">
+                            {post.post.title}
+                          </h4>
 
-                            <p className="mt-1 text-sm text-neutral-500">
-                              {post.post.author?.fullName ?? "Unknown author"}
-                            </p>
-                          </div>
-                        </a>
-                      ))}
+                          <p className="mt-1 text-sm text-neutral-500">
+                            {post.post.author?.fullName ?? "Unknown author"}
+                          </p>
+                        </div>
+                      </a>
+                    ))}
                 </div>
               </section>
 
@@ -231,31 +236,31 @@ export default function Home() {
                 <div className="mt-6 space-y-7">
                   {isLoadingMonthlyPosts
                     ? Array.from({ length: 4 }).map((_, index) => (
-                        <SidebarPostSkeleton
-                          key={`trending-skeleton-${index + 1}`}
-                        />
-                      ))
+                      <SidebarPostSkeleton
+                        key={`trending-skeleton-${index + 1}`}
+                      />
+                    ))
                     : trendingMonthlyPosts?.map((post, index) => (
-                        <a
-                          key={post.post.id}
-                          href={getArticleLink(post.post.slug)}
-                          className="group flex gap-4"
-                        >
-                          <span className="text-sm font-medium text-neutral-300">
-                            {String(index + 1).padStart(2, "0")}
-                          </span>
+                      <a
+                        key={post.post.id}
+                        href={getArticleLink(post.post.slug)}
+                        className="group flex gap-4"
+                      >
+                        <span className="text-sm font-medium text-neutral-300">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
 
-                          <div>
-                            <h4 className="text-[15px] leading-6 font-semibold transition group-hover:text-neutral-600">
-                              {post.post.title}
-                            </h4>
+                        <div>
+                          <h4 className="text-[15px] leading-6 font-semibold transition group-hover:text-neutral-600">
+                            {post.post.title}
+                          </h4>
 
-                            <p className="mt-1 text-sm text-neutral-500">
-                              {post.post.author?.fullName ?? "Unknown author"}
-                            </p>
-                          </div>
-                        </a>
-                      ))}
+                          <p className="mt-1 text-sm text-neutral-500">
+                            {post.post.author?.fullName ?? "Unknown author"}
+                          </p>
+                        </div>
+                      </a>
+                    ))}
                 </div>
               </section>
             </div>

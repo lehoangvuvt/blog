@@ -7,9 +7,11 @@ import {
   ParseIntPipe,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { TagsService } from './tags.service';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('tags')
 export class TagsController {
@@ -32,16 +34,21 @@ export class TagsController {
     return await this.tagsService.findMany(page, limit, search, ids);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post(':tagId/follow')
-  followTag(@CurrentUser('id') userId: string, @Param('tagId') tagId: string) {
-    return this.tagsService.followTag(userId, tagId);
-  }
-
-  @Delete(':tagId/follow')
-  unfollowTag(
-    @CurrentUser('id') userId: string,
+  followTag(
+    @CurrentUser() user: { sub: string },
     @Param('tagId') tagId: string,
   ) {
-    return this.tagsService.unfollowTag(userId, tagId);
+    return this.tagsService.followTag(user.sub, tagId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':tagId/follow')
+  unfollowTag(
+    @CurrentUser() user: { sub: string },
+    @Param('tagId') tagId: string,
+  ) {
+    return this.tagsService.unfollowTag(user.sub, tagId);
   }
 }

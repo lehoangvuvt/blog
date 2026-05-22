@@ -8,6 +8,7 @@ import {
   selectFontSize,
   selectTheme,
 } from "@/features/app-settings/selectors";
+import Image from "next/image";
 
 function usePostThemeClasses() {
   const theme = useAppSelector(selectTheme);
@@ -20,22 +21,22 @@ function usePostThemeClasses() {
       font === "serif"
         ? "font-serif"
         : font === "monospace"
-        ? "font-mono"
-        : "font-sans",
+          ? "font-mono"
+          : "font-sans",
 
     titleSize:
       fontSize === "small"
         ? "text-xl"
         : fontSize === "large"
-        ? "text-3xl"
-        : "text-2xl",
+          ? "text-3xl"
+          : "text-2xl",
 
     subtitleSize:
       fontSize === "small"
         ? "text-sm"
         : fontSize === "large"
-        ? "text-lg"
-        : "text-base",
+          ? "text-lg"
+          : "text-base",
 
     borderClass: isDark ? "border-white/10" : "border-black/10",
     titleClass: isDark ? "text-zinc-100" : "text-neutral-950",
@@ -164,9 +165,15 @@ export const PostItem = {
 
     const image = (
       <div
-        className={`aspect-square overflow-hidden rounded-md ${styles.imageBgClass}`}
+        className={`relative aspect-square w-full overflow-hidden rounded-2xl ${styles.imageBgClass}`}
       >
-        <img src={src} alt={alt} className="h-full w-full object-cover" />
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 400px"
+        />
       </div>
     );
 

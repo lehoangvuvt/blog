@@ -123,7 +123,8 @@ export const trendingTimeRanges = ["daily", "weekly", "monthly"] as const;
 export type TrendingTimeRange = (typeof trendingTimeRanges)[number];
 
 export type MeQueryData = {
-  savedPostIds?: number[];
+  savedPostIds: number[];
+  followedTagIds: string[];
   [key: string]: unknown;
 };
 
