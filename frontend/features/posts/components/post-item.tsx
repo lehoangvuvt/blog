@@ -116,7 +116,7 @@ export const PostItem = {
             ${styles.titleClass}
           `}
       >
-        {children}
+        <h3>{children}</h3>
       </Link>
     );
   },

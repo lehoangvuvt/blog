@@ -31,6 +31,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+
   /* smoother rendering */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -67,6 +68,8 @@ body {
   letter-spacing: -0.01em;
 }
 
+/* headings */
+
 .article-content h1,
 .article-content h2,
 .article-content h3,
@@ -81,10 +84,62 @@ body {
 .prose h6 {
   font-family: var(--font-sans);
   line-height: 1.15;
-  font-family: var(--font-sans);
   font-weight: 700;
   letter-spacing: -0.04em;
   color: #111827;
+}
+
+/* desktop sizes */
+.article-content h1,
+.prose h1 {
+  font-size: 3rem;
+}
+
+.article-content h2,
+.prose h2 {
+  font-size: 2.25rem;
+}
+
+.article-content h3,
+.prose h3 {
+  font-size: 1.75rem;
+}
+
+.article-content h4,
+.prose h4 {
+  font-size: 1.5rem;
+}
+
+/* mobile heading sizes */
+@media (max-width: 768px) {
+  .article-content h1,
+  .prose h1 {
+    font-size: 2rem;
+    line-height: 1.1;
+  }
+
+  .article-content h2,
+  .prose h2 {
+    font-size: 1.65rem;
+    line-height: 1.15;
+  }
+
+  .article-content h3,
+  .prose h3 {
+    font-size: 1.35rem;
+    line-height: 1.2;
+  }
+
+  .article-content h4,
+  .prose h4 {
+    font-size: 1.15rem;
+    line-height: 1.25;
+  }
+
+  .article-content {
+    font-size: 1.02rem;
+    line-height: 1.8;
+  }
 }
 
 /* Better spacing */

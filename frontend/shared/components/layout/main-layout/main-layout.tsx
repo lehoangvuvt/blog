@@ -38,7 +38,7 @@ export default function MainLayout({
         ${isOpenSideBar ? "md:pl-60" : "md:pl-0"}
       `}
       >
-        <div className="p-6">{children}</div>
+        <div className="md:p-6 p-0">{children}</div>
       </main>
     </div>
   );
