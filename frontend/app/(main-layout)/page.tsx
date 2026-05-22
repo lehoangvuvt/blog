@@ -16,6 +16,8 @@ const allTag: Tag = {
   id: "0",
   name: "All",
   slug: "all",
+  postsCount: 0,
+  authorsCount: 0,
 };
 
 export default function Home() {
@@ -57,9 +59,15 @@ export default function Home() {
   } = usePosts(postsParams);
 
   const { data: trendingWeeklyPosts, isLoading: isLoadingWeeklyPosts } =
-    useTrendingPosts("weekly", { limit: 5, tag: selectedTopic.slug !== allTag.slug ? selectedTopic.slug : undefined });
+    useTrendingPosts("weekly", {
+      limit: 5,
+      tag: selectedTopic.slug !== allTag.slug ? selectedTopic.slug : undefined,
+    });
   const { data: trendingMonthlyPosts, isLoading: isLoadingMonthlyPosts } =
-    useTrendingPosts("monthly", { limit: 5, tag: selectedTopic.slug !== allTag.slug ? selectedTopic.slug : undefined });
+    useTrendingPosts("monthly", {
+      limit: 5,
+      tag: selectedTopic.slug !== allTag.slug ? selectedTopic.slug : undefined,
+    });
 
   const posts = useMemo(() => {
     return data?.pages.flatMap((page) => page.data) ?? [];
@@ -82,10 +90,11 @@ export default function Home() {
                     key={topic.id}
                     type="button"
                     onClick={() => setSelectedTopic(topic)}
-                    className={`shrink-0 rounded-full px-4 py-2 text-sm capitalize transition cursor-pointer ${isActive
-                      ? "bg-black text-white"
-                      : "text-neutral-600 hover:bg-black/5 hover:text-black"
-                      }`}
+                    className={`shrink-0 rounded-full px-4 py-2 text-sm capitalize transition cursor-pointer ${
+                      isActive
+                        ? "bg-black text-white"
+                        : "text-neutral-600 hover:bg-black/5 hover:text-black"
+                    }`}
                   >
                     {topic.name}
                   </button>
@@ -186,31 +195,31 @@ export default function Home() {
                 <div className="mt-6 space-y-7">
                   {isLoadingWeeklyPosts
                     ? Array.from({ length: 4 }).map((_, index) => (
-                      <SidebarPostSkeleton
-                        key={`trending-skeleton-${index + 1}`}
-                      />
-                    ))
+                        <SidebarPostSkeleton
+                          key={`trending-skeleton-${index + 1}`}
+                        />
+                      ))
                     : trendingWeeklyPosts?.map((post, index) => (
-                      <a
-                        key={post.postId}
-                        href={getArticleLink(post.post.slug)}
-                        className="group flex gap-4"
-                      >
-                        <span className="text-sm font-medium text-neutral-300">
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
+                        <a
+                          key={post.postId}
+                          href={getArticleLink(post.post.slug)}
+                          className="group flex gap-4"
+                        >
+                          <span className="text-sm font-medium text-neutral-300">
+                            {String(index + 1).padStart(2, "0")}
+                          </span>
 
-                        <div>
-                          <h4 className="text-[15px] leading-6 font-semibold transition group-hover:text-neutral-600">
-                            {post.post.title}
-                          </h4>
+                          <div>
+                            <h4 className="text-[15px] leading-6 font-semibold transition group-hover:text-neutral-600">
+                              {post.post.title}
+                            </h4>
 
-                          <p className="mt-1 text-sm text-neutral-500">
-                            {post.post.author?.fullName ?? "Unknown author"}
-                          </p>
-                        </div>
-                      </a>
-                    ))}
+                            <p className="mt-1 text-sm text-neutral-500">
+                              {post.post.author?.fullName ?? "Unknown author"}
+                            </p>
+                          </div>
+                        </a>
+                      ))}
                 </div>
               </section>
 
@@ -222,31 +231,31 @@ export default function Home() {
                 <div className="mt-6 space-y-7">
                   {isLoadingMonthlyPosts
                     ? Array.from({ length: 4 }).map((_, index) => (
-                      <SidebarPostSkeleton
-                        key={`trending-skeleton-${index + 1}`}
-                      />
-                    ))
+                        <SidebarPostSkeleton
+                          key={`trending-skeleton-${index + 1}`}
+                        />
+                      ))
                     : trendingMonthlyPosts?.map((post, index) => (
-                      <a
-                        key={post.post.id}
-                        href={getArticleLink(post.post.slug)}
-                        className="group flex gap-4"
-                      >
-                        <span className="text-sm font-medium text-neutral-300">
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
+                        <a
+                          key={post.post.id}
+                          href={getArticleLink(post.post.slug)}
+                          className="group flex gap-4"
+                        >
+                          <span className="text-sm font-medium text-neutral-300">
+                            {String(index + 1).padStart(2, "0")}
+                          </span>
 
-                        <div>
-                          <h4 className="text-[15px] leading-6 font-semibold transition group-hover:text-neutral-600">
-                            {post.post.title}
-                          </h4>
+                          <div>
+                            <h4 className="text-[15px] leading-6 font-semibold transition group-hover:text-neutral-600">
+                              {post.post.title}
+                            </h4>
 
-                          <p className="mt-1 text-sm text-neutral-500">
-                            {post.post.author?.fullName ?? "Unknown author"}
-                          </p>
-                        </div>
-                      </a>
-                    ))}
+                            <p className="mt-1 text-sm text-neutral-500">
+                              {post.post.author?.fullName ?? "Unknown author"}
+                            </p>
+                          </div>
+                        </a>
+                      ))}
                 </div>
               </section>
             </div>
