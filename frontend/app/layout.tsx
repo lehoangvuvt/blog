@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
-import { DM_Sans, Newsreader } from "next/font/google";
+import { Plus_Jakarta_Sans, Source_Serif_4 } from "next/font/google";
 import { Providers } from "./providers";
 import "./globals.css";
 import { Suspense } from "react";
 
-const dmSans = DM_Sans({
+const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
+  subsets: ["latin", "vietnamese"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
-const newsreader = Newsreader({
+const sourceSerif = Source_Serif_4({
   variable: "--font-serif",
-  subsets: ["latin"],
+  subsets: ["latin", "vietnamese"],
   weight: ["400", "500", "600", "700"],
 });
 
@@ -28,8 +28,8 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
-      className={`${dmSans.variable} ${newsreader.variable} h-full antialiased`}
+      lang="vi"
+      className={`${plusJakarta.variable} ${sourceSerif.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-neutral-900 font-sans">
         <Suspense>
