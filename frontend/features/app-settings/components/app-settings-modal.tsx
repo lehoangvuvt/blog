@@ -173,7 +173,7 @@ export function AppSettingsModal({ isOpen, onClose }: Props) {
             >
               <div className="h-full w-full max-w-2xl overflow-y-auto rounded-3xl pr-2">
                 <article
-                  className={`rounded-3xl p-6 ${
+                  className={`article-content rounded-3xl p-6 ${
                     previewTheme === "dark" ? "bg-zinc-900" : "bg-white"
                   }`}
                 >

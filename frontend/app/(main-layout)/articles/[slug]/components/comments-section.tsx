@@ -183,7 +183,7 @@ export function CommentsSection({ postId, variant = "page" }: Props) {
           const authorName = comment.user.full_name || "Unknown user";
 
           return (
-            <article key={comment.id} className="py-8">
+            <article key={comment.id} className="article-content py-8">
               <div className="mb-4 flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
                   {comment.user.avatar ? (

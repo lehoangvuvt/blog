@@ -16,8 +16,8 @@ html {
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
 }
 
 @media (prefers-color-scheme: light) {
@@ -30,7 +30,12 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  /* smoother rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  text-rendering: optimizeLegibility;
 }
 
 .editor-placeholder {
@@ -46,4 +51,86 @@ body {
 .editor-paragraph {
   margin: 0 0 15px 0;
   position: relative;
+}
+
+/* article styles */
+
+.article-content,
+.prose {
+  font-family: var(--font-serif);
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+.article-content {
+  font-size: 1.125rem;
+  line-height: 1.9;
+  letter-spacing: -0.01em;
+}
+
+.article-content h1,
+.article-content h2,
+.article-content h3,
+.article-content h4,
+.article-content h5,
+.article-content h6,
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  font-family: var(--font-sans);
+  line-height: 1.15;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: #111827;
+}
+
+/* Better spacing */
+.article-content p,
+.prose p {
+  margin-top: 1.45em;
+  margin-bottom: 1.45em;
+}
+
+/* Links */
+.article-content a,
+.prose a {
+  text-underline-offset: 3px;
+}
+
+/* Blockquote */
+.article-content blockquote,
+.prose blockquote {
+  border-left: 3px solid #e5e5e5;
+
+  padding-left: 1rem;
+  margin-left: 0;
+
+  color: #525252;
+
+  font-style: italic;
+}
+
+/* Lists */
+.article-content ul,
+.article-content ol,
+.prose ul,
+.prose ol {
+  padding-left: 1.5rem;
+}
+
+/* Images */
+.article-content img,
+.prose img {
+  border-radius: 1rem;
+}
+
+/* Code */
+.article-content code,
+.article-content pre,
+.prose code,
+.prose pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }

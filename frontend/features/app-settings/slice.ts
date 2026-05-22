@@ -4,7 +4,7 @@ import type { AppSettingsState, Font, FontSize, Theme } from "./types";
 const initialState: AppSettingsState = {
   theme: "light",
   font: "sans-serif",
-  fontSize: "medium",
+  fontSize: "large",
   isOpenSideBar: true,
 };
 

@@ -34,7 +34,7 @@ export default function ArticleCollectionsSection({
             href={href}
             className="group block rounded-sm p-3 transition hover:-translate-y-0.5"
           >
-            <article className="relative overflow-hidden rounded-sm p-6 shadow-[0_18px_50px_rgba(60,40,20,0.12)] transition group-hover:shadow-[0_26px_70px_rgba(60,40,20,0.18)]">
+            <article className="article-content relative overflow-hidden rounded-sm p-6 shadow-[0_18px_50px_rgba(60,40,20,0.12)] transition group-hover:shadow-[0_26px_70px_rgba(60,40,20,0.18)]">
               <div className="absolute left-0 top-0 h-full w-6  from-black/10 to-transparent" />
 
               <div className="flex gap-6">

@@ -160,7 +160,7 @@ export default function CreateCollectionModal({
               Preview
             </p>
 
-            <article className="mt-4 border-b border-neutral-200 pb-5">
+            <article className="article-content mt-4 border-b border-neutral-200 pb-5">
               <h2 className="text-2xl font-semibold tracking-tight text-neutral-950">
                 {name || "Collection title"}
               </h2>

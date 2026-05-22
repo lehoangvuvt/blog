@@ -72,7 +72,7 @@ export function PostsBySameAuthor({ author, posts }: Props) {
 
       <div className="divide-y divide-black/10 border-t border-black/10">
         {posts.slice(0, 4).map((post) => (
-          <article key={post.slug} className="group py-6">
+          <article key={post.slug} className="article-content group py-6">
             <div className="grid gap-5 md:grid-cols-[1fr_96px]">
               <div className="min-w-0">
                 <Link

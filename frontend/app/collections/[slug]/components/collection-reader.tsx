@@ -114,7 +114,7 @@ export default function CollectionReader({ collection, currentPostId }: Props) {
 
       <article
         key={currentPost.id}
-        className="mx-auto w-full max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500 px-5 py-28"
+        className="article-content mx-auto w-full max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500 px-5 py-28"
       >
         <p className="mb-4 text-sm font-medium text-white/45">
           {collection.title} · Article {currentIndex + 1} of{" "}
@@ -140,7 +140,7 @@ export default function CollectionReader({ collection, currentPostId }: Props) {
         )}
 
         <div
-          className="prose prose-invert prose-neutral mt-14 max-w-none prose-headings:font-serif prose-p:text-lg prose-p:leading-8 prose-p:text-neutral-300"
+          className="article-content prose prose-invert prose-neutral mt-14 max-w-none prose-headings:font-serif prose-p:text-lg prose-p:leading-8 prose-p:text-neutral-300"
           dangerouslySetInnerHTML={{ __html: currentPost.htmlContent ?? "" }}
         />
 

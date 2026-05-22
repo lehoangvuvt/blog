@@ -100,7 +100,7 @@ async function getPost(slug: string) {
 
   if (!res.ok) {
     const text = await res.text();
-    console.error('Failed to fetch post:', res.status, text);
+    console.error("Failed to fetch post:", res.status, text);
     throw new Error(`Failed to fetch post: ${res.status}`);
   }
 
@@ -196,7 +196,7 @@ export default async function ArticlePage({
     <MainLayout>
       <ViewHandler postId={post.id} />
       <main className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-20 px-5 py-14 xl:grid-cols-[minmax(0,1fr)_220px]">
-        <article className="mx-auto w-full max-w-3xl">
+        <article className="article-content mx-auto w-full max-w-3xl">
           <header className="mb-14">
             <div className="mb-8">
               <BackButton />
@@ -229,8 +229,8 @@ export default async function ArticlePage({
                         {`${post.author.email
                           .charAt(0)
                           .toUpperCase()}${post.author.email
-                            .charAt(1)
-                            .toUpperCase()}`}
+                          .charAt(1)
+                          .toUpperCase()}`}
                       </div>
                     )}
 
