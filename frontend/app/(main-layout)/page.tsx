@@ -223,7 +223,7 @@ export default function Home() {
                   {isLoadingMonthlyPosts
                     ? Array.from({ length: 4 }).map((_, index) => (
                       <SidebarPostSkeleton
-                        key={`trending-skeleton-${index}`}
+                        key={`trending-skeleton-${index + 1}`}
                       />
                     ))
                     : trendingMonthlyPosts?.map((post, index) => (
