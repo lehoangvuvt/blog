@@ -123,7 +123,7 @@ export async function generateMetadata({
 
   const image = post.thumbnailImage ?? "/default-og-image.png";
 
-  const url = `https://blog-nine-gilt-50.vercel.app/articles/${slug}`;
+  const url = `https://themidnightletters.com/articles/${slug}`;
 
   return {
     title,
@@ -230,8 +230,8 @@ export default async function ArticlePage({
                         {`${post.author.email
                           .charAt(0)
                           .toUpperCase()}${post.author.email
-                            .charAt(1)
-                            .toUpperCase()}`}
+                          .charAt(1)
+                          .toUpperCase()}`}
                       </div>
                     )}
 
