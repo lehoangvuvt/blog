@@ -90,15 +90,39 @@ export default function Home() {
     <MainLayout>
       <main className="min-h-screen bg-[var(--midnight-bg)] text-[var(--midnight-text)]">
         <div className="mx-auto max-w-7xl px-5 pt-10 md:px-6 md:pt-14">
-          <section className="relative max-w-2xl border-b border-[var(--midnight-border)]/70 pb-9">
-            <h1 className="mt-4 text-3xl font-bold leading-[1.02] tracking-[-0.05em] text-[var(--midnight-text)] md:text-5xl">
+          <section className="max-w-3xl pt-4 md:pt-6">
+            <p className="text-[11px] tracking-[0.16em] text-[var(--midnight-soft)]">
+              THE MIDNIGHT LETTERS
+            </p>
+
+            <h1
+              className="
+      mt-4
+      text-4xl font-bold
+      leading-[0.98]
+      tracking-[-0.06em]
+      text-[var(--midnight-text)]
+      md:text-6xl
+    "
+            >
               Thoughts that arrive after midnight
             </h1>
 
-            <p className="mt-5 max-w-xl text-[15px] leading-7 text-[var(--midnight-muted)] md:text-base">
+            <p
+              className="
+      mt-5
+      max-w-2xl
+      text-[15px]
+      leading-7
+      text-[var(--midnight-muted)]
+      md:text-[17px]
+    "
+            >
               Essays, passing thoughts, quiet observations, and conversations
               from people still awake.
             </p>
+
+            <div className="mt-8 h-px w-12 bg-[var(--midnight-border)]" />
           </section>
         </div>
 
