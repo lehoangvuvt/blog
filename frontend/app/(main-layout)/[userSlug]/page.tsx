@@ -108,8 +108,12 @@ export default function UserArticlesPage() {
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[var(--midnight-soft)]">
-              <span>{userInfo?.statistics.followersCount ?? "-"} readers</span>
-              <span>{userInfo?.statistics.postsCount ?? "-"} letters</span>
+              <span>
+                {userInfo?.statistics.followersCount ?? "-"} &nbsp;&nbsp;readers
+              </span>
+              <span>
+                {userInfo?.statistics.postsCount ?? "-"} &nbsp;&nbsp;letters
+              </span>
             </div>
 
             <div className="mt-8 flex min-h-9 flex-wrap items-center gap-3">
@@ -148,18 +152,16 @@ export default function UserArticlesPage() {
                     if (!userInfo) return;
 
                     if (isFollowed) {
-                      unfollowAUser(userInfo.id, {
+                      unfollowAUser(userInfo, {
                         onSuccess: () => {
                           refetchUserInfo();
-                          refetchMe();
                         },
                       });
                       return;
                     }
 
-                    followAUser(userInfo.id, {
+                    followAUser(userInfo, {
                       onSuccess: () => {
-                        refetchMe();
                         refetchUserInfo();
                       },
                     });
