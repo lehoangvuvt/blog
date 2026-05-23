@@ -118,7 +118,6 @@ export default function CreateCollectionModal({
                   <button
                     type="button"
                     onClick={() => {
-                      setThumbnailFile(null);
                       setThumbnailPreview("");
                     }}
                     className="ml-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-neutral-950 shadow-sm"

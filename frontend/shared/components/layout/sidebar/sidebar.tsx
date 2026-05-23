@@ -49,28 +49,27 @@ export default function Sidebar() {
 
       <aside
         className={`
-          fixed inset-y-0 left-0 z-[100]
-          w-[76vw] max-w-80 border-r border-[var(--midnight-border)]/70
-          bg-[var(--midnight-bg)] text-[var(--midnight-text)]
-          shadow-[24px_0_80px_rgba(0,0,0,0.38)]
-          transition-transform duration-300 ease-out
-          md:w-72 md:max-w-none
+    fixed left-0 top-16 z-40
+    h-[calc(100vh-4rem)]
+    w-[76vw] max-w-72
+    border-r border-[var(--midnight-border)]/70
+    bg-[var(--midnight-bg)]/96
+    text-[var(--midnight-text)]
+    backdrop-blur-2xl
+    transition-transform duration-300 ease-out
+    md:w-64 md:max-w-none
 
-          ${isOpenSideBar ? "translate-x-0" : "-translate-x-full"}
-        `}
+    ${isOpenSideBar ? "translate-x-0" : "-translate-x-full"}
+  `}
       >
-        <div className="flex h-screen flex-col px-6 py-8">
-          <div className="mb-10 border-b border-[var(--midnight-border)]/70 pb-8">
-            <p className="text-xs tracking-[0.16em] text-[var(--midnight-soft)]">
+        <div className="flex h-full flex-col px-5 py-6">
+          <div className="mb-7 border-b border-[var(--midnight-border)]/70 pb-5">
+            <p className="text-xs tracking-[0.14em] text-[var(--midnight-soft)]">
               The Midnight Letters
             </p>
 
-            <p className="mt-4 text-2xl font-bold leading-tight tracking-[-0.045em] text-[var(--midnight-text)]">
-              Letter desk
-            </p>
-
             <p className="mt-3 text-sm leading-6 text-[var(--midnight-muted)]">
-              Fragments, essays, and notes written after dark.
+              Thoughts written after dark.
             </p>
           </div>
 
@@ -88,13 +87,13 @@ export default function Sidebar() {
                   key={item.href}
                   href={item.href}
                   className={`
-                    block border-l px-4 py-3 text-[15px] transition-colors
-                    ${
-                      isActive
-                        ? "border-[var(--midnight-accent)] text-[var(--midnight-text)]"
-                        : "border-transparent text-[var(--midnight-muted)] hover:border-[var(--midnight-border-strong)] hover:text-[var(--midnight-text)]"
-                    }
-                  `}
+              block border-l px-4 py-2.5 text-[15px] transition-colors
+              ${
+                isActive
+                  ? "border-[var(--midnight-accent)] text-[var(--midnight-text)]"
+                  : "border-transparent text-[var(--midnight-muted)] hover:border-[var(--midnight-border-strong)] hover:text-[var(--midnight-text)]"
+              }
+            `}
                 >
                   {item.label}
                 </Link>
@@ -102,13 +101,9 @@ export default function Sidebar() {
             })}
           </nav>
 
-          <div className="mt-auto border-t border-[var(--midnight-border)]/70 pt-6">
-            <p className="text-xs tracking-[0.16em] text-[var(--midnight-soft)]">
-              Midnight margin
-            </p>
-
-            <p className="mt-3 text-sm leading-6 text-[var(--midnight-muted)]">
-              Read slowly. Write honestly. Leave a trace.
+          <div className="mt-auto border-t border-[var(--midnight-border)]/70 pt-5">
+            <p className="text-sm leading-6 text-[var(--midnight-muted)]">
+              Read slowly. Leave a trace.
             </p>
           </div>
         </div>
