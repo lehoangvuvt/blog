@@ -9,10 +9,17 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setSideBarState } from "@/features/app-settings/slice";
 import { useMe } from "@/features/auth/hooks/use-me";
 
-const sidebarItems = [
-  { label: "Latest letters", href: "/", needAuth: false },
-  { label: "Following", href: "/following/writters", needAuth: true },
-  { label: "Saved letters", href: "/saved-letters", needAuth: true },
+type SidebarItem = {
+  label: string;
+  href: string;
+  rootPath?: string;  
+  needAuth: boolean;
+};
+
+const sidebarItems: SidebarItem[] = [
+  { label: "Latest letters", href: "/", rootPath: "/", needAuth: false },
+  { label: "Following", href: "/following/writers", rootPath: "/following", needAuth: true },
+  { label: "Saved letters", href: "/saved-letters", rootPath: "/saved-letters", needAuth: true },
 ];
 
 export default function Sidebar() {
@@ -78,7 +85,7 @@ export default function Sidebar() {
               const isActive =
                 item.href === "/"
                   ? pathname === "/"
-                  : pathname.startsWith(item.href);
+                  : pathname.startsWith(item.rootPath || item.href);
 
               return (
                 <Link

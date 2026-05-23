@@ -17,7 +17,7 @@ export default function SavedPostsPage() {
         <section className="mx-auto w-full max-w-3xl px-5 pt-12 md:px-6">
           <header className="border-b border-[var(--midnight-border)]/70 pb-7">
             <h1 className="mt-4 text-5xl font-bold tracking-[-0.06em] text-[var(--midnight-text)]">
-              Saved letters
+              Saved Letters
             </h1>
 
             <p className="mt-4 max-w-xl text-[15px] leading-7 text-[var(--midnight-muted)]">

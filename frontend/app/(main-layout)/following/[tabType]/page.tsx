@@ -14,9 +14,9 @@ import useFollowTag from "@/features/tags/hooks/use-follow-tag";
 import useUnfollowTag from "@/features/tags/hooks/use-unfollow-tag";
 import NotificationPopover from "@/shared/components/notification-popover";
 import useNotification from "@/hooks/use-notification";
-import { Tag } from "@/features/tags/types";
+import type { Tag } from "@/features/tags/types";
 
-type Tab = "writters" | "subjects";
+type Tab = "writers" | "subjects";
 
 export default function FollowingPage() {
   const { close, open, notifications } = useNotification();
@@ -24,7 +24,7 @@ export default function FollowingPage() {
   const params = useParams();
 
   const [activeTab, setActiveTab] = useState<Tab>(
-    params.tabType === "writters" ? "writters" : "subjects"
+    params.tabType === "writers" ? "writers" : "subjects"
   );
 
   const { data: me, isLoading: isLoadingMe } = useMe();
@@ -44,7 +44,7 @@ export default function FollowingPage() {
         sortBy: "latest",
         authorIds: followingIds,
       },
-      activeTab === "writters" && followingIds.length > 0
+      activeTab === "writers" && followingIds.length > 0
     );
 
   const shouldFetchFollowedTags =
@@ -53,9 +53,9 @@ export default function FollowingPage() {
   const { data: followedTagsData, isLoading: isLoadingFollowedTags } = useTags(
     shouldFetchFollowedTags
       ? {
-          ids: followedTagIds,
-          limit: followedTagIds.length,
-        }
+        ids: followedTagIds,
+        limit: followedTagIds.length,
+      }
       : undefined,
     shouldFetchFollowedTags
   );
@@ -80,7 +80,7 @@ export default function FollowingPage() {
       .filter((tag) => !followedTagIds.includes(tag.id)) ?? [];
 
   const showInitialSkeleton =
-    activeTab === "writters" &&
+    activeTab === "writers" &&
     (isLoadingMe || isLoading) &&
     posts.length === 0;
 
@@ -117,12 +117,11 @@ export default function FollowingPage() {
             <div className="mt-8 flex gap-2 overflow-x-auto">
               <button
                 type="button"
-                onClick={() => setActiveTab("writters")}
-                className={`rounded-full border px-4 py-2 text-sm transition ${
-                  activeTab === "writters"
+                onClick={() => setActiveTab("writers")}
+                className={`rounded-full border px-4 py-2 text-sm transition ${activeTab === "writers"
                     ? "border-[var(--midnight-accent)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-text)]"
                     : "border-transparent text-[var(--midnight-muted)] hover:border-[var(--midnight-border)]/70 hover:text-[var(--midnight-text)]"
-                }`}
+                  }`}
               >
                 Writers
               </button>
@@ -130,11 +129,10 @@ export default function FollowingPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab("subjects")}
-                className={`rounded-full border px-4 py-2 text-sm transition ${
-                  activeTab === "subjects"
+                className={`rounded-full border px-4 py-2 text-sm transition ${activeTab === "subjects"
                     ? "border-[var(--midnight-accent)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-text)]"
                     : "border-transparent text-[var(--midnight-muted)] hover:border-[var(--midnight-border)]/70 hover:text-[var(--midnight-text)]"
-                }`}
+                  }`}
               >
                 Subjects
               </button>
@@ -142,7 +140,7 @@ export default function FollowingPage() {
           </header>
         </section>
 
-        {activeTab === "writters" && (
+        {activeTab === "writers" && (
           <section className="mx-auto w-full max-w-3xl px-5 md:px-6">
             <PostsContainer
               hasMore={!hasNoFollowings && Boolean(hasNextPage)}
@@ -342,19 +340,18 @@ function TopicList({
             </h3>
 
             <p className="mt-1 text-sm text-[var(--midnight-muted)]">
-              {topic.postsCount.toLocaleString()} letters ·{" "}
-              {topic.authorsCount.toLocaleString()} writers
+              {topic.postsCount.toLocaleString()} &nbsp;letters ·{" "}
+              {topic.authorsCount.toLocaleString()} &nbsp;&nbsp;writers
             </p>
           </div>
 
           <button
             type="button"
             onClick={() => onAction(topic)}
-            className={`group ml-6 shrink-0 rounded-full border px-5 py-2 text-sm font-medium transition ${
-              active
+            className={`group ml-6 shrink-0 rounded-full border px-5 py-2 text-sm font-medium transition ${active
                 ? "border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-muted)] hover:border-red-400/40 hover:text-red-300"
                 : "border-[var(--midnight-border)]/70 text-[var(--midnight-muted)] hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-accent-hover)]"
-            }`}
+              }`}
           >
             <span className="relative block h-5 overflow-hidden">
               <span className="block transition-transform duration-200 group-hover:-translate-y-full">

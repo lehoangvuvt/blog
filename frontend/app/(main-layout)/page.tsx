@@ -97,26 +97,26 @@ export default function Home() {
 
             <h1
               className="
-      mt-4
-      text-4xl font-bold
-      leading-[0.98]
-      tracking-[-0.06em]
-      text-[var(--midnight-text)]
-      md:text-6xl
-    "
+              mt-4
+              text-4xl font-bold
+              leading-[0.98]
+              tracking-[-0.06em]
+              text-[var(--midnight-text)]
+              md:text-6xl
+            "
             >
               Thoughts that arrive after midnight
             </h1>
 
             <p
               className="
-      mt-5
-      max-w-2xl
-      text-[15px]
-      leading-7
-      text-[var(--midnight-muted)]
-      md:text-[17px]
-    "
+              mt-5
+              max-w-2xl
+              text-[15px]
+              leading-7
+              text-[var(--midnight-muted)]
+              md:text-[17px]
+            "
             >
               Essays, passing thoughts, quiet observations, and conversations
               from people still awake.
