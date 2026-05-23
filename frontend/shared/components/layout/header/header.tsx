@@ -27,7 +27,6 @@ export default function Header() {
   const dispatch = useAppDispatch();
 
   const [searchText, setSearchText] = useState(searchParams.get("q") ?? "");
-
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -45,10 +44,7 @@ export default function Header() {
 
   useEffect(() => {
     const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
-
-    if (saved) {
-      setRecentSearches(JSON.parse(saved));
-    }
+    if (saved) setRecentSearches(JSON.parse(saved));
   }, []);
 
   useEffect(() => {
@@ -68,10 +64,7 @@ export default function Header() {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const saveRecentSearch = (query: string) => {
@@ -83,7 +76,6 @@ export default function Header() {
     ].slice(0, 5);
 
     setRecentSearches(next);
-
     localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(next));
   };
 
@@ -91,7 +83,6 @@ export default function Header() {
     const next = recentSearches.filter((item) => item !== query);
 
     setRecentSearches(next);
-
     localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(next));
   };
 
@@ -99,11 +90,9 @@ export default function Header() {
     e.preventDefault();
 
     const query = searchText.trim();
-
     if (!query) return;
 
     saveRecentSearch(query);
-
     setIsSearchFocused(false);
 
     router.push(`/search/articles?q=${encodeURIComponent(query)}`);
@@ -112,28 +101,25 @@ export default function Header() {
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-50 h-16 border-b border-[var(--midnight-border)]/70 bg-[rgba(14,17,22,0.82)] text-[var(--midnight-text)] shadow-[0_18px_50px_rgba(0,0,0,0.24)] backdrop-blur-2xl">
-        <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-between gap-5 px-4 md:px-6">
-          <div className="flex min-w-0 flex-1 items-center gap-4">
+        <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-between gap-3 px-3 md:gap-5 md:px-6">
+          <div className="flex min-w-0 flex-1 items-center gap-2 md:gap-4">
             <button
               type="button"
               onClick={() => dispatch(toggleSideBar())}
-              className="
-                flex h-9 w-9 shrink-0 items-center justify-center
-                rounded-full
-                text-[var(--midnight-muted)]
-                transition-all duration-300
-                hover:bg-[var(--midnight-code-bg)]
-                hover:text-[var(--midnight-accent-hover)]
-              "
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[var(--midnight-muted)] transition-all duration-300 hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-accent-hover)]"
               aria-label="Toggle sidebar"
             >
               <Menu className="h-5 w-5" />
             </button>
 
-            <Link href="/" className="flex shrink-0 items-center gap-2">
-              <MoonStar className="h-4 w-4 text-[var(--midnight-accent)]/80" />
+            <Link href="/" className="flex min-w-0 shrink items-center gap-2">
+              <MoonStar className="h-4 w-4 shrink-0 text-[var(--midnight-accent)]/80" />
 
-              <span className="text-lg font-bold tracking-[-0.04em] text-[var(--midnight-text)]">
+              <span className="hidden truncate text-lg font-bold tracking-[-0.04em] text-[var(--midnight-text)] sm:block">
+                The Midnight Letters
+              </span>
+
+              <span className="truncate text-sm font-bold tracking-[-0.04em] text-[var(--midnight-text)] sm:hidden">
                 The Midnight Letters
               </span>
             </Link>
@@ -141,14 +127,7 @@ export default function Header() {
             <form
               ref={searchContainerRef}
               onSubmit={handleSearch}
-              className="
-                relative hidden w-full max-w-sm items-center
-                rounded-full
-                border border-[var(--midnight-border)]/70
-                bg-[var(--midnight-code-bg)]
-                px-4
-                md:flex
-              "
+              className="relative hidden w-full max-w-sm items-center rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] px-4 md:flex"
             >
               <Search className="h-4 w-4 text-[var(--midnight-soft)]" />
 
@@ -158,12 +137,7 @@ export default function Header() {
                 value={searchText}
                 onFocus={() => setIsSearchFocused(true)}
                 onChange={(e) => setSearchText(e.target.value)}
-                className="
-                  h-10 w-full bg-transparent px-3
-                  text-sm text-[var(--midnight-text)]
-                  outline-none
-                  placeholder:text-[var(--midnight-muted)]
-                "
+                className="h-10 w-full bg-transparent px-3 text-sm text-[var(--midnight-text)] outline-none placeholder:text-[var(--midnight-muted)]"
               />
 
               {isSearchFocused && recentSearches.length > 0 && (
@@ -182,11 +156,8 @@ export default function Header() {
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => {
                           setSearchText(item);
-
                           saveRecentSearch(item);
-
                           setIsSearchFocused(false);
-
                           router.push(
                             `/search/articles?q=${encodeURIComponent(item)}`
                           );
@@ -200,15 +171,7 @@ export default function Header() {
                         type="button"
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => removeRecentSearch(item)}
-                        className="
-                            mr-2 flex h-7 w-7 items-center justify-center
-                            rounded-full
-                            text-[var(--midnight-soft)]
-                            opacity-0 transition-all
-                            hover:bg-[var(--midnight-surface-soft)]
-                            hover:text-[var(--midnight-accent-hover)]
-                            group-hover:opacity-100
-                          "
+                        className="mr-2 flex h-7 w-7 items-center justify-center rounded-full text-[var(--midnight-soft)] opacity-0 transition-all hover:bg-[var(--midnight-surface-soft)] hover:text-[var(--midnight-accent-hover)] group-hover:opacity-100"
                       >
                         <X className="h-3.5 w-3.5" />
                       </button>
@@ -219,30 +182,20 @@ export default function Header() {
             </form>
           </div>
 
-          <nav className="flex shrink-0 items-center gap-3">
+          <nav className="flex shrink-0 items-center gap-2 md:gap-3">
             <button
               type="button"
               onClick={() => setIsSettingsOpen(true)}
-              className="
-                hidden items-center gap-2
-                text-sm text-[var(--midnight-muted)]
-                transition hover:text-[var(--midnight-accent-hover)]
-                sm:flex
-              "
+              className="hidden items-center gap-2 text-sm text-[var(--midnight-muted)] transition hover:text-[var(--midnight-accent-hover)] sm:flex"
             >
               <Settings2 className="h-4 w-4" />
-              Reading mood
+              <span className="hidden md:inline">Reading mood</span>
             </button>
 
             {isLoggedIn && (
               <Link
                 href="/new-article"
-                className="
-                  hidden items-center gap-2
-                  text-sm text-[var(--midnight-muted)]
-                  transition hover:text-[var(--midnight-accent-hover)]
-                  md:flex
-                "
+                className="hidden items-center gap-2 text-sm text-[var(--midnight-muted)] transition hover:text-[var(--midnight-accent-hover)] md:flex"
               >
                 <PenSquare className="h-4 w-4" />
                 Write a letter
@@ -255,26 +208,17 @@ export default function Header() {
               <>
                 <Link
                   href="/sign-in"
-                  className="
-                    text-sm text-[var(--midnight-muted)]
-                    transition hover:text-[var(--midnight-accent-hover)]
-                  "
+                  className="hidden text-sm text-[var(--midnight-muted)] transition hover:text-[var(--midnight-accent-hover)] sm:inline"
                 >
                   Sign in
                 </Link>
 
                 <Link
                   href="/sign-up"
-                  className="
-                    rounded-full
-                    bg-[var(--midnight-accent)]
-                    px-4 py-2
-                    text-sm font-medium
-                    text-[var(--midnight-on-accent)]
-                    transition hover:opacity-90
-                  "
+                  className="rounded-full bg-[var(--midnight-accent)] px-3 py-2 text-sm font-medium text-[var(--midnight-on-accent)] transition hover:opacity-90 sm:px-4"
                 >
-                  Join the letters
+                  <span className="sm:hidden">Join</span>
+                  <span className="hidden sm:inline">Join the letters</span>
                 </Link>
               </>
             ) : (
@@ -282,14 +226,7 @@ export default function Header() {
                 <button
                   type="button"
                   onClick={() => setIsProfileOpen((prev) => !prev)}
-                  className="
-                    flex h-9 w-9 items-center justify-center
-                    overflow-hidden rounded-full
-                    border border-[var(--midnight-border)]/70
-                    bg-[var(--midnight-code-bg)]
-                    text-xs font-medium
-                    text-[var(--midnight-accent)]
-                  "
+                  className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] text-xs font-medium text-[var(--midnight-accent)]"
                   aria-label="Open profile menu"
                 >
                   {me.avatarUrl ? (
@@ -320,14 +257,7 @@ export default function Header() {
                         <Link
                           href={`/${me.slug}`}
                           onClick={() => setIsProfileOpen(false)}
-                          className="
-                            flex items-center gap-3
-                            rounded-xl px-3 py-2.5
-                            text-sm text-[var(--midnight-text)]
-                            transition-colors
-                            hover:bg-[var(--midnight-code-bg)]
-                            hover:text-[var(--midnight-accent-hover)]
-                          "
+                          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[var(--midnight-text)] transition-colors hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-accent-hover)]"
                         >
                           <User2 className="h-4 w-4" />
                           Profile
@@ -336,14 +266,7 @@ export default function Header() {
                         <Link
                           href="/settings"
                           onClick={() => setIsProfileOpen(false)}
-                          className="
-                            flex items-center gap-3
-                            rounded-xl px-3 py-2.5
-                            text-sm text-[var(--midnight-text)]
-                            transition-colors
-                            hover:bg-[var(--midnight-code-bg)]
-                            hover:text-[var(--midnight-accent-hover)]
-                          "
+                          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[var(--midnight-text)] transition-colors hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-accent-hover)]"
                         >
                           <Settings2 className="h-4 w-4" />
                           Settings
@@ -353,18 +276,9 @@ export default function Header() {
                           type="button"
                           onClick={() => {
                             localStorage.removeItem("accessToken");
-
                             window.location.reload();
                           }}
-                          className="
-                            flex w-full items-center gap-3
-                            rounded-xl px-3 py-2.5
-                            text-left text-sm
-                            text-[var(--midnight-muted)]
-                            transition-colors
-                            hover:bg-[var(--midnight-code-bg)]
-                            hover:text-red-300
-                          "
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-[var(--midnight-muted)] transition-colors hover:bg-[var(--midnight-code-bg)] hover:text-red-300"
                         >
                           <LogOut className="h-4 w-4" />
                           Sign out

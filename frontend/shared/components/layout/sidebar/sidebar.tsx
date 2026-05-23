@@ -12,7 +12,7 @@ import { useMe } from "@/features/auth/hooks/use-me";
 const sidebarItems = [
   { label: "Latest letters", href: "/", needAuth: false },
   { label: "Following", href: "/following/writters", needAuth: true },
-  { label: "Saved letters", href: "/saved-posts", needAuth: true },
+  { label: "Saved letters", href: "/saved-letters", needAuth: true },
 ];
 
 export default function Sidebar() {
@@ -41,9 +41,8 @@ export default function Sidebar() {
         type="button"
         onClick={() => dispatch(setSideBarState({ isOpen: false }))}
         className={`
-          fixed inset-0 z-[90] bg-black/60 backdrop-blur-[2px] transition-opacity duration-300 md:hidden
-          ${isOpenSideBar ? "opacity-100" : "pointer-events-none opacity-0"}
-        `}
+        fixed inset-0 z-30 bg-black/50 transition-opacity duration-300 md:hidden
+        ${isOpenSideBar ? "opacity-100" : "pointer-events-none opacity-0"}`}
         aria-label="Close sidebar"
       />
 
@@ -55,7 +54,6 @@ export default function Sidebar() {
     border-r border-[var(--midnight-border)]/70
     bg-[var(--midnight-bg)]/96
     text-[var(--midnight-text)]
-    backdrop-blur-2xl
     transition-transform duration-300 ease-out
     md:w-64 md:max-w-none
 

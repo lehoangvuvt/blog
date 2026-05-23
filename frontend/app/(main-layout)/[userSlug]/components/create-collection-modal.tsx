@@ -2,7 +2,7 @@
 import { useMe } from "@/features/auth/hooks/use-me";
 import useCreatePostCollection from "@/features/post-collections/hooks/use-create-post-collection";
 import { useQueryClient } from "@tanstack/react-query";
-import { ImagePlus } from "lucide-react";
+import { ImagePlus, X } from "lucide-react";
 import { useState } from "react";
 
 export default function CreateCollectionModal({
@@ -14,22 +14,22 @@ export default function CreateCollectionModal({
 }) {
   const { data: myInfo } = useMe();
   const queryClient = useQueryClient();
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [thumbnailPreview, setThumbnailPreview] = useState("");
+
   const { mutate: createCollection } = useCreatePostCollection();
 
   if (!open) return null;
 
   const handleThumbnailChange = (file?: File) => {
     if (!file) return;
-
     setThumbnailPreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     if (!myInfo) return;
 
     createCollection(
@@ -42,6 +42,7 @@ export default function CreateCollectionModal({
           queryClient.invalidateQueries({
             queryKey: ["post-collections", myInfo.id],
           });
+
           onClose();
         },
       }
@@ -49,26 +50,28 @@ export default function CreateCollectionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 px-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-[3px]">
       <form
         onSubmit={handleSubmit}
-        className="relative w-full max-w-[640px] rounded-xl bg-white shadow-[0_16px_60px_rgba(0,0,0,0.14)]"
+        className="relative w-full max-w-[640px] overflow-hidden rounded-2xl border border-[var(--midnight-border)]/70 bg-[var(--midnight-surface)] shadow-[0_28px_90px_rgba(0,0,0,0.38)]"
       >
-        <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-3">
+        <div className="flex items-center justify-between border-b border-[var(--midnight-border)]/70 px-5 py-4">
           <button
             type="button"
             onClick={onClose}
-            className="text-sm text-neutral-500 hover:text-neutral-950"
+            className="rounded-full px-3 py-1.5 text-sm text-[var(--midnight-muted)] transition hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-text)]"
           >
             Cancel
           </button>
 
-          <p className="text-sm font-medium text-neutral-700">New collection</p>
+          <p className="text-sm font-medium text-[var(--midnight-muted)]">
+            New collection
+          </p>
 
           <button
             type="submit"
             disabled={!name.trim() || !description.trim()}
-            className="rounded-full bg-[#ff6719] px-4 py-1.5 text-sm font-medium text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:bg-neutral-300"
+            className="rounded-full bg-[var(--midnight-accent)] px-4 py-1.5 text-sm font-medium text-[var(--midnight-on-accent)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Create
           </button>
@@ -78,8 +81,8 @@ export default function CreateCollectionModal({
           <input
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder="Bundle title"
-            className="w-full border-none bg-transparent px-0 text-[38px] font-semibold leading-tight tracking-[-0.04em] text-neutral-950 outline-none placeholder:text-neutral-300"
+            placeholder="Collection title"
+            className="w-full border-none bg-transparent px-0 text-[38px] font-bold leading-tight tracking-[-0.055em] text-[var(--midnight-text)] outline-none placeholder:text-[var(--midnight-soft)]"
             required
             autoFocus
           />
@@ -87,23 +90,23 @@ export default function CreateCollectionModal({
           <textarea
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            placeholder="What is this collection about?"
+            placeholder="What belongs in this collection?"
             rows={3}
-            className="mt-4 w-full resize-none border-none bg-transparent px-0 text-xl leading-8 text-neutral-600 outline-none placeholder:text-neutral-300"
+            className="mt-4 w-full resize-none border-none bg-transparent px-0 text-xl leading-8 text-[var(--midnight-muted)] outline-none placeholder:text-[var(--midnight-soft)]"
             required
           />
 
           <div className="mt-7">
             {thumbnailPreview ? (
-              <div className="group relative overflow-hidden rounded-md border border-neutral-200">
+              <div className="group relative overflow-hidden rounded-2xl border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)]">
                 <img
                   src={thumbnailPreview}
-                  alt="Bundle thumbnail preview"
-                  className="h-[240px] w-full object-cover"
+                  alt="Collection thumbnail preview"
+                  className="h-[240px] w-full object-cover opacity-90 saturate-[0.85]"
                 />
 
-                <div className="absolute inset-0 hidden items-center justify-center bg-black/30 group-hover:flex">
-                  <label className="cursor-pointer rounded-full bg-white px-4 py-2 text-sm font-medium text-neutral-950 shadow-sm">
+                <div className="absolute inset-0 hidden items-center justify-center bg-black/45 backdrop-blur-[2px] group-hover:flex">
+                  <label className="cursor-pointer rounded-full bg-[var(--midnight-accent)] px-4 py-2 text-sm font-medium text-[var(--midnight-on-accent)] shadow-sm">
                     Replace image
                     <input
                       type="file"
@@ -117,26 +120,24 @@ export default function CreateCollectionModal({
 
                   <button
                     type="button"
-                    onClick={() => {
-                      setThumbnailPreview("");
-                    }}
-                    className="ml-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-neutral-950 shadow-sm"
+                    onClick={() => setThumbnailPreview("")}
+                    className="ml-2 rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-surface)] px-4 py-2 text-sm font-medium text-[var(--midnight-text)] shadow-sm transition hover:text-red-300"
                   >
                     Remove
                   </button>
                 </div>
               </div>
             ) : (
-              <label className="flex h-[180px] cursor-pointer items-center justify-center rounded-md border border-dashed border-neutral-300 bg-[#f8f6f1] text-center transition hover:bg-neutral-100">
+              <label className="flex h-[180px] cursor-pointer items-center justify-center rounded-2xl border border-dashed border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] text-center transition hover:border-[var(--midnight-accent)]/60">
                 <div>
-                  <ImagePlus className="mx-auto h-5 w-5 text-neutral-400" />
+                  <ImagePlus className="mx-auto h-5 w-5 text-[var(--midnight-muted)]" />
 
-                  <p className="mt-2 text-sm font-medium text-neutral-700">
+                  <p className="mt-2 text-sm font-medium text-[var(--midnight-text)]">
                     Add a cover image
                   </p>
 
-                  <p className="mt-1 text-sm text-neutral-400">
-                    Optional, but useful for previews
+                  <p className="mt-1 text-sm text-[var(--midnight-muted)]">
+                    Optional, but useful for previews.
                   </p>
                 </div>
 
@@ -152,25 +153,34 @@ export default function CreateCollectionModal({
             )}
           </div>
 
-          <div className="mt-9 border-t border-neutral-200 pt-6">
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-neutral-400">
+          <div className="mt-9 border-t border-[var(--midnight-border)]/70 pt-6">
+            <p className="text-xs tracking-[0.14em] text-[var(--midnight-soft)]">
               Preview
             </p>
 
-            <article className="article-content mt-4 border-b border-neutral-200 pb-5">
-              <h2 className="text-2xl font-semibold tracking-tight text-neutral-950">
-                {name || "Bundle title"}
+            <article className="mt-4 border-b border-[var(--midnight-border)]/70 pb-5">
+              <h2 className="text-2xl font-bold tracking-[-0.045em] text-[var(--midnight-text)]">
+                {name || "Collection title"}
               </h2>
 
-              <p className="mt-2 max-w-xl text-base leading-7 text-neutral-600">
-                {description || "What is this collection about?"}
+              <p className="mt-2 max-w-xl text-base leading-7 text-[var(--midnight-muted)]">
+                {description || "What belongs in this collection?"}
               </p>
 
-              <p className="mt-4 text-sm text-neutral-400">0 letters</p>
+              <p className="mt-4 text-sm text-[var(--midnight-soft)]">
+                0 letters
+              </p>
             </article>
           </div>
         </div>
       </form>
+
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute inset-0 -z-10"
+        aria-label="Close modal"
+      />
     </div>
   );
 }

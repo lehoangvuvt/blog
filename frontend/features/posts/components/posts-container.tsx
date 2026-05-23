@@ -42,7 +42,7 @@ export default function PostsContainer({
   }, [hasMore, isLoading, onLoadMore]);
 
   return (
-    <section className="mx-auto w-full max-w-2xl">
+    <section className="mx-auto w-full max-w-2xl px-4 md:px-0">
       <div className="divide-y divide-[var(--midnight-border)]">{children}</div>
 
       <div ref={loaderRef} className="py-10 text-center">

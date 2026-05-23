@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+
 import MainLayout from "@/shared/components/layout/main-layout/main-layout";
 import PostsContainer from "@/features/posts/components/posts-container";
 import { PostItem } from "@/features/posts/components/post-item";
@@ -10,20 +12,19 @@ import { useTags } from "@/features/tags/hooks/use-tags";
 import { formatTimeAgo } from "@/shared/utils";
 import useFollowTag from "@/features/tags/hooks/use-follow-tag";
 import useUnfollowTag from "@/features/tags/hooks/use-unfollow-tag";
-import { useParams, useRouter } from "next/navigation";
 import NotificationPopover from "@/shared/components/notification-popover";
 import useNotification from "@/hooks/use-notification";
+import { Tag } from "@/features/tags/types";
 
-type Tab = "writters" | "topics";
+type Tab = "writters" | "subjects";
 
 export default function FollowingPage() {
   const { close, open, notifications } = useNotification();
   const router = useRouter();
-
   const params = useParams();
 
   const [activeTab, setActiveTab] = useState<Tab>(
-    params.tabType === "writters" ? "writters" : "topics"
+    params.tabType === "writters" ? "writters" : "subjects"
   );
 
   const { data: me, isLoading: isLoadingMe } = useMe();
@@ -47,7 +48,7 @@ export default function FollowingPage() {
     );
 
   const shouldFetchFollowedTags =
-    activeTab === "topics" && followedTagIds.length > 0;
+    activeTab === "subjects" && followedTagIds.length > 0;
 
   const { data: followedTagsData, isLoading: isLoadingFollowedTags } = useTags(
     shouldFetchFollowedTags
@@ -68,7 +69,7 @@ export default function FollowingPage() {
       {
         limit: 30,
       },
-      activeTab === "topics"
+      activeTab === "subjects"
     );
 
   const posts = data?.pages.flatMap((page) => page.data) ?? [];
@@ -86,7 +87,7 @@ export default function FollowingPage() {
   const hasNoFollowings = !isLoadingMe && followingIds.length === 0;
 
   const showTopicsSkeleton =
-    activeTab === "topics" &&
+    activeTab === "subjects" &&
     !isLoadingMe &&
     followedTagIds.length > 0 &&
     isLoadingFollowedTags;
@@ -101,25 +102,26 @@ export default function FollowingPage() {
   return (
     <MainLayout>
       <NotificationPopover onClose={close} notifications={notifications} />
-      <main className="min-h-screen bg-white text-black">
-        <section className="mx-auto w-full max-w-2xl px-5 pt-14 md:px-6">
-          <header className="border-b border-black/10 pb-6">
-            <h1 className="font-serif text-5xl font-semibold tracking-tight">
-              The Reading Room
+
+      <main className="min-h-screen bg-[var(--midnight-bg)] text-[var(--midnight-text)]">
+        <section className="mx-auto w-full max-w-3xl px-5 pt-12 md:px-6">
+          <header className="border-b border-[var(--midnight-border)]/70 pb-7">
+            <h1 className="mt-4 text-5xl font-bold tracking-[-0.06em] text-[var(--midnight-text)]">
+              Following
             </h1>
 
-            <p className="mt-3 text-sm leading-6 text-black/55">
-              Follow writers and subjects that sound good after midnight.
+            <p className="mt-4 max-w-xl text-[15px] leading-7 text-[var(--midnight-muted)]">
+              Letters from writers and subjects you keep returning to.
             </p>
 
-            <div className="mt-8 flex gap-6 overflow-x-auto">
+            <div className="mt-8 flex gap-2 overflow-x-auto">
               <button
                 type="button"
                 onClick={() => setActiveTab("writters")}
-                className={`border-b pb-3 text-sm font-medium whitespace-nowrap transition ${
+                className={`rounded-full border px-4 py-2 text-sm transition ${
                   activeTab === "writters"
-                    ? "border-black text-black"
-                    : "border-transparent text-black/45 hover:text-black"
+                    ? "border-[var(--midnight-accent)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-text)]"
+                    : "border-transparent text-[var(--midnight-muted)] hover:border-[var(--midnight-border)]/70 hover:text-[var(--midnight-text)]"
                 }`}
               >
                 Writers
@@ -127,11 +129,11 @@ export default function FollowingPage() {
 
               <button
                 type="button"
-                onClick={() => setActiveTab("topics")}
-                className={`border-b pb-3 text-sm font-medium whitespace-nowrap transition ${
-                  activeTab === "topics"
-                    ? "border-black text-black"
-                    : "border-transparent text-black/45 hover:text-black"
+                onClick={() => setActiveTab("subjects")}
+                className={`rounded-full border px-4 py-2 text-sm transition ${
+                  activeTab === "subjects"
+                    ? "border-[var(--midnight-accent)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-text)]"
+                    : "border-transparent text-[var(--midnight-muted)] hover:border-[var(--midnight-border)]/70 hover:text-[var(--midnight-text)]"
                 }`}
               >
                 Subjects
@@ -141,226 +143,148 @@ export default function FollowingPage() {
         </section>
 
         {activeTab === "writters" && (
-          <PostsContainer
-            hasMore={!hasNoFollowings && !!hasNextPage}
-            isLoading={isFetchingNextPage}
-            onLoadMore={() => fetchNextPage()}
-          >
-            {showInitialSkeleton &&
-              Array.from({ length: 5 }).map((_, index) => (
-                <PostItem.Skeleton key={`skeleton-loading-${index + 1}`} />
-              ))}
+          <section className="mx-auto w-full max-w-3xl px-5 md:px-6">
+            <PostsContainer
+              hasMore={!hasNoFollowings && Boolean(hasNextPage)}
+              isLoading={isFetchingNextPage}
+              onLoadMore={() => fetchNextPage()}
+            >
+              {showInitialSkeleton &&
+                Array.from({ length: 5 }).map((_, index) => (
+                  <PostItem.Skeleton key={`skeleton-loading-${index + 1}`} />
+                ))}
 
-            {!showInitialSkeleton &&
-              !hasNoFollowings &&
-              posts.map((post) => {
-                const authorName =
-                  post.author?.fullName ||
-                  post.author?.email ||
-                  "Unknown writer";
+              {!showInitialSkeleton &&
+                !hasNoFollowings &&
+                posts.map((post) => {
+                  const authorName =
+                    post.author?.fullName ||
+                    post.author?.email ||
+                    "Unknown writer";
 
-                const authorSlug = post.author?.slug;
-                const postLink = `/articles/${post.slug}`;
+                  const authorSlug = post.author?.slug;
+                  const postLink = `/articles/${post.slug}`;
 
-                return (
-                  <PostItem.Container key={post.id}>
-                    <PostItem.Content>
-                      <PostItem.Header>
-                        <PostItem.Avatar
-                          src={post.author?.avatar}
-                          alt={authorName}
-                        />
+                  return (
+                    <PostItem.Container key={post.id}>
+                      <PostItem.Content>
+                        <PostItem.Header>
+                          <PostItem.Avatar
+                            src={post.author?.avatar}
+                            alt={authorName}
+                          />
 
-                        {authorSlug ? (
-                          <PostItem.Author link={`/${authorSlug}`}>
-                            {authorName}
-                          </PostItem.Author>
-                        ) : (
-                          <span>{authorName}</span>
+                          {authorSlug ? (
+                            <PostItem.Author link={`/${authorSlug}`}>
+                              {authorName}
+                            </PostItem.Author>
+                          ) : (
+                            <span>{authorName}</span>
+                          )}
+
+                          <PostItem.Dot />
+
+                          <PostItem.Date>
+                            {formatTimeAgo(post.postedDate)}
+                          </PostItem.Date>
+                        </PostItem.Header>
+
+                        <PostItem.Title link={postLink}>
+                          {post.title}
+                        </PostItem.Title>
+
+                        {post.subTitle && (
+                          <PostItem.SubTitle>{post.subTitle}</PostItem.SubTitle>
                         )}
 
-                        <PostItem.Dot />
+                        <PostItem.Footer />
+                      </PostItem.Content>
 
-                        <PostItem.Date>
-                          {formatTimeAgo(post.postedDate)}
-                        </PostItem.Date>
-                      </PostItem.Header>
+                      <PostItem.Thumbnail
+                        src={post.thumbnailImage ?? undefined}
+                        alt={post.title}
+                        link={postLink}
+                      />
+                    </PostItem.Container>
+                  );
+                })}
 
-                      <PostItem.Title link={postLink}>
-                        {post.title}
-                      </PostItem.Title>
+              {!showInitialSkeleton && hasNoFollowings && (
+                <div className="pt-12 pb-16">
+                  <h2 className="text-2xl font-bold tracking-[-0.04em] text-[var(--midnight-text)]">
+                    No writers followed yet.
+                  </h2>
 
-                      {post.subTitle && (
-                        <PostItem.SubTitle>{post.subTitle}</PostItem.SubTitle>
-                      )}
+                  <p className="mt-3 max-w-md text-[15px] leading-7 text-[var(--midnight-muted)]">
+                    Follow a few voices and their newest letters will appear
+                    here.
+                  </p>
+                </div>
+              )}
+            </PostsContainer>
+          </section>
+        )}
 
-                      <PostItem.Footer />
-                    </PostItem.Content>
+        {activeTab === "subjects" && (
+          <section className="mx-auto w-full max-w-3xl px-5 py-8 md:px-6">
+            {isLoadingMe || showTopicsSkeleton ? (
+              <TopicSkeleton />
+            ) : followedTopics.length > 0 ? (
+              <TopicList
+                topics={followedTopics}
+                actionLabel="Following"
+                hoverLabel="Unfollow"
+                onAction={(topic) =>
+                  unfollowTag(topic, {
+                    onSuccess: () =>
+                      open("Subject unfollowed successfully", "success"),
+                    onError: () => open("Failed to unfollow subject", "error"),
+                  })
+                }
+                active
+              />
+            ) : (
+              <div className="pt-4 pb-10">
+                <p className="text-2xl font-bold tracking-[-0.04em] text-[var(--midnight-text)]">
+                  No subjects followed yet.
+                </p>
 
-                    <PostItem.Thumbnail
-                      src={post.thumbnailImage ?? undefined}
-                      alt={post.title}
-                      link={postLink}
-                    />
-                  </PostItem.Container>
-                );
-              })}
-
-            {!showInitialSkeleton && hasNoFollowings && (
-              <div className="py-20 text-center">
-                <h2 className="font-serif text-2xl font-semibold">
-                  No writers followed yet
-                </h2>
-
-                <p className="mt-2 text-sm text-black/50">
-                  Follow a few voices and their newest letters will show up
-                  here.
+                <p className="mt-3 max-w-md text-[15px] leading-7 text-[var(--midnight-muted)]">
+                  Follow subjects to shape the letters you see.
                 </p>
               </div>
             )}
-          </PostsContainer>
-        )}
 
-        {activeTab === "topics" && (
-          <section className="mx-auto w-full max-w-2xl px-5 py-8 md:px-6">
-            {isLoadingMe || showTopicsSkeleton ? (
-              <div className="space-y-6">
-                {Array.from({ length: 3 }).map((_, index) => (
-                  <div
-                    key={`topic-skeleton-${index + 1}`}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="space-y-2">
-                      <div className="h-6 w-40 animate-pulse rounded bg-black/[0.06]" />
-                      <div className="h-4 w-28 animate-pulse rounded bg-black/[0.05]" />
-                    </div>
+            <div className="mt-12 border-t border-[var(--midnight-border)]/70 pt-9">
+              <div className="mb-6 flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-xs tracking-[0.14em] text-[var(--midnight-soft)]">
+                    Suggested
+                  </p>
 
-                    <div className="h-10 w-24 animate-pulse rounded-full bg-black/[0.06]" />
-                  </div>
-                ))}
-              </div>
-            ) : followedTopics.length > 0 ? (
-              <div className="divide-y divide-black/10">
-                {followedTopics.map((topic) => (
-                  <div
-                    key={topic.id}
-                    className="flex w-full items-center justify-between py-5 text-left"
-                  >
-                    <div className="min-w-0">
-                      <h3 className="truncate font-sans text-xl font-semibold text-black">
-                        {topic.name}
-                      </h3>
-
-                      <p className="mt-1 text-sm text-black/55">
-                        {topic.postsCount.toLocaleString()} letters ·{" "}
-                        {topic.authorsCount.toLocaleString()} authors
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        unfollowTag(topic, {
-                          onSuccess: () =>
-                            open("Tag unfollowed successfully", "success"),
-                          onError: () =>
-                            open("Failed to unfollow tag", "error"),
-                        })
-                      }
-                      className="group ml-6 shrink-0 rounded-full border border-black bg-black px-5 py-2 text-sm font-medium text-white transition hover:bg-white"
-                    >
-                      <span className="relative block h-5 overflow-hidden">
-                        <span className="block transition-transform duration-200 group-hover:-translate-y-full">
-                          Following
-                        </span>
-
-                        <span className="absolute left-0 top-0 block translate-y-full text-black transition-transform duration-200 group-hover:translate-y-0">
-                          Unfollow
-                        </span>
-                      </span>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-black/50">No subjects followed yet.</p>
-            )}
-
-            <div className="mt-14 border-t border-black/10 pt-10">
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="font-serif text-3xl font-semibold">
-                  Suggested subjects
-                </h2>
-
-                <button
-                  type="button"
-                  className="text-sm text-black/50 transition hover:text-black"
-                >
-                  See all
-                </button>
+                  <h2 className="mt-2 text-3xl font-bold tracking-[-0.05em] text-[var(--midnight-text)]">
+                    Subjects to follow
+                  </h2>
+                </div>
               </div>
 
               {isLoadingRecommendedTags ? (
-                <div className="space-y-6">
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <div
-                      key={`recommended-topic-skeleton-${index + 1}`}
-                      className="flex items-center justify-between"
-                    >
-                      <div className="space-y-2">
-                        <div className="h-6 w-40 animate-pulse rounded bg-black/[0.06]" />
-                        <div className="h-4 w-28 animate-pulse rounded bg-black/[0.05]" />
-                      </div>
-
-                      <div className="h-10 w-24 animate-pulse rounded-full bg-black/[0.06]" />
-                    </div>
-                  ))}
-                </div>
+                <TopicSkeleton />
               ) : recommendedTopics.length > 0 ? (
-                <div className="divide-y divide-black/10">
-                  {recommendedTopics.map((topic) => (
-                    <div
-                      key={topic.id}
-                      className="flex w-full items-center justify-between py-5 text-left"
-                    >
-                      <div className="min-w-0">
-                        <h3 className="truncate font-sans text-xl font-semibold text-black">
-                          {topic.name}
-                        </h3>
-
-                        <p className="mt-1 text-sm text-black/55">
-                          {topic.postsCount.toLocaleString()} letters ·{" "}
-                          {topic.authorsCount.toLocaleString()} authors
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          followTag(topic, {
-                            onSuccess: () =>
-                              open("Tag followed successfully", "success"),
-                            onError: () =>
-                              open("Failed to follow tag", "error"),
-                          })
-                        }
-                        className="group ml-6 shrink-0 rounded-full border border-neutral-300 bg-white px-5 py-2 text-sm font-medium text-neutral-700 transition-all duration-200 hover:border-neutral-900 hover:bg-neutral-900"
-                      >
-                        <span className="relative block h-5 overflow-hidden">
-                          <span className="block transition-transform duration-200 group-hover:-translate-y-full">
-                            Follow
-                          </span>
-
-                          <span className="absolute left-0 top-0 block translate-y-full text-white transition-transform duration-200 group-hover:translate-y-0">
-                            Follow
-                          </span>
-                        </span>
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                <TopicList
+                  topics={recommendedTopics}
+                  actionLabel="Follow"
+                  hoverLabel="Follow"
+                  onAction={(topic) =>
+                    followTag(topic, {
+                      onSuccess: () =>
+                        open("Subject followed successfully", "success"),
+                      onError: () => open("Failed to follow subject", "error"),
+                    })
+                  }
+                />
               ) : (
-                <p className="text-sm text-black/50">
+                <p className="text-sm text-[var(--midnight-muted)]">
                   No suggested subjects right now.
                 </p>
               )}
@@ -369,5 +293,81 @@ export default function FollowingPage() {
         )}
       </main>
     </MainLayout>
+  );
+}
+
+function TopicSkeleton() {
+  return (
+    <div className="space-y-5">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div
+          key={`topic-skeleton-${index + 1}`}
+          className="flex items-center justify-between border-b border-[var(--midnight-border)]/70 py-5"
+        >
+          <div className="space-y-2">
+            <div className="h-6 w-40 animate-pulse rounded bg-[var(--midnight-code-bg)]" />
+            <div className="h-4 w-28 animate-pulse rounded bg-[var(--midnight-code-bg)]" />
+          </div>
+
+          <div className="h-10 w-24 animate-pulse rounded-full bg-[var(--midnight-code-bg)]" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TopicList({
+  topics,
+  actionLabel,
+  hoverLabel,
+  onAction,
+  active = false,
+}: {
+  topics: Tag[];
+  actionLabel: string;
+  hoverLabel: string;
+  onAction: (topic: Tag) => void;
+  active?: boolean;
+}) {
+  return (
+    <div className="divide-y divide-[var(--midnight-border)]/70">
+      {topics.map((topic) => (
+        <div
+          key={topic.id}
+          className="flex w-full items-center justify-between py-5 text-left"
+        >
+          <div className="min-w-0">
+            <h3 className="truncate text-xl font-bold tracking-[-0.035em] text-[var(--midnight-text)]">
+              {topic.name}
+            </h3>
+
+            <p className="mt-1 text-sm text-[var(--midnight-muted)]">
+              {topic.postsCount.toLocaleString()} letters ·{" "}
+              {topic.authorsCount.toLocaleString()} writers
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onAction(topic)}
+            className={`group ml-6 shrink-0 rounded-full border px-5 py-2 text-sm font-medium transition ${
+              active
+                ? "border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-muted)] hover:border-red-400/40 hover:text-red-300"
+                : "border-[var(--midnight-border)]/70 text-[var(--midnight-muted)] hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-accent-hover)]"
+            }`}
+          >
+            <span className="relative block h-5 overflow-hidden">
+              <span className="block transition-transform duration-200 group-hover:-translate-y-full">
+                {actionLabel}
+              </span>
+
+              <span className="absolute left-0 top-0 block translate-y-full transition-transform duration-200 group-hover:translate-y-0">
+                {hoverLabel}
+              </span>
+            </span>
+          </button>
+        </div>
+      ))}
+    </div>
   );
 }

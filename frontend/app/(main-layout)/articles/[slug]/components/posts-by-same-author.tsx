@@ -67,7 +67,7 @@ export function PostsBySameAuthor({ author, posts }: Props) {
         </div>
 
         <Link
-          href={`/@${author.slug}`}
+          href={`/${author.slug}`}
           className="hidden rounded-full border border-[var(--midnight-border)]/70 px-4 py-2 text-sm text-[var(--midnight-muted)] transition-colors hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-accent-hover)] sm:block"
         >
           Visit their desk
