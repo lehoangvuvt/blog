@@ -22,7 +22,9 @@ export default function FollowingPage() {
 
   const params = useParams();
 
-  const [activeTab, setActiveTab] = useState<Tab>(params.tabType === "writters" ? "writters" : "topics");
+  const [activeTab, setActiveTab] = useState<Tab>(
+    params.tabType === "writters" ? "writters" : "topics"
+  );
 
   const { data: me, isLoading: isLoadingMe } = useMe();
 
@@ -50,11 +52,11 @@ export default function FollowingPage() {
   const { data: followedTagsData, isLoading: isLoadingFollowedTags } = useTags(
     shouldFetchFollowedTags
       ? {
-        ids: followedTagIds,
-        limit: followedTagIds.length,
-      }
+          ids: followedTagIds,
+          limit: followedTagIds.length,
+        }
       : undefined,
-    shouldFetchFollowedTags,
+    shouldFetchFollowedTags
   );
 
   const followedTopics = shouldFetchFollowedTags
@@ -103,34 +105,36 @@ export default function FollowingPage() {
         <section className="mx-auto w-full max-w-2xl px-5 pt-14 md:px-6">
           <header className="border-b border-black/10 pb-6">
             <h1 className="font-serif text-5xl font-semibold tracking-tight">
-              Following
+              The Reading Room
             </h1>
 
             <p className="mt-3 text-sm leading-6 text-black/55">
-              Follow writers and topics to personalize your reading.
+              Follow writers and subjects that sound good after midnight.
             </p>
 
             <div className="mt-8 flex gap-6 overflow-x-auto">
               <button
                 type="button"
                 onClick={() => setActiveTab("writters")}
-                className={`border-b pb-3 text-sm font-medium whitespace-nowrap transition ${activeTab === "writters"
-                  ? "border-black text-black"
-                  : "border-transparent text-black/45 hover:text-black"
-                  }`}
+                className={`border-b pb-3 text-sm font-medium whitespace-nowrap transition ${
+                  activeTab === "writters"
+                    ? "border-black text-black"
+                    : "border-transparent text-black/45 hover:text-black"
+                }`}
               >
-                Writters
+                Writers
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab("topics")}
-                className={`border-b pb-3 text-sm font-medium whitespace-nowrap transition ${activeTab === "topics"
-                  ? "border-black text-black"
-                  : "border-transparent text-black/45 hover:text-black"
-                  }`}
+                className={`border-b pb-3 text-sm font-medium whitespace-nowrap transition ${
+                  activeTab === "topics"
+                    ? "border-black text-black"
+                    : "border-transparent text-black/45 hover:text-black"
+                }`}
               >
-                Topics
+                Subjects
               </button>
             </div>
           </header>
@@ -205,11 +209,12 @@ export default function FollowingPage() {
             {!showInitialSkeleton && hasNoFollowings && (
               <div className="py-20 text-center">
                 <h2 className="font-serif text-2xl font-semibold">
-                  You are not following anyone yet
+                  No writers followed yet
                 </h2>
 
                 <p className="mt-2 text-sm text-black/50">
-                  Follow writers to see their latest articles here.
+                  Follow a few voices and their newest letters will show up
+                  here.
                 </p>
               </div>
             )}
@@ -247,17 +252,21 @@ export default function FollowingPage() {
                       </h3>
 
                       <p className="mt-1 text-sm text-black/55">
-                        {topic.postsCount.toLocaleString()} articles ·{" "}
+                        {topic.postsCount.toLocaleString()} letters ·{" "}
                         {topic.authorsCount.toLocaleString()} authors
                       </p>
                     </div>
 
                     <button
                       type="button"
-                      onClick={() => unfollowTag(topic, {
-                        onSuccess: () => open("Tag unfollowed successfully", "success"),
-                        onError: () => open("Failed to unfollow tag", "error"),
-                      })}
+                      onClick={() =>
+                        unfollowTag(topic, {
+                          onSuccess: () =>
+                            open("Tag unfollowed successfully", "success"),
+                          onError: () =>
+                            open("Failed to unfollow tag", "error"),
+                        })
+                      }
                       className="group ml-6 shrink-0 rounded-full border border-black bg-black px-5 py-2 text-sm font-medium text-white transition hover:bg-white"
                     >
                       <span className="relative block h-5 overflow-hidden">
@@ -274,15 +283,13 @@ export default function FollowingPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-black/50">
-                You are not following any topics yet.
-              </p>
+              <p className="text-sm text-black/50">No subjects followed yet.</p>
             )}
 
             <div className="mt-14 border-t border-black/10 pt-10">
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="font-serif text-3xl font-semibold">
-                  Recommended for you
+                  Suggested subjects
                 </h2>
 
                 <button
@@ -322,17 +329,21 @@ export default function FollowingPage() {
                         </h3>
 
                         <p className="mt-1 text-sm text-black/55">
-                          {topic.postsCount.toLocaleString()} articles ·{" "}
+                          {topic.postsCount.toLocaleString()} letters ·{" "}
                           {topic.authorsCount.toLocaleString()} authors
                         </p>
                       </div>
 
                       <button
                         type="button"
-                        onClick={() => followTag(topic, {
-                          onSuccess: () => open("Tag followed successfully", "success"),
-                          onError: () => open("Failed to follow tag", "error"),
-                        })}
+                        onClick={() =>
+                          followTag(topic, {
+                            onSuccess: () =>
+                              open("Tag followed successfully", "success"),
+                            onError: () =>
+                              open("Failed to follow tag", "error"),
+                          })
+                        }
                         className="group ml-6 shrink-0 rounded-full border border-neutral-300 bg-white px-5 py-2 text-sm font-medium text-neutral-700 transition-all duration-200 hover:border-neutral-900 hover:bg-neutral-900"
                       >
                         <span className="relative block h-5 overflow-hidden">
@@ -350,7 +361,7 @@ export default function FollowingPage() {
                 </div>
               ) : (
                 <p className="text-sm text-black/50">
-                  No recommended topics available.
+                  No suggested subjects right now.
                 </p>
               )}
             </div>

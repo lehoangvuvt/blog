@@ -23,6 +23,7 @@ const allTag: Tag = {
 
 export default function Home() {
   const { data: me } = useMe();
+
   const followedTagIds = useMemo(() => me?.followedTagIds ?? [], [me]);
 
   const shouldFetchFollowedTags = followedTagIds.length > 0;
@@ -35,10 +36,13 @@ export default function Home() {
     shouldFetchFollowedTags
   );
 
-  const followedTopics =
-    followedTagsData?.pages.flatMap((page) => page.data) ? [allTag, ...followedTagsData.pages.flatMap((page) => page.data)] : [allTag];
+  const followedTopics = useMemo(() => {
+    const topics = followedTagsData?.pages.flatMap((page) => page.data) ?? [];
 
-  const [selectedTopic, setSelectedTopic] = useState(allTag);
+    return [allTag, ...topics];
+  }, [followedTagsData]);
+
+  const [selectedTopic, setSelectedTopic] = useState<Tag>(allTag);
 
   const [emblaRef] = useEmblaCarousel({
     dragFree: true,
@@ -51,7 +55,9 @@ export default function Home() {
       limit: 8,
       published: true,
       sortBy: "latest" as const,
-      ...(selectedTopic.id !== allTag.id && { tag: selectedTopic.slug }),
+      ...(selectedTopic.id !== allTag.id && {
+        tag: selectedTopic.slug,
+      }),
     }),
     [selectedTopic.id, selectedTopic.slug]
   );
@@ -69,6 +75,7 @@ export default function Home() {
       limit: 5,
       tag: selectedTopic.slug !== allTag.slug ? selectedTopic.slug : undefined,
     });
+
   const { data: trendingMonthlyPosts, isLoading: isLoadingMonthlyPosts } =
     useTrendingPosts("monthly", {
       limit: 5,
@@ -81,41 +88,57 @@ export default function Home() {
 
   return (
     <MainLayout>
-      <main className="min-h-screen text-[#191919]">
-        <div className="sticky top-16 z-10 mt-5 border-b border-black/5 bg-white/95 backdrop-blur">
+      <main className="min-h-screen bg-[var(--midnight-bg)] text-[var(--midnight-text)]">
+        <div className="mx-auto max-w-7xl px-5 pt-10 md:px-6 md:pt-14">
+          <section className="relative max-w-2xl border-b border-[var(--midnight-border)]/70 pb-9">
+            <h1 className="mt-4 text-3xl font-bold leading-[1.02] tracking-[-0.05em] text-[var(--midnight-text)] md:text-5xl">
+              Thoughts that arrive after midnight
+            </h1>
+
+            <p className="mt-5 max-w-xl text-[15px] leading-7 text-[var(--midnight-muted)] md:text-base">
+              Essays, passing thoughts, quiet observations, and conversations
+              from people still awake.
+            </p>
+          </section>
+        </div>
+
+        <div className="sticky top-16 z-10 mt-6 border-y border-[var(--midnight-border)]/70 bg-[var(--midnight-bg)]/90 backdrop-blur-xl">
           <div
             ref={emblaRef}
-            className="mx-auto max-w-7xl overflow-hidden px-5 py-3 cursor-grab"
+            className="mx-auto max-w-7xl cursor-grab overflow-hidden px-5 py-3 md:px-6"
           >
             <div className="flex gap-2">
-              {!isLoadingFollowedTags && followedTopics.map((topic) => {
-                const isActive = selectedTopic.slug === topic.slug;
+              {!isLoadingFollowedTags &&
+                followedTopics.map((topic) => {
+                  const isActive = selectedTopic.slug === topic.slug;
 
-                return (
-                  <button
-                    key={topic.id}
-                    type="button"
-                    onClick={() => setSelectedTopic(topic)}
-                    className={`shrink-0 rounded-full px-4 py-2 text-sm capitalize transition cursor-pointer ${isActive
-                      ? "bg-black text-white"
-                      : "text-neutral-600 hover:bg-black/5 hover:text-black"
+                  return (
+                    <button
+                      key={topic.id}
+                      type="button"
+                      onClick={() => setSelectedTopic(topic)}
+                      className={`shrink-0 rounded-full border px-4 py-2 text-sm transition-all duration-300 ${
+                        isActive
+                          ? "border-[var(--midnight-border-strong)] bg-[var(--midnight-surface-soft)] text-[var(--midnight-text)]"
+                          : "border-transparent text-[var(--midnight-muted)] hover:border-[var(--midnight-border)] hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-text)]"
                       }`}
-                  >
-                    {topic.name}
-                  </button>
-                );
-              })}
+                    >
+                      {topic.name}
+                    </button>
+                  );
+                })}
             </div>
           </div>
         </div>
 
-        <div className="mx-auto grid max-w-7xl gap-16 px-5 py-10 lg:grid-cols-[minmax(0,720px)_280px]">
+        <div className="mx-auto grid max-w-7xl gap-16 px-5 py-10 md:px-6 lg:grid-cols-[minmax(0,720px)_280px]">
           <section>
             <PostsContainer
               hasMore={Boolean(hasNextPage)}
               isLoading={isLoadingPosts}
               onLoadMore={() => {
                 if (!hasNextPage) return;
+
                 fetchNextPage();
               }}
             >
@@ -124,11 +147,14 @@ export default function Home() {
                   <PostItem.Skeleton key={`initial-skeleton-${index + 1}`} />
                 ))}
 
-              <div className="divide-y divide-black/10">
+              <div className="divide-y divide-[var(--midnight-border)]/70">
                 {posts.map((post) => {
                   const articleLink = getArticleLink(post.slug);
+
                   const authorName = post.author?.fullName ?? "Unknown author";
+
                   const authorSlug = post.author?.slug;
+
                   const authorLink = authorSlug ? `/${authorSlug}` : "#";
 
                   return (
@@ -176,9 +202,12 @@ export default function Home() {
 
               {!isLoadingPosts && posts.length === 0 && (
                 <div className="py-20 text-center">
-                  <h2 className="text-2xl font-bold">No articles found</h2>
-                  <p className="mt-2 text-sm text-neutral-500">
-                    No posts match “{selectedTopic.name}” yet.
+                  <h2 className="text-2xl font-bold tracking-[-0.03em] text-[var(--midnight-text)]">
+                    It&apos;s quiet here tonight
+                  </h2>
+
+                  <p className="mt-2 text-sm text-[var(--midnight-muted)]">
+                    No thoughts have drifted into this corner yet.
                   </p>
                 </div>
               )}
@@ -193,74 +222,74 @@ export default function Home() {
           <aside className="hidden lg:block">
             <div className="sticky top-32 space-y-14">
               <section>
-                <h3 className="text-sm font-semibold tracking-wide text-neutral-500 uppercase">
-                  Trending this week
+                <h3 className="text-sm font-semibold tracking-[0.08em] text-[var(--midnight-soft)]">
+                  Recently passed around
                 </h3>
 
                 <div className="mt-6 space-y-7">
                   {isLoadingWeeklyPosts
                     ? Array.from({ length: 4 }).map((_, index) => (
-                      <SidebarPostSkeleton
-                        key={`trending-skeleton-${index + 1}`}
-                      />
-                    ))
+                        <SidebarPostSkeleton
+                          key={`weekly-trending-skeleton-${index + 1}`}
+                        />
+                      ))
                     : trendingWeeklyPosts?.map((post, index) => (
-                      <a
-                        key={post.postId}
-                        href={getArticleLink(post.post.slug)}
-                        className="group flex gap-4"
-                      >
-                        <span className="text-sm font-medium text-neutral-300">
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
+                        <a
+                          key={post.postId}
+                          href={getArticleLink(post.post.slug)}
+                          className="group flex gap-4"
+                        >
+                          <span className="text-sm font-medium text-[var(--midnight-accent)]/80">
+                            {String(index + 1).padStart(2, "0")}
+                          </span>
 
-                        <div>
-                          <h4 className="text-[15px] leading-6 font-semibold transition group-hover:text-neutral-600">
-                            {post.post.title}
-                          </h4>
+                          <div>
+                            <h4 className="text-[15px] font-semibold leading-6 text-[var(--midnight-text)] transition group-hover:text-[var(--midnight-accent-hover)]">
+                              {post.post.title}
+                            </h4>
 
-                          <p className="mt-1 text-sm text-neutral-500">
-                            {post.post.author?.fullName ?? "Unknown author"}
-                          </p>
-                        </div>
-                      </a>
-                    ))}
+                            <p className="mt-1 text-sm text-[var(--midnight-muted)]">
+                              {post.post.author?.fullName ?? "Unknown author"}
+                            </p>
+                          </div>
+                        </a>
+                      ))}
                 </div>
               </section>
 
               <section>
-                <h3 className="text-sm font-semibold tracking-wide text-neutral-500 uppercase">
-                  Monthly reads
+                <h3 className="text-sm font-semibold tracking-[0.08em] text-[var(--midnight-soft)]">
+                  Kept people awake this month
                 </h3>
 
                 <div className="mt-6 space-y-7">
                   {isLoadingMonthlyPosts
                     ? Array.from({ length: 4 }).map((_, index) => (
-                      <SidebarPostSkeleton
-                        key={`trending-skeleton-${index + 1}`}
-                      />
-                    ))
+                        <SidebarPostSkeleton
+                          key={`monthly-trending-skeleton-${index + 1}`}
+                        />
+                      ))
                     : trendingMonthlyPosts?.map((post, index) => (
-                      <a
-                        key={post.post.id}
-                        href={getArticleLink(post.post.slug)}
-                        className="group flex gap-4"
-                      >
-                        <span className="text-sm font-medium text-neutral-300">
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
+                        <a
+                          key={post.post.id}
+                          href={getArticleLink(post.post.slug)}
+                          className="group flex gap-4"
+                        >
+                          <span className="text-sm font-medium text-[var(--midnight-accent)]/80">
+                            {String(index + 1).padStart(2, "0")}
+                          </span>
 
-                        <div>
-                          <h4 className="text-[15px] leading-6 font-semibold transition group-hover:text-neutral-600">
-                            {post.post.title}
-                          </h4>
+                          <div>
+                            <h4 className="text-[15px] font-semibold leading-6 text-[var(--midnight-text)] transition group-hover:text-[var(--midnight-accent-hover)]">
+                              {post.post.title}
+                            </h4>
 
-                          <p className="mt-1 text-sm text-neutral-500">
-                            {post.post.author?.fullName ?? "Unknown author"}
-                          </p>
-                        </div>
-                      </a>
-                    ))}
+                            <p className="mt-1 text-sm text-[var(--midnight-muted)]">
+                              {post.post.author?.fullName ?? "Unknown author"}
+                            </p>
+                          </div>
+                        </a>
+                      ))}
                 </div>
               </section>
             </div>

@@ -2,49 +2,43 @@
 "use client";
 
 import Link from "next/link";
-import { useAppSelector } from "@/store/hooks";
-import {
-  selectFont,
-  selectFontSize,
-  selectTheme,
-} from "@/features/app-settings/selectors";
 import Image from "next/image";
+import { useAppSelector } from "@/store/hooks";
+import { selectFont, selectFontSize } from "@/features/app-settings/selectors";
 
 function usePostThemeClasses() {
-  const theme = useAppSelector(selectTheme);
   const font = useAppSelector(selectFont);
   const fontSize = useAppSelector(selectFontSize);
-  const isDark = theme === "dark";
 
   return {
     fontClass:
       font === "serif"
         ? "font-serif"
         : font === "monospace"
-          ? "font-mono"
-          : "font-sans",
+        ? "font-mono"
+        : "font-sans",
 
     titleSize:
       fontSize === "small"
         ? "text-xl"
         : fontSize === "large"
-          ? "text-3xl"
-          : "text-2xl",
+        ? "text-3xl"
+        : "text-2xl",
 
     subtitleSize:
       fontSize === "small"
         ? "text-sm"
         : fontSize === "large"
-          ? "text-lg"
-          : "text-base",
+        ? "text-lg"
+        : "text-base",
 
-    borderClass: isDark ? "border-white/10" : "border-black/10",
-    titleClass: isDark ? "text-zinc-100" : "text-neutral-950",
-    mutedClass: isDark ? "text-zinc-400" : "text-neutral-600",
-    softMutedClass: isDark ? "text-zinc-500" : "text-neutral-400",
-    imageBgClass: isDark ? "bg-white/5" : "bg-black/[0.04]",
-    skeletonClass: isDark ? "bg-white/10" : "bg-black/10",
-    skeletonSoftClass: isDark ? "bg-white/5" : "bg-black/5",
+    borderClass: "border-[var(--midnight-border)]/70",
+    titleClass: "text-[var(--midnight-text)]",
+    mutedClass: "text-[var(--midnight-muted)]",
+    softMutedClass: "text-[var(--midnight-soft)]",
+    imageBgClass: "bg-[var(--midnight-code-bg)]",
+    skeletonClass: "bg-[var(--midnight-code-bg)]",
+    skeletonSoftClass: "bg-[var(--midnight-border)]/70",
   };
 }
 
@@ -55,10 +49,12 @@ export const PostItem = {
     return (
       <article
         className={`
-            border-b py-8 article-content 
-            ${styles.borderClass}
-            ${styles.fontClass}
-          `}
+          group border-b px-0 py-8 transition-colors duration-300
+          hover:bg-[rgba(21,25,34,0.45)]
+          md:px-4
+          ${styles.borderClass}
+          ${styles.fontClass}
+        `}
       >
         <div className="grid gap-5 md:grid-cols-[1fr_112px]">{children}</div>
       </article>
@@ -87,7 +83,7 @@ export const PostItem = {
     return (
       <Link
         href={link}
-        className={`font-medium hover:underline ${styles.titleClass}`}
+        className={`font-medium transition-colors duration-300 hover:text-[var(--midnight-accent-hover)] ${styles.titleClass}`}
       >
         {children}
       </Link>
@@ -96,11 +92,14 @@ export const PostItem = {
 
   Dot() {
     const styles = usePostThemeClasses();
-    return <span className={styles.softMutedClass}>·</span>;
+
+    return <span className={styles.softMutedClass}>&middot;</span>;
   },
 
   Date({ children }: { children: React.ReactNode }) {
-    return <span>{children}</span>;
+    const styles = usePostThemeClasses();
+
+    return <span className={styles.softMutedClass}>{children}</span>;
   },
 
   Title({ children, link }: { children: React.ReactNode; link: string }) {
@@ -110,12 +109,13 @@ export const PostItem = {
       <Link
         href={link}
         className={`
-            block max-w-2xl line-clamp-2
-            font-serif font-semibold leading-snug
-            tracking-[-0.02em] hover:underline
-            ${styles.titleSize}
-            ${styles.titleClass}
-          `}
+          block max-w-2xl line-clamp-2
+          font-semibold leading-snug tracking-[-0.035em]
+          transition-colors duration-300
+          hover:text-[var(--midnight-accent-hover)]
+          ${styles.titleSize}
+          ${styles.titleClass}
+        `}
       >
         <h3>{children}</h3>
       </Link>
@@ -128,10 +128,10 @@ export const PostItem = {
     return (
       <p
         className={`
-            mt-2 max-w-2xl line-clamp-2 leading-relaxed
-            ${styles.subtitleSize}
-            ${styles.mutedClass}
-          `}
+          mt-2 max-w-2xl line-clamp-2 leading-relaxed
+          ${styles.subtitleSize}
+          ${styles.mutedClass}
+        `}
       >
         {children}
       </p>
@@ -154,7 +154,11 @@ export const PostItem = {
     if (!src) return null;
 
     return (
-      <img src={src} alt={alt} className="h-5 w-5 rounded-full object-cover" />
+      <img
+        src={src}
+        alt={alt}
+        className="h-5 w-5 rounded-full object-cover opacity-90 ring-1 ring-[var(--midnight-border)]"
+      />
     );
   },
 
@@ -165,13 +169,17 @@ export const PostItem = {
 
     const image = (
       <div
-        className={`relative aspect-square w-full overflow-hidden rounded-2xl ${styles.imageBgClass}`}
+        className={`
+          relative aspect-square w-full overflow-hidden rounded-2xl
+          border border-[var(--midnight-border)]/70
+          ${styles.imageBgClass}
+        `}
       >
         <Image
           src={src}
           alt={alt}
           fill
-          className="object-cover"
+          className="object-cover opacity-85 saturate-[0.85] transition duration-500 group-hover:opacity-95 group-hover:saturate-100"
           sizes="(max-width: 768px) 100vw, 400px"
         />
       </div>
@@ -191,7 +199,7 @@ export const PostItem = {
 
     return (
       <article
-        className={`article-content animate-pulse border-b py-8 ${styles.borderClass}`}
+        className={`animate-pulse border-b px-0 py-8 md:px-4 ${styles.borderClass}`}
       >
         <div className="grid gap-5 md:grid-cols-[1fr_112px]">
           <div>
@@ -218,7 +226,7 @@ export const PostItem = {
           </div>
 
           <div
-            className={`hidden aspect-square rounded-md md:block ${styles.skeletonClass}`}
+            className={`hidden aspect-square rounded-2xl md:block ${styles.skeletonClass}`}
           />
         </div>
       </article>

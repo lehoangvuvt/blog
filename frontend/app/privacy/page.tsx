@@ -8,7 +8,7 @@ export default function PrivacyPage() {
         <div className="mx-auto max-w-3xl px-6 py-20">
           <div className="mb-16">
             <p className="text-sm uppercase tracking-[0.2em] text-black/40">
-              Stories
+              The Midnight Letters
             </p>
 
             <h1 className="mt-5 font-serif text-6xl tracking-tight text-[#242424]">
@@ -32,7 +32,7 @@ export default function PrivacyPage() {
 
               <p className="mt-3 leading-8 text-black/65">
                 We may collect information such as your email address, profile
-                details, and activity on Stories including articles, comments,
+                details, and activity on The Midnight Letters including letters, comments,
                 and interactions.
               </p>
             </section>
@@ -44,7 +44,7 @@ export default function PrivacyPage() {
 
               <p className="mt-3 leading-8 text-black/65">
                 Your information is used to operate the platform, personalize
-                your experience, improve Stories, and keep the service secure.
+                your experience, improve The Midnight Letters, and keep the service secure.
               </p>
             </section>
 
@@ -54,8 +54,8 @@ export default function PrivacyPage() {
               </h2>
 
               <p className="mt-3 leading-8 text-black/65">
-                Articles, comments, profile information, and other public
-                activity may be visible to other users on Stories.
+                Letters, comments, profile information, and other public
+                activity may be visible to other users on The Midnight Letters.
               </p>
             </section>
 
@@ -77,7 +77,7 @@ export default function PrivacyPage() {
 
               <p className="mt-3 leading-8 text-black/65">
                 We may update this Privacy Policy from time to time. Continued
-                use of Stories means you accept the updated version.
+                use of The Midnight Letters means you accept the updated version.
               </p>
             </section>
           </div>
@@ -90,8 +90,8 @@ export default function PrivacyPage() {
 
               <span>•</span>
 
-              <a href="mailto:support@stories.com" className="hover:text-black">
-                support@stories.com
+              <a href="mailto:support@themidnightletters.com" className="hover:text-black">
+                support@themidnightletters.com
               </a>
             </div>
           </div>

@@ -17,11 +17,11 @@ export default function SavedPostsPage() {
         <section className="mx-auto w-full max-w-2xl px-5 pt-14 md:px-6">
           <header className="border-b border-black/10 pb-8">
             <h1 className="font-serif text-5xl font-semibold tracking-tight">
-              Saved
+              Saved letters
             </h1>
 
             <p className="mt-3 text-sm leading-6 text-black/55">
-              Articles you saved for later.
+              Letters you kept for later.
             </p>
           </header>
         </section>
@@ -87,11 +87,11 @@ export default function SavedPostsPage() {
           {!isLoading && savedPosts.length === 0 && (
             <div className="py-20 text-center">
               <h2 className="font-serif text-2xl font-semibold">
-                No saved articles yet
+                No saved letters yet
               </h2>
 
               <p className="mt-2 text-sm text-black/50">
-                Save articles you want to read later.
+                Save the letters you want to return to.
               </p>
             </div>
           )}

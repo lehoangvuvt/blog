@@ -2,8 +2,9 @@
 "use client";
 
 import { useCreatePostComment } from "@/features/posts/hooks/use-create-post-comment";
-import { MoreHorizontal } from "lucide-react";
+import { MessageCircle, MoreHorizontal, MoonStar } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+
 import { usePostComments } from "@/features/posts/hooks/use-post-comments";
 import { useMe } from "@/features/auth/hooks/use-me";
 
@@ -27,6 +28,7 @@ function getInitial(name: string) {
 
 export function CommentsSection({ postId, variant = "page" }: Props) {
   const { data: userInfo } = useMe();
+
   const { mutate: createPostComment, isPending } = useCreatePostComment();
 
   const {
@@ -42,6 +44,7 @@ export function CommentsSection({ postId, variant = "page" }: Props) {
   });
 
   const comments = commentsData?.pages.flatMap((page) => page.data) ?? [];
+
   const meta = commentsData?.pages[0]?.meta ?? null;
 
   const [content, setContent] = useState("");
@@ -97,31 +100,39 @@ export function CommentsSection({ postId, variant = "page" }: Props) {
     <section
       className={
         variant === "drawer"
-          ? "pt-6 text-neutral-950"
-          : "mt-24 border-t border-black/10 pt-10 text-neutral-950"
+          ? "pt-6 text-[var(--midnight-text)]"
+          : "mt-24 border-t border-[var(--midnight-border)]/70 pt-10 text-[var(--midnight-text)]"
       }
     >
       {variant === "page" && (
         <div className="mb-10">
-          <h2 className="font-serif text-3xl font-semibold tracking-tight">
-            Responses
+          <div className="flex items-center gap-2 text-xs tracking-[0.14em] text-[var(--midnight-soft)]">
+            <MoonStar className="h-3.5 w-3.5 text-[var(--midnight-accent)]/80" />
+
+            <span>The Midnight Letters</span>
+          </div>
+
+          <h2 className="mt-3 text-3xl font-bold tracking-[-0.05em] text-[var(--midnight-text)]">
+            Replies
           </h2>
 
-          <p className="mt-1 text-sm text-neutral-500">
-            {responseCount} {responseCount === 1 ? "response" : "responses"}
+          <p className="mt-2 text-sm text-[var(--midnight-muted)]">
+            {responseCount} {responseCount === 1 ? "reply" : "replies"} in the
+            margin
           </p>
         </div>
       )}
 
       {variant === "drawer" && (
-        <p className="mb-5 text-sm text-neutral-500">
-          {responseCount} {responseCount === 1 ? "response" : "responses"}
+        <p className="mb-5 text-sm text-[var(--midnight-muted)]">
+          {responseCount} {responseCount === 1 ? "reply" : "replies"} in the
+          margin
         </p>
       )}
 
-      <div className="mb-12 rounded-xl border border-black/10 bg-white p-4">
+      <div className="midnight-panel mb-12 rounded-2xl p-5">
         <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-neutral-100 text-sm font-medium text-neutral-500">
+          <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] text-sm font-medium text-[var(--midnight-muted)]">
             {userInfo?.avatarUrl ? (
               <img
                 src={userInfo.avatarUrl}
@@ -133,7 +144,7 @@ export function CommentsSection({ postId, variant = "page" }: Props) {
             )}
           </div>
 
-          <p className="text-sm font-medium text-neutral-900">
+          <p className="text-sm font-medium text-[var(--midnight-text)]">
             {userInfo?.fullName ?? "You"}
           </p>
         </div>
@@ -141,69 +152,106 @@ export function CommentsSection({ postId, variant = "page" }: Props) {
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="Write a response..."
+          placeholder="Leave a quiet thought..."
           rows={4}
-          className="min-h-28 w-full resize-none bg-transparent text-base leading-7 text-neutral-800 outline-none placeholder:text-neutral-400"
+          className="
+            min-h-28 w-full resize-none rounded-xl
+            border border-[var(--midnight-border)]/70
+            bg-[var(--midnight-code-bg)]
+            px-4 py-3
+            text-[15px] leading-7 text-[var(--midnight-text)]
+            outline-none transition-colors
+            placeholder:text-[var(--midnight-soft)]
+            focus:border-[var(--midnight-accent)]/70
+          "
         />
 
-        <div className="mt-4 flex items-center justify-end gap-3">
-          {content.trim().length > 0 && (
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <div className="ml-auto flex items-center gap-3">
+            {content.trim().length > 0 && (
+              <button
+                type="button"
+                onClick={() => setContent("")}
+                className="
+                  rounded-full px-4 py-2 text-sm
+                  text-[var(--midnight-muted)]
+                  transition-colors
+                  hover:bg-[var(--midnight-code-bg)]
+                  hover:text-[var(--midnight-text)]
+                "
+              >
+                Cancel
+              </button>
+            )}
+
             <button
               type="button"
-              onClick={() => setContent("")}
-              className="text-sm text-neutral-500 transition hover:text-neutral-900"
+              onClick={handleSubmit}
+              disabled={!canSubmit}
+              className="
+                rounded-full
+                bg-[var(--midnight-accent)]
+                px-5 py-2
+                text-sm font-medium
+                text-[var(--midnight-on-accent)]
+                transition-all duration-300
+                hover:opacity-90
+                disabled:opacity-40
+              "
             >
-              Cancel
+              {isPending ? "Sending..." : "Leave reply"}
             </button>
-          )}
-
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={!canSubmit}
-            className="rounded-full bg-neutral-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-700 disabled:bg-neutral-200 disabled:text-white"
-          >
-            {isPending ? "Posting..." : "Post"}
-          </button>
+          </div>
         </div>
       </div>
 
-      <div className="divide-y divide-black/10 border-t border-black/10">
+      <div className="divide-y divide-[var(--midnight-border)]/70 border-t border-[var(--midnight-border)]/70">
         {isLoading && (
-          <p className="py-8 text-sm text-neutral-500">Loading responses...</p>
+          <p className="py-10 text-sm text-[var(--midnight-muted)]">
+            Listening for replies...
+          </p>
         )}
 
         {!isLoading && comments.length === 0 && (
-          <p className="py-8 text-sm text-neutral-500">
-            No responses yet. Be the first to respond.
-          </p>
+          <div className="py-12 text-center">
+            <p className="text-sm text-[var(--midnight-muted)]">
+              It’s quiet in the margin tonight.
+            </p>
+
+            <p className="mt-1 text-sm text-[var(--midnight-soft)]">
+              Be the first voice here.
+            </p>
+          </div>
         )}
 
         {comments.map((comment) => {
           const authorName = comment.user.full_name || "Unknown user";
 
           return (
-            <article key={comment.id} className="article-content py-8">
+            <article
+              key={comment.id}
+              className="group py-8 transition-colors duration-300 hover:bg-[rgba(21,25,34,0.35)] md:px-4"
+            >
               <div className="mb-4 flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
                   {comment.user.avatar ? (
                     <img
                       src={comment.user.avatar}
                       alt={authorName}
-                      className="h-9 w-9 rounded-full object-cover"
+                      className="h-9 w-9 rounded-full border border-[var(--midnight-border)]/70 object-cover opacity-95"
                     />
                   ) : (
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-100 text-sm font-medium text-neutral-500">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] text-sm font-medium text-[var(--midnight-muted)]">
                       {getInitial(authorName)}
                     </div>
                   )}
 
                   <div>
-                    <p className="text-sm font-medium text-neutral-950">
+                    <p className="text-sm font-medium text-[var(--midnight-text)]">
                       {authorName}
                     </p>
 
-                    <p className="mt-0.5 text-sm text-neutral-500">
+                    <p className="mt-0.5 text-sm text-[var(--midnight-soft)]">
                       {formatCommentDate(comment.created_at)}
                     </p>
                   </div>
@@ -211,21 +259,27 @@ export function CommentsSection({ postId, variant = "page" }: Props) {
 
                 <button
                   type="button"
-                  className="rounded-full p-1.5 text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-700"
+                  className="
+                    rounded-full p-2
+                    text-[var(--midnight-soft)]
+                    transition-all duration-300
+                    hover:bg-[var(--midnight-code-bg)]
+                    hover:text-[var(--midnight-accent-hover)]
+                  "
                   aria-label="More options"
                 >
                   <MoreHorizontal className="h-4 w-4" />
                 </button>
               </div>
 
-              <p className="whitespace-pre-wrap text-[15px] leading-7 text-neutral-800">
+              <p className="whitespace-pre-wrap text-[15px] leading-8 text-[var(--midnight-muted)]">
                 {comment.content}
               </p>
 
-              <div className="mt-4 flex items-center gap-5 text-sm text-neutral-500">
+              <div className="mt-5 flex items-center gap-5 text-sm text-[var(--midnight-soft)]">
                 <button
                   type="button"
-                  className="transition hover:text-neutral-950"
+                  className="transition-colors hover:text-[var(--midnight-accent-hover)]"
                 >
                   Reply
                 </button>
@@ -241,15 +295,17 @@ export function CommentsSection({ postId, variant = "page" }: Props) {
           );
         })}
 
-        <div ref={loadMoreRef} className="py-8 text-center">
+        <div ref={loadMoreRef} className="py-10 text-center">
           {isFetchingNextPage && (
-            <p className="text-sm text-neutral-500">
-              Loading more responses...
+            <p className="text-sm text-[var(--midnight-muted)]">
+              More voices drifting in...
             </p>
           )}
 
           {!hasNextPage && comments.length > 0 && (
-            <p className="text-sm text-neutral-400">You’re all caught up.</p>
+            <p className="text-sm text-[var(--midnight-soft)]">
+              You’ve reached the end of the conversation.
+            </p>
           )}
         </div>
       </div>

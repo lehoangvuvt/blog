@@ -52,7 +52,7 @@ export default function VerifyEmailPage() {
         </div>
 
         <h1 className="font-serif text-5xl tracking-tight text-[#242424]">
-          Stories
+          The Midnight Letters
         </h1>
 
         {!token && (

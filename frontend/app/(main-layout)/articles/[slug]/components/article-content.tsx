@@ -1,14 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { StickyNote, X } from "lucide-react";
+import { Highlighter, MessageCircle, Share2, StickyNote } from "lucide-react";
 
 import { useAppSelector } from "@/store/hooks";
-import {
-  selectFont,
-  selectFontSize,
-  selectTheme,
-} from "@/features/app-settings/selectors";
+import { selectFont, selectFontSize } from "@/features/app-settings/selectors";
 
 type Props = {
   html: string;
@@ -25,7 +21,6 @@ export function ArticleContent({ html }: Props) {
   const articleRef = useRef<HTMLElement | null>(null);
   const popoverRef = useRef<HTMLDivElement | null>(null);
 
-  const theme = useAppSelector(selectTheme);
   const font = useAppSelector(selectFont);
   const fontSize = useAppSelector(selectFontSize);
 
@@ -95,7 +90,7 @@ export function ArticleContent({ html }: Props) {
       );
 
       setPopoverPos({
-        top: rect.top - containerRect.top - 44,
+        top: rect.top - containerRect.top - 50,
         left: rect.left - containerRect.left + rect.width / 2,
       });
 
@@ -113,16 +108,6 @@ export function ArticleContent({ html }: Props) {
     );
   };
 
-  const shareX = () => {
-    window.open(
-      `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-        selectedText
-      )}&url=${encodeURIComponent(window.location.href)}`,
-      "_blank",
-      "noopener,noreferrer"
-    );
-  };
-
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -132,7 +117,9 @@ export function ArticleContent({ html }: Props) {
         closePopover();
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
@@ -161,7 +148,7 @@ export function ArticleContent({ html }: Props) {
       {highlightRects.map((rect, index) => (
         <div
           key={index}
-          className="pointer-events-none absolute z-0 rounded-[2px] bg-[#2f6fed]/70"
+          className="pointer-events-none absolute z-0 rounded-[3px] bg-[rgba(143,164,194,0.24)]"
           style={{
             top: rect.top,
             left: rect.left,
@@ -175,55 +162,60 @@ export function ArticleContent({ html }: Props) {
         ref={articleRef}
         onMouseUp={handleMouseUp}
         className={`
-          relative z-10 prose prose-neutral max-w-none scroll-smooth transition-colors
-          ${
-            theme === "dark" ? "prose-invert text-zinc-200" : "text-neutral-800"
-          }
+          relative z-10 prose max-w-none scroll-smooth text-[var(--midnight-text)] transition-colors
           ${fontClass}
           ${sizeClass}
 
           [&_*]:font-inherit
 
-          prose-headings:font-serif
-          prose-headings:font-semibold
-          prose-headings:tracking-[-0.025em]
-          prose-headings:text-neutral-950
-          dark:prose-headings:text-zinc-100
+          prose-headings:font-sans
+          prose-headings:font-bold
+          prose-headings:tracking-[-0.04em]
+          prose-headings:text-[var(--midnight-text)]
 
           prose-h2:mt-14 prose-h2:mb-5 prose-h2:text-3xl prose-h2:leading-tight
           prose-h3:mt-10 prose-h3:mb-4 prose-h3:text-2xl prose-h3:leading-tight
 
           prose-p:my-6 prose-p:leading-8 prose-p:text-[inherit]
 
-          prose-a:text-neutral-950 prose-a:underline prose-a:decoration-black/20
-          prose-a:underline-offset-4 hover:prose-a:decoration-black
-          dark:prose-a:text-zinc-100 dark:prose-a:decoration-white/25
+          prose-a:text-[var(--midnight-link)]
+          prose-a:underline
+          prose-a:decoration-[var(--midnight-accent)]/50
+          prose-a:underline-offset-4
+          hover:prose-a:text-[var(--midnight-accent-hover)]
+          hover:prose-a:decoration-[var(--midnight-accent-hover)]
 
-          prose-strong:font-semibold prose-strong:text-neutral-950
-          dark:prose-strong:text-zinc-100
+          prose-strong:font-semibold prose-strong:text-[var(--midnight-text)]
 
-          prose-blockquote:border-l-neutral-300 prose-blockquote:pl-5
-          prose-blockquote:font-serif prose-blockquote:text-[inherit]
-          prose-blockquote:text-neutral-600
-          dark:prose-blockquote:border-l-zinc-700
-          dark:prose-blockquote:text-zinc-300
+          prose-blockquote:rounded-r-xl
+          prose-blockquote:border-l-[var(--midnight-accent)]/70
+          prose-blockquote:bg-[var(--midnight-quote-bg)]
+          prose-blockquote:py-2
+          prose-blockquote:pl-5
+          prose-blockquote:font-normal
+          prose-blockquote:text-[var(--midnight-muted)]
 
           prose-ul:my-6 prose-ol:my-6 prose-li:my-2
           prose-li:text-[inherit] prose-li:leading-8
 
-          prose-img:my-10 prose-img:rounded-xl
+          prose-img:my-10 prose-img:rounded-2xl
+          prose-img:border prose-img:border-[var(--midnight-border)]/70
 
-          prose-hr:my-12 prose-hr:border-black/10 dark:prose-hr:border-white/10
+          prose-hr:my-12 prose-hr:border-[var(--midnight-border)]/70
 
-          prose-code:rounded-md prose-code:bg-black/[0.04]
+          prose-code:rounded-md prose-code:bg-[var(--midnight-code-bg)]
           prose-code:px-1.5 prose-code:py-0.5
           prose-code:text-[0.9em] prose-code:font-normal
-          prose-code:text-neutral-800
+          prose-code:text-[var(--midnight-text)]
           before:prose-code:content-none after:prose-code:content-none
-          dark:prose-code:bg-white/10 dark:prose-code:text-zinc-200
 
-          prose-pre:my-8 prose-pre:rounded-xl prose-pre:bg-neutral-950
-          prose-pre:p-5 prose-pre:text-sm
+          prose-pre:my-8
+          prose-pre:rounded-2xl
+          prose-pre:border prose-pre:border-[var(--midnight-border)]/70
+          prose-pre:bg-[var(--midnight-code-bg)]
+          prose-pre:p-5
+          prose-pre:text-sm
+          prose-pre:text-[var(--midnight-text)]
         `}
         dangerouslySetInnerHTML={{ __html: html }}
       />
@@ -238,61 +230,76 @@ export function ArticleContent({ html }: Props) {
             transform: "translateX(-50%)",
           }}
           className="
-    absolute z-[9999]
-    w-auto
-    rounded-md
-    bg-[#242424]
-    px-2 py-1.5
-    shadow-xl
-  "
+            absolute z-[9999]
+            w-auto
+            overflow-hidden
+            rounded-full
+            border border-[var(--midnight-border)]/70
+            bg-[var(--midnight-surface)]/95
+            px-1.5 py-1.5
+            shadow-[0_18px_60px_rgba(0,0,0,0.35)]
+            backdrop-blur-xl
+          "
         >
           {!showNoteBox ? (
             <div className="flex items-center gap-1">
               <button
                 type="button"
-                className="rounded px-2.5 py-1.5 text-xs font-medium text-white hover:bg-white/10"
+                title="Highlight"
+                aria-label="Highlight"
+                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[var(--midnight-text)] transition-colors hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-accent-hover)]"
               >
+                <Highlighter className="h-3.5 w-3.5" />
                 Highlight
               </button>
 
               <button
                 type="button"
-                className="rounded px-2.5 py-1.5 text-xs font-medium text-white hover:bg-white/10"
+                title="Respond"
+                aria-label="Respond"
+                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[var(--midnight-text)] transition-colors hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-accent-hover)]"
               >
+                <MessageCircle className="h-3.5 w-3.5" />
                 Respond
               </button>
 
               <button
                 type="button"
+                title="Share"
+                aria-label="Share"
                 onClick={shareFacebook}
-                className="rounded px-2.5 py-1.5 text-xs font-medium text-white hover:bg-white/10"
+                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[var(--midnight-text)] transition-colors hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-accent-hover)]"
               >
+                <Share2 className="h-3.5 w-3.5" />
                 Share
               </button>
 
               <button
                 type="button"
+                title="Private note"
+                aria-label="Private note"
                 onClick={() => setShowNoteBox(true)}
-                className="rounded px-2.5 py-1.5 text-xs font-medium text-white hover:bg-white/10"
+                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[var(--midnight-text)] transition-colors hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-accent-hover)]"
               >
-                Private note
+                <StickyNote className="h-3.5 w-3.5" />
+                Note
               </button>
             </div>
           ) : (
-            <div className="w-[260px] space-y-2 p-1">
+            <div className="w-[280px] space-y-3 rounded-2xl p-2">
               <textarea
                 value={note}
                 onMouseDown={(e) => e.stopPropagation()}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Write your note..."
-                className="h-24 w-full resize-none rounded-md border border-white/10 bg-white p-3 text-sm text-black outline-none"
+                placeholder="Leave a quiet note..."
+                className="h-24 w-full resize-none rounded-xl border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] p-3 text-sm text-[var(--midnight-text)] outline-none placeholder:text-[var(--midnight-soft)] focus:border-[var(--midnight-accent)]/70"
               />
 
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={closePopover}
-                  className="rounded px-3 py-1.5 text-xs font-medium text-white/70 hover:bg-white/10"
+                  className="rounded-full px-3 py-1.5 text-xs font-medium text-[var(--midnight-muted)] transition-colors hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-text)]"
                 >
                   Cancel
                 </button>
@@ -301,9 +308,9 @@ export function ArticleContent({ html }: Props) {
                   type="button"
                   disabled={!note.trim()}
                   onClick={saveNote}
-                  className="rounded bg-white px-3 py-1.5 text-xs font-medium text-black disabled:opacity-40"
+                  className="rounded-full bg-[var(--midnight-accent)] px-3 py-1.5 text-xs font-medium text-[var(--midnight-on-accent)] transition-opacity disabled:opacity-40"
                 >
-                  Save
+                  Save note
                 </button>
               </div>
             </div>

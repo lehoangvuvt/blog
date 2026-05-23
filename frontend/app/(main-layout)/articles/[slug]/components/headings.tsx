@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ListTree } from "lucide-react";
 
 export type Heading = {
   id: string;
@@ -51,10 +52,13 @@ export default function HeadingNavigation({
 
   return (
     <aside className="hidden xl:block">
-      <div className="sticky top-28 max-h-[calc(100vh-7rem)] overflow-y-auto pl-1 pr-2">
-        <p className="mb-4 text-sm text-neutral-400">In this article</p>
+      <div className="sticky top-28 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-2xl border border-[var(--midnight-border)]/70 bg-[var(--midnight-surface)]/45 p-4 backdrop-blur-xl">
+        <div className="mb-4 flex items-center gap-2 text-xs tracking-[0.14em] text-[var(--midnight-soft)]">
+          <ListTree className="h-3.5 w-3.5 text-[var(--midnight-accent)]/80" />
+          <span>Thread of thought</span>
+        </div>
 
-        <nav className="space-y-1 border-l border-black/10">
+        <nav className="space-y-1 border-l border-[var(--midnight-border)]/70">
           {headings.map((heading) => {
             const isActive = activeId === heading.id;
 
@@ -63,18 +67,18 @@ export default function HeadingNavigation({
                 key={heading.id}
                 href={`#${heading.id}`}
                 className={`
-                  relative block py-1.5 pr-2 text-sm leading-6 transition-colors
+                  relative block rounded-r-lg py-1.5 pr-2 text-sm leading-6 transition-all duration-300
                   ${
                     isActive
-                      ? "font-medium text-neutral-950"
-                      : "text-neutral-500 hover:text-neutral-900"
+                      ? "bg-[var(--midnight-code-bg)] text-[var(--midnight-accent-hover)]"
+                      : "text-[var(--midnight-muted)] hover:bg-[var(--midnight-code-bg)]/70 hover:text-[var(--midnight-text)]"
                   }
                   ${heading.level === 3 ? "pl-5" : "pl-4"}
                   ${heading.level >= 4 ? "pl-8" : ""}
                 `}
               >
                 {isActive && (
-                  <span className="absolute left-[-1px] top-1/2 h-5 w-px -translate-y-1/2 bg-neutral-950" />
+                  <span className="absolute left-[-1px] top-1/2 h-5 w-px -translate-y-1/2 bg-[var(--midnight-accent)]" />
                 )}
 
                 <span className="line-clamp-2">{heading.text}</span>

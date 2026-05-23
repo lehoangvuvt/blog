@@ -2,22 +2,21 @@
 import sanitizeHtml from "sanitize-html";
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
+import { MoonStar } from "lucide-react";
 
 import MainLayout from "@/shared/components/layout/main-layout/main-layout";
-
 import { ArticleContent } from "@/app/(main-layout)/articles/[slug]/components/article-content";
 import HeadingNavigation, {
   type Heading,
 } from "@/app/(main-layout)/articles/[slug]/components/headings";
 
 import type { PostDetails } from "@/features/posts/types";
-
 import { PostsBySameAuthor } from "./components/posts-by-same-author";
 import { ArticleToolbar } from "./components/article-toolbar";
 import { BackButton } from "@/shared/components/back-button";
 import ViewHandler from "./components/view-handler";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 
 function slugify(text: string) {
   return text
@@ -38,7 +37,6 @@ function getReadingTime(html: string) {
     .trim();
 
   const words = text.split(" ").filter(Boolean).length;
-
   const minutes = Math.max(1, Math.ceil(words / 250));
 
   return `${minutes} min read`;
@@ -46,7 +44,6 @@ function getReadingTime(html: string) {
 
 function extractHeadings(html: string) {
   const headings: Heading[] = [];
-
   const usedIds = new Map<string, number>();
 
   const htmlWithIds = html.replace(
@@ -62,7 +59,6 @@ function extractHeadings(html: string) {
       }
 
       const baseId = slugify(text);
-
       const count = usedIds.get(baseId) ?? 0;
 
       usedIds.set(baseId, count + 1);
@@ -118,11 +114,8 @@ export async function generateMetadata({
   const post = await getPost(slug);
 
   const title = post.title;
-
   const description = post.subTitle ?? "Read this article.";
-
   const image = post.thumbnailImage ?? "/default-og-image.png";
-
   const url = `https://themidnightletters.com/articles/${slug}`;
 
   return {
@@ -190,43 +183,55 @@ export default async function ArticlePage({
   });
 
   const readingTime = getReadingTime(sanitizedHtmlContent);
-
   const { headings, htmlWithIds } = extractHeadings(sanitizedHtmlContent);
+
+  const tagNames = post.tags?.map((tag) => tag.name).filter(Boolean) ?? [];
 
   return (
     <MainLayout>
       <ViewHandler postId={post.id} />
-      <main className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-20 px-5 py-14 xl:grid-cols-[minmax(0,1fr)_220px]">
+
+      <main className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-20 px-5 py-12 text-[var(--midnight-text)] md:py-16 xl:grid-cols-[minmax(0,1fr)_220px]">
         <article className="article-content mx-auto w-full max-w-3xl">
           <header className="mb-14">
-            <div className="mb-8">
+            <div className="mb-10">
               <BackButton />
             </div>
 
+            <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] px-4 py-2 text-xs tracking-[0.14em] text-[var(--midnight-soft)]">
+              <MoonStar className="h-3.5 w-3.5 text-[var(--midnight-accent)]/80" />
+
+              <span>
+                {tagNames.length > 0 ? tagNames.join(" / ") : "Letter"}
+              </span>
+
+              <span className="h-px w-8 bg-[var(--midnight-accent)]/50" />
+            </div>
+
             <div className="space-y-6">
-              <h1 className="font-serif text-5xl leading-[1.08] font-semibold tracking-[-0.04em] text-black">
+              <h1 className="text-4xl font-bold leading-[1.04] tracking-[-0.055em] text-[var(--midnight-text)] md:text-6xl">
                 {post.title}
               </h1>
 
               {post.subTitle && (
-                <p className="max-w-2xl text-xl leading-9 text-black/60">
+                <p className="max-w-2xl text-xl leading-9 tracking-[-0.02em] text-[var(--midnight-muted)] md:text-2xl">
                   {post.subTitle}
                 </p>
               )}
             </div>
 
             {(post.author || post.tags?.length) && (
-              <div className="mt-10 border-t border-black/5 pt-6">
+              <div className="midnight-panel mt-10 rounded-2xl p-5">
                 {post.author && (
                   <div className="flex items-center gap-4">
                     {post.author.avatar ? (
                       <img
                         src={post.author.avatar}
                         alt={post.author.email}
-                        className="h-11 w-11 rounded-full object-cover"
+                        className="h-11 w-11 rounded-full border border-[var(--midnight-border)] object-cover opacity-95"
                       />
                     ) : (
-                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-black/[0.04] text-sm font-medium text-black/50">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--midnight-border)] bg-[var(--midnight-code-bg)] text-sm font-medium text-[var(--midnight-accent)]">
                         {`${post.author.email
                           .charAt(0)
                           .toUpperCase()}${post.author.email
@@ -238,12 +243,12 @@ export default async function ArticlePage({
                     <div>
                       <Link
                         href={`/${post.author.slug}`}
-                        className="text-[15px] font-medium text-black hover:underline"
+                        className="text-[15px] font-medium text-[var(--midnight-text)] transition-colors hover:text-[var(--midnight-accent-hover)]"
                       >
                         {post.author.slug}
                       </Link>
 
-                      <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-black/45">
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-[var(--midnight-muted)]">
                         {post.createdAt && (
                           <span>
                             {new Date(post.createdAt).toLocaleDateString(
@@ -257,9 +262,10 @@ export default async function ArticlePage({
                           </span>
                         )}
 
-                        <span>·</span>
-
+                        <span>&middot;</span>
                         <span>{readingTime}</span>
+                        <span>&middot;</span>
+                        <span>written after hours</span>
                       </div>
                     </div>
                   </div>
@@ -272,9 +278,9 @@ export default async function ArticlePage({
                         key={tag.id}
                         href={`/tags/${tag.name}`}
                         className="
-                          rounded-full border border-black/10
-                          px-3 py-1 text-sm text-black/55
-                          transition-colors hover:border-black/20 hover:text-black
+                          rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)]
+                          px-3 py-1 text-sm text-[var(--midnight-muted)]
+                          transition-colors hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-accent-hover)]
                         "
                       >
                         {tag.name}
@@ -291,16 +297,18 @@ export default async function ArticlePage({
           </header>
 
           {post.thumbnailImage && (
-            <div className="mb-14 overflow-hidden rounded-2xl bg-black/[0.03]">
+            <div className="mb-16 overflow-hidden rounded-[1.5rem] border border-[var(--midnight-border)]/70 bg-[var(--midnight-surface)] shadow-[0_28px_90px_rgba(0,0,0,0.24)]">
               <div className="relative aspect-video w-full">
                 <Image
                   src={post.thumbnailImage}
                   alt={post.title}
                   fill
-                  className="object-cover"
+                  className="object-cover opacity-90 saturate-[0.82]"
                   priority
                   sizes="(max-width: 768px) 100vw, 1200px"
                 />
+
+                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(9,11,15,0.56)] via-transparent to-transparent" />
               </div>
             </div>
           )}

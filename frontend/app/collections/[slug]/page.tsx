@@ -70,7 +70,7 @@ export default function CollectionBookReader() {
     fetchCollection();
   }, [slug]);
 
-  const articles = collection?.posts ?? [];
+  const articles = useMemo(() => collection?.posts ?? [], [collection?.posts]);
   const isIntroPage = articleIndex === -1;
 
   const currentArticle = useMemo(() => {
@@ -122,30 +122,30 @@ export default function CollectionBookReader() {
 
   if (isLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#ece4d8] text-[#211b16]">
-        <p className="font-serif text-xl">Opening collection...</p>
+      <main className="flex min-h-screen items-center justify-center bg-[var(--midnight-bg)] text-[var(--midnight-text)]">
+        <p className="font-serif text-xl">Opening bundle...</p>
       </main>
     );
   }
 
   if (!collection || articles.length === 0) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#ece4d8] text-[#211b16]">
-        <p className="font-serif text-xl">Collection not found.</p>
+      <main className="flex min-h-screen items-center justify-center bg-[var(--midnight-bg)] text-[var(--midnight-text)]">
+        <p className="font-serif text-xl">This bundle went missing.</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#ece4d8] text-[#211b16]">
+    <main className="min-h-screen bg-[var(--midnight-bg)] text-[var(--midnight-text)]">
       <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6">
         <button
           type="button"
           onClick={() => window.history.back()}
-          className="flex items-center gap-2 text-sm text-black/50 transition hover:text-black"
+          className="flex items-center gap-2 text-sm text-[var(--midnight-muted)] transition hover:text-[var(--midnight-accent-hover)]"
         >
           <ArrowLeft className="h-4 w-4" />
-          Collection
+          Back to desk
         </button>
 
         <div className="flex items-center gap-3">
@@ -153,7 +153,7 @@ export default function CollectionBookReader() {
             type="button"
             onClick={goIntro}
             className={`h-2 rounded-full transition-all ${
-              isIntroPage ? "w-10 bg-black" : "w-2 bg-black/70"
+              isIntroPage ? "w-10 bg-[var(--midnight-accent)]" : "w-2 bg-[var(--midnight-muted)]"
             }`}
             aria-label="Go to introduction"
           />
@@ -165,10 +165,10 @@ export default function CollectionBookReader() {
               onClick={() => goToArticle(index)}
               className={`h-2 rounded-full transition-all ${
                 index === articleIndex
-                  ? "w-10 bg-black"
+                  ? "w-10 bg-[var(--midnight-accent)]"
                   : index < articleIndex
-                  ? "w-2 bg-black/70"
-                  : "w-2 bg-black/20"
+                  ? "w-2 bg-[var(--midnight-muted)]"
+                  : "w-2 bg-[var(--midnight-border)]"
               }`}
               aria-label={`Go to article ${index + 1}`}
             />
@@ -178,7 +178,7 @@ export default function CollectionBookReader() {
         <button
           type="button"
           onClick={() => setOpenMenu((prev) => !prev)}
-          className="rounded-full p-2 text-black/50 transition hover:bg-black/5 hover:text-black"
+          className="rounded-full p-2 text-[var(--midnight-muted)] transition hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-accent-hover)]"
         >
           {openMenu ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
@@ -186,15 +186,15 @@ export default function CollectionBookReader() {
 
       {openMenu && (
         <div className="mx-auto max-w-5xl px-6 pb-6">
-          <div className="rounded-3xl bg-[#fbf7ef] p-3 shadow-[0_20px_60px_rgba(60,40,20,0.16)]">
+          <div className="rounded-3xl border border-[var(--midnight-border)] bg-[var(--midnight-surface)] p-3 shadow-[0_20px_60px_rgba(0,0,0,0.24)]">
             <button
               type="button"
               onClick={goIntro}
               className={`block w-full rounded-2xl px-5 py-4 text-left transition ${
-                isIntroPage ? "bg-[#211b16] text-white" : "hover:bg-black/5"
+                isIntroPage ? "bg-[var(--midnight-accent)] text-[var(--midnight-on-accent)]" : "hover:bg-[var(--midnight-code-bg)]"
               }`}
             >
-              <p className="text-xs opacity-50">Introduction</p>
+              <p className="text-xs opacity-50">Bundle note</p>
               <p className="mt-1 line-clamp-1 font-serif text-lg">
                 {collection.name}
               </p>
@@ -207,11 +207,11 @@ export default function CollectionBookReader() {
                 onClick={() => goToArticle(index)}
                 className={`block w-full rounded-2xl px-5 py-4 text-left transition ${
                   index === articleIndex
-                    ? "bg-[#211b16] text-white"
-                    : "hover:bg-black/5"
+                    ? "bg-[var(--midnight-accent)] text-[var(--midnight-on-accent)]"
+                    : "hover:bg-[var(--midnight-code-bg)]"
                 }`}
               >
-                <p className="text-xs opacity-50">Article {index + 1}</p>
+                <p className="text-xs opacity-50">Letter {index + 1}</p>
                 <p className="mt-1 line-clamp-1 font-serif text-lg">
                   {article.title}
                 </p>
@@ -222,40 +222,40 @@ export default function CollectionBookReader() {
       )}
 
       <section className="mx-auto max-w-4xl px-4 pb-20">
-        <article className="article-content relative min-h-[760px] overflow-hidden rounded-sm bg-[#fbf7ef] px-8 py-12 shadow-[0_30px_80px_rgba(60,40,20,0.18)] md:px-20 md:py-16">
-          <div className="absolute left-0 top-0 h-full w-8 bg-gradient-to-r from-black/10 to-transparent" />
+        <article className="article-content relative min-h-[760px] overflow-hidden rounded-sm border border-[var(--midnight-border)] bg-[var(--midnight-surface)] px-8 py-12 shadow-[0_30px_80px_rgba(0,0,0,0.26)] md:px-20 md:py-16">
+          <div className="absolute left-0 top-0 h-full w-8 bg-gradient-to-r from-[rgba(143,163,191,0.12)] to-transparent" />
 
           {!isIntroPage && (
             <button
               type="button"
               className="absolute right-8 top-0 flex flex-col items-center"
             >
-              <div className="h-16 w-10 rounded-b-md bg-[#211b16]" />
-              <Bookmark className="-mt-12 h-5 w-5 text-white" />
+              <div className="h-16 w-10 rounded-b-md bg-[var(--midnight-accent)]" />
+              <Bookmark className="-mt-12 h-5 w-5 text-[var(--midnight-on-accent)]" />
             </button>
           )}
 
           {isIntroPage ? (
             <div className="flex min-h-[620px] flex-col items-center justify-center text-center">
-              <p className="text-xs uppercase tracking-[0.35em] text-black/35">
-                Reading Collection
+              <p className="text-xs uppercase tracking-[0.35em] text-[var(--midnight-soft)]">
+                Reading bundle
               </p>
 
               <h1 className="mx-auto mt-8 max-w-2xl font-serif text-6xl leading-tight">
                 {collection.name}
               </h1>
 
-              <p className="mx-auto mt-6 max-w-xl font-serif text-xl leading-8 text-black/55">
+              <p className="mx-auto mt-6 max-w-xl font-serif text-xl leading-8 text-[var(--midnight-muted)]">
                 {collection.description}
               </p>
 
-              <div className="mx-auto my-12 h-px w-24 bg-black/20" />
+              <div className="mx-auto my-12 h-px w-24 bg-[var(--midnight-border)]" />
 
               <div className="grid max-w-xl grid-cols-1 gap-8">
                 <div>
                   <p className="font-serif text-4xl">{articles.length}</p>
-                  <p className="mt-2 text-xs uppercase tracking-[0.2em] text-black/35">
-                    Articles
+                  <p className="mt-2 text-xs uppercase tracking-[0.2em] text-[var(--midnight-soft)]">
+                    Letters
                   </p>
                 </div>
               </div>
@@ -264,24 +264,24 @@ export default function CollectionBookReader() {
             currentArticle && (
               <>
                 <div className="mb-10 text-center">
-                  <p className="text-xs uppercase tracking-[0.35em] text-black/35">
-                    Article {articleIndex + 1}
+                  <p className="text-xs uppercase tracking-[0.35em] text-[var(--midnight-soft)]">
+                    Letter {articleIndex + 1}
                   </p>
 
                   <h1 className="mx-auto mt-6 max-w-2xl font-serif text-5xl leading-tight">
                     {currentArticle.title}
                   </h1>
 
-                  <p className="mx-auto mt-5 max-w-xl font-serif text-xl leading-8 text-black/55">
+                  <p className="mx-auto mt-5 max-w-xl font-serif text-xl leading-8 text-[var(--midnight-muted)]">
                     {currentArticle.subTitle}
                   </p>
 
-                  <p className="mt-5 text-sm text-black/40">
+                  <p className="mt-5 text-sm text-[var(--midnight-soft)]">
                     By {currentArticle.author.full_name}
                   </p>
                 </div>
 
-                <div className="mx-auto mb-12 h-px w-24 bg-black/20" />
+                <div className="mx-auto mb-12 h-px w-24 bg-[var(--midnight-border)]" />
 
                 {currentArticle.thumbnailImage && (
                   <img
@@ -292,14 +292,14 @@ export default function CollectionBookReader() {
                 )}
 
                 <div
-                  className="prose prose-lg mx-auto max-w-2xl font-serif prose-headings:font-serif prose-p:text-[22px] prose-p:leading-[2.2rem] prose-p:text-black/75 prose-img:rounded-sm"
+                  className="prose prose-lg mx-auto max-w-2xl font-serif prose-headings:font-serif prose-p:text-[22px] prose-p:leading-[2.2rem] prose-p:text-[var(--midnight-muted)] prose-img:rounded-sm"
                   // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
                   dangerouslySetInnerHTML={{
                     __html: currentArticle.htmlContent,
                   }}
                 />
 
-                <footer className="mt-20 flex items-center justify-between border-t border-black/10 pt-6 text-sm text-black/45">
+                <footer className="mt-20 flex items-center justify-between border-t border-[var(--midnight-border)] pt-6 text-sm text-[var(--midnight-muted)]">
                   <span>
                     {articleIndex + 1} / {articles.length}
                   </span>
@@ -321,12 +321,12 @@ export default function CollectionBookReader() {
             disabled={isFirst}
             className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm transition ${
               isFirst
-                ? "cursor-not-allowed text-black/20"
-                : "text-black/50 hover:bg-black/5 hover:text-black"
+                ? "cursor-not-allowed text-[var(--midnight-soft)]"
+                : "text-[var(--midnight-muted)] hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-accent-hover)]"
             }`}
           >
             <ArrowLeft className="h-4 w-4" />
-            Previous
+            Previous letter
           </button>
 
           <button
@@ -335,15 +335,15 @@ export default function CollectionBookReader() {
             disabled={isLast}
             className={`flex items-center gap-2 rounded-full px-5 py-3 text-sm transition ${
               isLast
-                ? "cursor-not-allowed bg-black/20 text-white/60"
-                : "bg-[#211b16] text-white hover:bg-black"
+                ? "cursor-not-allowed bg-[var(--midnight-border)] text-[var(--midnight-muted)]"
+                : "bg-[var(--midnight-accent)] text-[var(--midnight-on-accent)] hover:bg-[var(--midnight-accent-hover)]"
             }`}
           >
             {isIntroPage
-              ? "Start reading"
+              ? "Begin bundle"
               : isLast
               ? "Finished"
-              : "Next article"}
+              : "Next letter"}
             {!isLast && <ArrowRight className="h-4 w-4" />}
           </button>
         </div>

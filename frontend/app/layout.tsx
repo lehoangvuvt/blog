@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Source_Serif_4 } from "next/font/google";
+import { Newsreader, Plus_Jakarta_Sans } from "next/font/google";
 
 import { Providers } from "./providers";
 import "./globals.css";
@@ -8,20 +8,20 @@ import { Suspense } from "react";
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
   subsets: ["latin", "vietnamese"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
-const sourceSerif = Source_Serif_4({
-  variable: "--font-serif",
+const newsreader = Newsreader({
+  variable: "--font-body-serif",
   subsets: ["latin", "vietnamese"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Stories",
-  description: "A place to write, read, and connect",
+  title: "The Midnight Letters",
+  description: "A quiet place for late thoughts and midnight letters",
 };
 
 export default function RootLayout({
@@ -32,9 +32,9 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${plusJakarta.variable} ${sourceSerif.variable} h-full antialiased`}
+      className={`${plusJakarta.variable} ${newsreader.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-white text-neutral-900 font-sans">
+      <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)] font-sans">
         <Suspense>
           <Providers>{children}</Providers>
         </Suspense>

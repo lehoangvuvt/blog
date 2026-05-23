@@ -5,15 +5,12 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-
 import {
   selectFont,
   selectFontSize,
   selectTheme,
 } from "@/features/app-settings/selectors";
-
 import { setFont, setFontSize, setTheme } from "@/features/app-settings/slice";
-
 import type { Font, FontSize } from "../types";
 
 type Props = {
@@ -56,80 +53,79 @@ export function AppSettingsModal({ isOpen, onClose }: Props) {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           onClick={(e) => e.target === e.currentTarget && onClose()}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.96, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 20 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
-            className="flex h-[70vh] w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-2xl"
+            className="flex h-[70vh] w-full max-w-5xl overflow-hidden rounded-3xl border border-[var(--midnight-border)] bg-[var(--midnight-surface)] text-[var(--midnight-text)] shadow-2xl"
           >
-            <div className="h-full w-full max-w-md overflow-y-auto border-r border-gray-200 bg-white p-6 text-black">
+            <div className="h-full w-full max-w-md overflow-y-auto border-r border-[var(--midnight-border)] bg-[var(--midnight-surface)] p-6">
               <div className="mb-6">
-                <h2 className="text-2xl font-bold">Appearance Settings</h2>
-                <p className="mt-1 text-sm text-gray-500">
-                  Customize your reading experience
+                <h2 className="font-serif text-2xl font-semibold text-[var(--midnight-accent)]">
+                  Reading Mood
+                </h2>
+                <p className="mt-1 text-sm text-[var(--midnight-muted)]">
+                  Shape the page for a slower night.
                 </p>
               </div>
 
               <div className="mb-5">
-                <div className="mb-2 text-sm font-medium">Theme</div>
+                <div className="mb-2 text-sm font-medium text-[var(--midnight-text)]">
+                  Lighting
+                </div>
 
                 <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPreviewTheme("light")}
-                    className={`rounded-xl border px-4 py-2 transition ${
-                      previewTheme === "light"
-                        ? "border-black bg-black text-white"
-                        : "border-gray-300 bg-white text-black hover:bg-gray-100"
-                    }`}
-                  >
-                    Light
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setPreviewTheme("dark")}
-                    className={`rounded-xl border px-4 py-2 transition ${
-                      previewTheme === "dark"
-                        ? "border-black bg-black text-white"
-                        : "border-gray-300 bg-white text-black hover:bg-gray-100"
-                    }`}
-                  >
-                    Dark
-                  </button>
+                  {(["light", "dark"] as const).map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setPreviewTheme(value)}
+                      className={`rounded-xl border px-4 py-2 transition ${
+                        previewTheme === value
+                          ? "border-[var(--midnight-accent)] bg-[var(--midnight-accent)] text-[var(--midnight-on-accent)]"
+                          : "border-[var(--midnight-border)] bg-[var(--midnight-surface)] text-[var(--midnight-muted)] hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-accent-hover)]"
+                      }`}
+                    >
+                      {value === "light" ? "Lamplight" : "After dark"}
+                    </button>
+                  ))}
                 </div>
               </div>
 
               <div className="mb-5">
-                <div className="mb-2 text-sm font-medium">Font</div>
+                <div className="mb-2 text-sm font-medium text-[var(--midnight-text)]">
+                  Letter voice
+                </div>
 
                 <select
                   value={previewFont}
                   onChange={(e) => setPreviewFont(e.target.value as Font)}
-                  className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-black outline-none transition"
+                  className="w-full rounded-xl border border-[var(--midnight-border)] bg-[var(--midnight-surface)] px-3 py-2 text-[var(--midnight-text)] outline-none transition"
                 >
-                  <option value="sans-serif">Sans Serif</option>
-                  <option value="serif">Serif</option>
-                  <option value="monospace">Monospace</option>
+                  <option value="sans-serif">Soft Sans</option>
+                  <option value="serif">Letter Serif</option>
+                  <option value="monospace">Typewriter</option>
                 </select>
               </div>
 
               <div className="mb-6">
-                <div className="mb-2 text-sm font-medium">Font Size</div>
+                <div className="mb-2 text-sm font-medium text-[var(--midnight-text)]">
+                  Line pace
+                </div>
 
                 <select
                   value={previewFontSize}
                   onChange={(e) =>
                     setPreviewFontSize(e.target.value as FontSize)
                   }
-                  className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-black outline-none transition"
+                  className="w-full rounded-xl border border-[var(--midnight-border)] bg-[var(--midnight-surface)] px-3 py-2 text-[var(--midnight-text)] outline-none transition"
                 >
-                  <option value="small">Small</option>
-                  <option value="medium">Medium</option>
-                  <option value="large">Large</option>
+                  <option value="small">Quiet</option>
+                  <option value="medium">Room tone</option>
+                  <option value="large">Slow and open</option>
                 </select>
               </div>
 
@@ -137,7 +133,7 @@ export function AppSettingsModal({ isOpen, onClose }: Props) {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-1/2 rounded-xl border border-gray-300 bg-white px-4 py-3 text-black transition hover:bg-gray-100"
+                  className="w-1/2 rounded-xl border border-[var(--midnight-border)] bg-[var(--midnight-surface)] px-4 py-3 text-[var(--midnight-muted)] transition hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-accent-hover)]"
                 >
                   Cancel
                 </button>
@@ -145,7 +141,7 @@ export function AppSettingsModal({ isOpen, onClose }: Props) {
                 <button
                   type="button"
                   onClick={handleSave}
-                  className="w-1/2 rounded-xl bg-black px-4 py-3 font-medium text-white transition hover:bg-zinc-800"
+                  className="w-1/2 rounded-xl bg-[var(--midnight-accent)] px-4 py-3 font-medium text-[var(--midnight-on-accent)] transition hover:bg-[var(--midnight-accent-hover)]"
                 >
                   Save
                 </button>
@@ -155,8 +151,8 @@ export function AppSettingsModal({ isOpen, onClose }: Props) {
             <div
               className={`flex flex-1 justify-center overflow-hidden p-6 transition-all ${
                 previewTheme === "dark"
-                  ? "bg-zinc-950 text-white"
-                  : "bg-zinc-100 text-black"
+                  ? "bg-[var(--midnight-accent)] text-[var(--midnight-on-accent)]"
+                  : "bg-[var(--midnight-bg)] text-[var(--midnight-text)]"
               } ${
                 previewFont === "serif"
                   ? "font-serif"
@@ -172,64 +168,37 @@ export function AppSettingsModal({ isOpen, onClose }: Props) {
               }`}
             >
               <div className="h-full w-full max-w-2xl overflow-y-auto rounded-3xl pr-2">
-                <article
-                  className={`article-content rounded-3xl p-6 ${
-                    previewTheme === "dark" ? "bg-zinc-900" : "bg-white"
-                  }`}
-                >
-                  <div
-                    className={`mb-3 inline-flex rounded-full px-3 py-1 text-xs font-medium ${
-                      previewTheme === "dark"
-                        ? "bg-white/10 text-zinc-300"
-                        : "bg-black/5 text-zinc-600"
-                    }`}
-                  >
-                    Technology
+                <article className="article-content rounded-3xl border border-[var(--midnight-border)] bg-[var(--midnight-surface)] p-6">
+                  <div className="mb-3 inline-flex rounded-full bg-[var(--midnight-code-bg)] px-3 py-1 text-xs font-medium text-[var(--midnight-accent)]">
+                    Letter sample
                   </div>
 
                   <h1 className="mb-3 text-3xl font-bold leading-tight">
-                    Building a modern blogging experience
+                    A letter left after midnight
                   </h1>
 
-                  <div
-                    className={`mb-6 flex items-center gap-3 text-sm ${
-                      previewTheme === "dark"
-                        ? "text-zinc-400"
-                        : "text-zinc-500"
-                    }`}
-                  >
-                    <div
-                      className={`h-9 w-9 rounded-full ${
-                        previewTheme === "dark" ? "bg-zinc-700" : "bg-zinc-300"
-                      }`}
-                    />
+                  <div className="mb-6 flex items-center gap-3 text-sm text-[var(--midnight-muted)]">
+                    <div className="h-9 w-9 rounded-full bg-[var(--midnight-code-bg)]" />
 
                     <div>
                       <div className="font-medium">John Doe</div>
-                      <div>May 12, 2026 · 8 min read</div>
+                      <div>May 12, 2026 &middot; 8 min read</div>
                     </div>
                   </div>
 
                   <div className="space-y-5 leading-7">
                     <p className="opacity-90">
-                      Modern frontend architecture has evolved significantly
-                      with the rise of Next.js.
+                      Some nights ask for softer words, a quiet room, and room
+                      to be a little unserious.
                     </p>
 
                     <p className="opacity-90">
-                      Redux Toolkit simplifies state management and improves
-                      scalability.
+                      The best pages hang around. They wait until the thought
+                      stops pretending.
                     </p>
 
-                    <blockquote
-                      className={`rounded-2xl border-l-4 p-4 italic ${
-                        previewTheme === "dark"
-                          ? "border-white/20 bg-white/5"
-                          : "border-black/20 bg-black/5"
-                      }`}
-                    >
-                      “Good architecture is built on clarity and
-                      maintainability.”
+                    <blockquote className="rounded-2xl border-l-4 border-[var(--midnight-gold)] bg-[var(--midnight-code-bg)] p-4 italic">
+                      &quot;Write like the page can keep a secret.&quot;
                     </blockquote>
                   </div>
                 </article>

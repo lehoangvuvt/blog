@@ -61,7 +61,7 @@ export default function FinishSignUpForm() {
           </div>
 
           <h1 className="font-serif text-5xl tracking-tight text-[#242424]">
-            Stories
+            The Midnight Letters
           </h1>
 
           <h2 className="mt-6 text-3xl font-bold text-[#242424]">
@@ -173,7 +173,7 @@ export default function FinishSignUpForm() {
             </h2>
 
             <p className="mt-3 text-sm leading-relaxed text-black/60">
-              Your Stories account is ready. You can now sign in and start
+              Your Midnight Letters account is ready. You can now sign in and start
               writing.
             </p>
 

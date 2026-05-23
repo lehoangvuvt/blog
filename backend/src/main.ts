@@ -14,8 +14,8 @@ async function bootstrap() {
 
   app.enableCors({
     origin: [
-      // 'http://localhost:3002',
-      // 'http://localhost:3000',
+      'http://localhost:3002',
+      'http://localhost:3000',
       'https://blog-nine-gilt-50.vercel.app',
       'https://themidnightletters.com',
     ],

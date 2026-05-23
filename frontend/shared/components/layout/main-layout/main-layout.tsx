@@ -3,10 +3,7 @@
 import Header from "@/shared/components/layout/header/header";
 import Sidebar from "@/shared/components/layout/sidebar/sidebar";
 
-import {
-  selectSideBarStatus,
-  selectTheme,
-} from "@/features/app-settings/selectors";
+import { selectSideBarStatus } from "@/features/app-settings/selectors";
 
 import { useAppSelector } from "@/store/hooks";
 
@@ -17,16 +14,8 @@ export default function MainLayout({
 }) {
   const isOpenSideBar = useAppSelector(selectSideBarStatus);
 
-  const theme = useAppSelector(selectTheme);
-
-  const isDark = theme === "dark";
-
   return (
-    <div
-      className={`min-h-screen transition-colors duration-300 ${
-        isDark ? "bg-zinc-950 text-white" : "bg-white text-black"
-      }`}
-    >
+    <div className="min-h-screen bg-transparent text-[var(--midnight-text)] transition-colors duration-300">
       <Header />
 
       <Sidebar />
@@ -35,10 +24,10 @@ export default function MainLayout({
         className={`
         pt-10 transition-all duration-300 ease-in-out
         pl-0
-        ${isOpenSideBar ? "md:pl-60" : "md:pl-0"}
+        ${isOpenSideBar ? "md:pl-64" : "md:pl-0"}
       `}
       >
-        <div className="md:p-6 p-0">{children}</div>
+        <div>{children}</div>
       </main>
     </div>
   );

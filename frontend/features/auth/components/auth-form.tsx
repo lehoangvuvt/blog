@@ -99,7 +99,7 @@ export default function AuthForm({ type }: { type: "signup" | "signin" }) {
           </div>
 
           <h1 className="font-serif text-5xl tracking-tight text-[#242424]">
-            Stories
+            The Midnight Letters
           </h1>
 
           <h2 className="mt-6 text-3xl font-bold text-[#242424]">
@@ -109,7 +109,7 @@ export default function AuthForm({ type }: { type: "signup" | "signin" }) {
           <p className="mt-3 text-sm leading-relaxed text-black/60">
             {type === "signup"
               ? "Enter your email. We’ll send you a verification link to continue."
-              : "Sign in to continue reading and writing on Stories."}
+              : "Sign in to continue reading and writing on The Midnight Letters."}
           </p>
         </div>
 
@@ -254,7 +254,7 @@ export default function AuthForm({ type }: { type: "signup" | "signin" }) {
 
             <p className="mt-3 text-sm leading-relaxed text-black/60">
               We sent you a verification link. Open it to continue setting up
-              your Stories account.
+              your Midnight Letters account.
             </p>
 
             <div className="mt-8">

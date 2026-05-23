@@ -2,7 +2,7 @@
 import { useMe } from "@/features/auth/hooks/use-me";
 import useCreatePostCollection from "@/features/post-collections/hooks/use-create-post-collection";
 import { useQueryClient } from "@tanstack/react-query";
-import { ImagePlus, Upload, X } from "lucide-react";
+import { ImagePlus } from "lucide-react";
 import { useState } from "react";
 
 export default function CreateCollectionModal({
@@ -16,7 +16,6 @@ export default function CreateCollectionModal({
   const queryClient = useQueryClient();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState("");
   const { mutate: createCollection } = useCreatePostCollection();
 
@@ -25,7 +24,6 @@ export default function CreateCollectionModal({
   const handleThumbnailChange = (file?: File) => {
     if (!file) return;
 
-    setThumbnailFile(file);
     setThumbnailPreview(URL.createObjectURL(file));
   };
 
@@ -80,7 +78,7 @@ export default function CreateCollectionModal({
           <input
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder="Collection title"
+            placeholder="Bundle title"
             className="w-full border-none bg-transparent px-0 text-[38px] font-semibold leading-tight tracking-[-0.04em] text-neutral-950 outline-none placeholder:text-neutral-300"
             required
             autoFocus
@@ -100,7 +98,7 @@ export default function CreateCollectionModal({
               <div className="group relative overflow-hidden rounded-md border border-neutral-200">
                 <img
                   src={thumbnailPreview}
-                  alt="Collection thumbnail preview"
+                  alt="Bundle thumbnail preview"
                   className="h-[240px] w-full object-cover"
                 />
 
@@ -162,14 +160,14 @@ export default function CreateCollectionModal({
 
             <article className="article-content mt-4 border-b border-neutral-200 pb-5">
               <h2 className="text-2xl font-semibold tracking-tight text-neutral-950">
-                {name || "Collection title"}
+                {name || "Bundle title"}
               </h2>
 
               <p className="mt-2 max-w-xl text-base leading-7 text-neutral-600">
                 {description || "What is this collection about?"}
               </p>
 
-              <p className="mt-4 text-sm text-neutral-400">0 articles</p>
+              <p className="mt-4 text-sm text-neutral-400">0 letters</p>
             </article>
           </div>
         </div>

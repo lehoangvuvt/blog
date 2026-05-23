@@ -42,21 +42,19 @@ export default function PostsContainer({
   }, [hasMore, isLoading, onLoadMore]);
 
   return (
-    <section className="mx-auto w-full max-w-2xl px-5 md:px-6">
-      <div className="divide-y divide-black/10 dark:divide-white/10">
-        {children}
-      </div>
+    <section className="mx-auto w-full max-w-2xl">
+      <div className="divide-y divide-[var(--midnight-border)]">{children}</div>
 
       <div ref={loaderRef} className="py-10 text-center">
         {isLoading && (
-          <p className="text-sm text-neutral-500 dark:text-zinc-400">
-            Loading more posts...
+          <p className="text-sm text-[var(--midnight-muted)]">
+            Opening the next letters...
           </p>
         )}
 
         {!hasMore && (
-          <p className="text-sm text-neutral-400 dark:text-zinc-500">
-            You’re all caught up.
+          <p className="text-sm text-[var(--midnight-soft)]">
+            You are caught up for tonight.
           </p>
         )}
       </div>

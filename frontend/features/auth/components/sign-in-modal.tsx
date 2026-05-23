@@ -68,7 +68,7 @@ export default function SignInModal({ open, onClose }: Props) {
           </h2>
 
           <p className="mt-3 text-sm leading-relaxed text-black/60">
-            Sign in to continue reading and writing on Stories.
+            Sign in to continue reading and writing on The Midnight Letters.
           </p>
         </div>
 

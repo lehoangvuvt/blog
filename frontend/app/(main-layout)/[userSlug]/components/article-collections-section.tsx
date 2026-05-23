@@ -12,7 +12,7 @@ export default function ArticleCollectionsSection({
   collections: PostCollection[];
 }) {
   if (!collections.length) {
-    return <EmptyState icon={<Library />} title="No collections yet" />;
+    return <EmptyState icon={<Library />} title="No bundles yet" />;
   }
 
   return (
@@ -59,7 +59,7 @@ export default function ArticleCollectionsSection({
 
                 <div className="min-w-0 flex-1 py-1">
                   <p className="text-xs uppercase tracking-[0.28em] text-black/35">
-                    Reading Collection
+                    Letter bundle
                   </p>
 
                   <h3 className="mt-3 font-serif text-3xl leading-tight text-[#211b16]">
@@ -71,7 +71,7 @@ export default function ArticleCollectionsSection({
                   </p>
 
                   <div className="mt-5 flex flex-wrap items-center gap-x-2 text-sm text-black/40">
-                    <span>{collection.posts.length} articles</span>
+                    <span>{collection.posts.length} letters</span>
                     <span>·</span>
                     <span>
                       Updated{" "}
@@ -82,7 +82,7 @@ export default function ArticleCollectionsSection({
                   </div>
 
                   <div className="mt-6 flex items-center gap-2 text-sm font-medium text-[#211b16]">
-                    Read collection
+                    Open bundle
                     <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
                   </div>
                 </div>

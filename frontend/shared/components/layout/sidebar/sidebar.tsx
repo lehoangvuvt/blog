@@ -6,13 +6,13 @@ import { usePathname } from "next/navigation";
 
 import { selectSideBarStatus } from "@/features/app-settings/selectors";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setSideBarState } from "@/features/app-settings/slice"; // adjust path
+import { setSideBarState } from "@/features/app-settings/slice";
 import { useMe } from "@/features/auth/hooks/use-me";
 
 const sidebarItems = [
-  { label: "Explore", href: "/", needAuth: false },
+  { label: "Latest letters", href: "/", needAuth: false },
   { label: "Following", href: "/following/writters", needAuth: true },
-  { label: "Saved", href: "/saved-posts", needAuth: true },
+  { label: "Saved letters", href: "/saved-posts", needAuth: true },
 ];
 
 export default function Sidebar() {
@@ -33,9 +33,7 @@ export default function Sidebar() {
     }
   }, [dispatch]);
 
-  if (isAuthenticating) {
-    return null;
-  }
+  if (isAuthenticating) return null;
 
   return (
     <>
@@ -43,29 +41,36 @@ export default function Sidebar() {
         type="button"
         onClick={() => dispatch(setSideBarState({ isOpen: false }))}
         className={`
-          fixed inset-0 top-16 z-30 bg-black/20 transition-opacity duration-300 md:hidden
+          fixed inset-0 z-[90] bg-black/60 backdrop-blur-[2px] transition-opacity duration-300 md:hidden
           ${isOpenSideBar ? "opacity-100" : "pointer-events-none opacity-0"}
         `}
+        aria-label="Close sidebar"
       />
 
       <aside
         className={`
-        fixed top-16 bottom-0 left-0 z-40
-        w-[72vw] max-w-72 border-r border-black/[0.07] bg-[#fdfcf9]
-        transition-transform duration-300 ease-out
-        md:w-64 md:max-w-none
+          fixed inset-y-0 left-0 z-[100]
+          w-[76vw] max-w-80 border-r border-[var(--midnight-border)]/70
+          bg-[var(--midnight-bg)] text-[var(--midnight-text)]
+          shadow-[24px_0_80px_rgba(0,0,0,0.38)]
+          transition-transform duration-300 ease-out
+          md:w-72 md:max-w-none
 
-        ${isOpenSideBar ? "translate-x-0" : "-translate-x-full"}
-      `}
+          ${isOpenSideBar ? "translate-x-0" : "-translate-x-full"}
+        `}
       >
-        <div className="flex h-full flex-col px-5 py-7">
-          <div className="mb-8 px-1">
-            <p className="font-serif text-2xl font-semibold tracking-tight text-black">
-              Library
+        <div className="flex h-screen flex-col px-6 py-8">
+          <div className="mb-10 border-b border-[var(--midnight-border)]/70 pb-8">
+            <p className="text-xs tracking-[0.16em] text-[var(--midnight-soft)]">
+              The Midnight Letters
             </p>
 
-            <p className="mt-1 max-w-47.5 text-sm leading-5 text-black/45">
-              Essays, drafts, and saved ideas.
+            <p className="mt-4 text-2xl font-bold leading-tight tracking-[-0.045em] text-[var(--midnight-text)]">
+              Letter desk
+            </p>
+
+            <p className="mt-3 text-sm leading-6 text-[var(--midnight-muted)]">
+              Fragments, essays, and notes written after dark.
             </p>
           </div>
 
@@ -83,11 +88,11 @@ export default function Sidebar() {
                   key={item.href}
                   href={item.href}
                   className={`
-                    block border-l py-2.5 pl-4 text-[15px] transition-colors
+                    block border-l px-4 py-3 text-[15px] transition-colors
                     ${
                       isActive
-                        ? "border-black font-medium text-black"
-                        : "border-transparent text-black/45 hover:border-black/20 hover:text-black"
+                        ? "border-[var(--midnight-accent)] text-[var(--midnight-text)]"
+                        : "border-transparent text-[var(--midnight-muted)] hover:border-[var(--midnight-border-strong)] hover:text-[var(--midnight-text)]"
                     }
                   `}
                 >
@@ -97,17 +102,13 @@ export default function Sidebar() {
             })}
           </nav>
 
-          <div className="mt-auto border-t border-black/[0.07] pt-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-black/30">
-              Reading
+          <div className="mt-auto border-t border-[var(--midnight-border)]/70 pt-6">
+            <p className="text-xs tracking-[0.16em] text-[var(--midnight-soft)]">
+              Midnight margin
             </p>
 
-            <p className="mt-3 font-serif text-base leading-6 text-black">
-              Notes for thoughtful people.
-            </p>
-
-            <p className="mt-2 text-sm leading-5 text-black/40">
-              A quiet space for long-form writing.
+            <p className="mt-3 text-sm leading-6 text-[var(--midnight-muted)]">
+              Read slowly. Write honestly. Leave a trace.
             </p>
           </div>
         </div>

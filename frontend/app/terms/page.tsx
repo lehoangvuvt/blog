@@ -8,7 +8,7 @@ export default function TermsPage() {
         <div className="mx-auto max-w-3xl px-6 py-20">
           <div className="mb-16">
             <p className="text-sm uppercase tracking-[0.2em] text-black/40">
-              Stories
+              The Midnight Letters
             </p>
 
             <h1 className="mt-5 font-serif text-6xl tracking-tight text-[#242424]">
@@ -16,7 +16,7 @@ export default function TermsPage() {
             </h1>
 
             <p className="mt-5 text-lg leading-8 text-black/60">
-              Simple rules for using Stories.
+              Simple rules for using The Midnight Letters.
             </p>
 
             <p className="mt-3 text-sm text-black/40">
@@ -31,7 +31,7 @@ export default function TermsPage() {
               </h2>
 
               <p className="mt-3 leading-8 text-black/65">
-                Don’t misuse Stories, attack the service, spam users, or post
+                Don’t misuse The Midnight Letters, attack the service, spam users, or post
                 illegal or harmful content.
               </p>
             </section>
@@ -42,7 +42,7 @@ export default function TermsPage() {
               </h2>
 
               <p className="mt-3 leading-8 text-black/65">
-                You keep ownership of what you write. By publishing on Stories,
+                You keep ownership of what you write. By publishing on The Midnight Letters,
                 you allow us to display and distribute your content on the
                 platform.
               </p>
@@ -65,7 +65,7 @@ export default function TermsPage() {
               </h2>
 
               <p className="mt-3 leading-8 text-black/65">
-                We may update these Terms over time. Continued use of Stories
+                We may update these Terms over time. Continued use of The Midnight Letters
                 means you accept the updated version.
               </p>
             </section>
@@ -79,8 +79,8 @@ export default function TermsPage() {
 
               <span>•</span>
 
-              <a href="mailto:support@stories.com" className="hover:text-black">
-                support@stories.com
+              <a href="mailto:support@themidnightletters.com" className="hover:text-black">
+                support@themidnightletters.com
               </a>
             </div>
           </div>

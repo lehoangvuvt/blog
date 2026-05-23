@@ -119,10 +119,10 @@ export default function NewArticlePage() {
   const [darkMode, setDarkMode] = useState(autoDarkMode);
 
   const moodText = darkMode
-    ? "The world is quieter now. Write without interruption."
-    : "A fresh page. A clear mind. Start writing.";
+    ? "The night is quiet enough for the sentence you almost didn't write."
+    : "A clean page for thoughts that arrived early.";
 
-  const moodLabel = darkMode ? "Midnight Draft" : "Morning Notes";
+  const moodLabel = darkMode ? "Midnight draft" : "Morning letter";
 
   const moodY = scrollY * 0.15;
   const titleY = scrollY * 0.25;
@@ -154,7 +154,7 @@ export default function NewArticlePage() {
       }, 200);
     } catch {
       setPublishStatus("error");
-      setPublishError("Something went wrong while publishing.");
+      setPublishError("The page went quiet. Try sending it again.");
     }
   };
 
@@ -231,8 +231,8 @@ export default function NewArticlePage() {
           >
             <span>
               {darkMode
-                ? "Late night writing session"
-                : "Focused writing session"}
+                ? "Midnight writing session"
+                : "Daylight writing session"}
             </span>
           </div>
 
@@ -301,7 +301,7 @@ export default function NewArticlePage() {
             ref={titleRef}
             value={title}
             onChange={handleTitleChange}
-            placeholder="What's your title?"
+            placeholder="Title this letter"
             rows={1}
             className={`
               w-full resize-none overflow-hidden bg-transparent
@@ -339,7 +339,7 @@ export default function NewArticlePage() {
             onChange={(e) =>
               setSubtitle(e.target.value.slice(0, SUBTITLE_LIMIT))
             }
-            placeholder="Write a short subtitle or introduction..."
+            placeholder="Add a line that hints at what is inside..."
             rows={3}
             className={`
               w-full resize-none overflow-hidden bg-transparent
@@ -375,7 +375,7 @@ export default function NewArticlePage() {
               darkMode ? "text-white/40" : "text-black/40"
             }`}
           >
-            Thumbnail
+            Cover image
           </p>
 
           <label
@@ -408,7 +408,7 @@ export default function NewArticlePage() {
                 <div className="absolute inset-0 bg-black/20 opacity-0 transition-opacity group-hover:opacity-100" />
 
                 <div className="absolute bottom-4 right-4 rounded-full bg-white px-4 py-2 text-xs font-medium text-black shadow-lg">
-                  Change Image
+                  Swap cover
                 </div>
               </>
             ) : (
@@ -421,14 +421,14 @@ export default function NewArticlePage() {
                   +
                 </div>
 
-                <p className="font-serif text-xl">Add a thumbnail image</p>
+                <p className="font-serif text-xl">Add a cover image</p>
 
                 <p
                   className={`mt-2 text-sm ${
                     darkMode ? "text-white/45" : "text-black/45"
                   }`}
                 >
-                  Recommended ratio: 16:9
+                  Wide images give the letter room to breathe.
                 </p>
               </div>
             )}
@@ -498,7 +498,7 @@ export default function NewArticlePage() {
           <button
             type="button"
             onClick={() => {
-              const ok = confirm("Discard this article?");
+              const ok = confirm("Discard this draft?");
               if (!ok) return;
               router.push("/");
             }}
@@ -511,7 +511,7 @@ export default function NewArticlePage() {
               }
             `}
           >
-            Discard
+            Toss draft
           </button>
 
           <div className="flex items-center gap-3">
@@ -529,7 +529,7 @@ export default function NewArticlePage() {
                 }
               `}
             >
-              Draft
+              Save draft
             </button>
 
             <button
@@ -548,7 +548,7 @@ export default function NewArticlePage() {
                 }
               `}
             >
-              Publish
+              Send letter
             </button>
           </div>
         </div>
@@ -565,18 +565,18 @@ export default function NewArticlePage() {
           >
             <h2 className="text-lg font-semibold">
               {publishStatus === "success"
-                ? "Published successfully"
+                ? "Letter sent"
                 : publishStatus === "publishing"
-                ? "Publishing your story"
-                : "Prepare to Publish"}
+                ? "Sending your letter"
+                : "Ready to send?"}
             </h2>
 
             <p className="mt-1 text-sm opacity-60">
               {publishStatus === "success"
-                ? "Your article is now live."
+                ? "Your letter is now in the archive."
                 : publishStatus === "publishing"
-                ? "Please wait while we create your post."
-                : "Add or adjust topics before publishing"}
+                ? "Give us a second while the page settles."
+                : "Add or adjust subjects before sending."}
             </p>
 
             {publishStatus === "publishing" && (
@@ -605,14 +605,14 @@ export default function NewArticlePage() {
                   ✓
                 </div>
 
-                <p className="font-serif text-xl">Your story is published.</p>
+                <p className="font-serif text-xl">Your letter is live.</p>
 
                 <p
                   className={`mt-2 text-sm ${
                     darkMode ? "text-white/55" : "text-black/55"
                   }`}
                 >
-                  Readers can now discover your writing.
+                  Readers can now find it, share it, and linger.
                 </p>
               </div>
             )}
@@ -648,7 +648,7 @@ export default function NewArticlePage() {
                         addPublishTag();
                       }
                     }}
-                    placeholder="Add a topic for this article..."
+                    placeholder="Add a subject..."
                     className={`flex-1 rounded-lg border px-3 py-2 text-sm outline-none disabled:opacity-40 ${
                       darkMode
                         ? "border-white/10 bg-white/5"
@@ -664,7 +664,7 @@ export default function NewArticlePage() {
                       darkMode ? "bg-white text-black" : "bg-black text-white"
                     }`}
                   >
-                    Add
+                    Drop in
                   </button>
                 </div>
               </>
@@ -686,7 +686,7 @@ export default function NewArticlePage() {
                   }}
                   className="px-4 py-2 text-sm opacity-70 disabled:opacity-30"
                 >
-                  Cancel
+                  Not yet
                 </button>
 
                 {publishStatus !== "success" && (
@@ -703,8 +703,8 @@ export default function NewArticlePage() {
                     `}
                   >
                     {publishStatus === "publishing"
-                      ? "Publishing..."
-                      : "Publish"}
+                      ? "Sending..."
+                      : "Send letter"}
                   </button>
                 )}
               </div>
@@ -741,11 +741,11 @@ export default function NewArticlePage() {
                     darkMode ? "text-white/40" : "text-black/40"
                   }`}
                 >
-                  Published Successfully
+                  Letter sent
                 </p>
 
                 <h3 className="mt-3 font-serif text-3xl tracking-[-0.04em]">
-                  Your story is now live
+                  Your letter is live
                 </h3>
 
                 <p
@@ -753,7 +753,7 @@ export default function NewArticlePage() {
                     darkMode ? "text-white/60" : "text-black/60"
                   }`}
                 >
-                  Readers can now discover and share your writing.
+                  Readers can discover it, share it, and return to the thread.
                 </p>
 
                 {/* LINK */}
@@ -770,7 +770,7 @@ export default function NewArticlePage() {
               }
             `}
                 >
-                  Read Published Post
+                  Read the letter
                   <span className="text-base">↗</span>
                 </a>
 
@@ -794,7 +794,7 @@ export default function NewArticlePage() {
                     }
                   `}
                   >
-                    Copy Link
+                    Copy link
                   </button>
 
                   <button
@@ -813,7 +813,7 @@ export default function NewArticlePage() {
                 }
               `}
                   >
-                    Done
+                    Back to the desk
                   </button>
                 </div>
               </div>

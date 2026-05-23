@@ -2,18 +2,19 @@
 
 import { useRouter } from "next/navigation";
 
-export function BackButton() {
+export function BackButton({ className = "" }: { className?: string }) {
   const router = useRouter();
 
   return (
     <button
       type="button"
       onClick={() => router.back()}
-      className="
+      className={`
         inline-flex items-center gap-2
-        text-sm text-black/45
-        transition-colors hover:text-black
-      "
+        text-sm text-[var(--midnight-muted)]
+        transition-colors hover:text-[var(--midnight-accent-hover)]
+        ${className}
+      `}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

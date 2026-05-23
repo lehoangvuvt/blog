@@ -81,7 +81,7 @@ export default function ForgotPasswordPage() {
           </div>
 
           <h1 className="font-serif text-5xl tracking-tight text-[#242424]">
-            Stories
+            The Midnight Letters
           </h1>
 
           <h2 className="mt-6 text-3xl font-bold text-[#242424]">

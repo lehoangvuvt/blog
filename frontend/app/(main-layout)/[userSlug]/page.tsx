@@ -22,6 +22,12 @@ import useUnfollowAUser from "@/features/users/hooks/use-unfollow-a-user";
 type Tab = "Posts" | "Collections" | "Reposts" | "Likes";
 
 const allTabs: Tab[] = ["Posts", "Collections", "Reposts", "Likes"];
+const tabLabels: Record<Tab, string> = {
+  Posts: "Letters",
+  Collections: "Bundles",
+  Reposts: "Echoes",
+  Likes: "Appreciations",
+};
 
 export default function UserArticlesPage() {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -79,7 +85,7 @@ export default function UserArticlesPage() {
                 }
               : {
                   background:
-                    "radial-gradient(circle at top left, rgba(0,0,0,0.05), transparent 34%), radial-gradient(circle at bottom right, rgba(255,103,25,0.12), transparent 32%), #f8f6f1",
+                    "radial-gradient(circle at top left, rgba(200,155,99,0.13), transparent 34%), radial-gradient(circle at bottom right, rgba(214,160,109,0.1), transparent 32%), #161311",
                 }
           }
         >
@@ -135,11 +141,11 @@ export default function UserArticlesPage() {
                 >
                   <span>
                     {userInfo?.statistics.followersCount ?? "-"} &nbsp;
-                    followers
+                    readers
                   </span>
                   <span>·</span>
                   <span>
-                    {userInfo?.statistics.postsCount ?? "-"} &nbsp; posts
+                    {userInfo?.statistics.postsCount ?? "-"} &nbsp; letters
                   </span>
                 </div>
 
@@ -161,7 +167,7 @@ export default function UserArticlesPage() {
                         }`}
                       >
                         <Plus className="h-4 w-4" />
-                        New article
+                        Write a letter
                       </Link>
 
                       <button
@@ -174,7 +180,7 @@ export default function UserArticlesPage() {
                         }`}
                       >
                         <Library className="h-4 w-4" />
-                        Create collection
+                        Create bundle
                       </button>
 
                       <button
@@ -237,7 +243,7 @@ export default function UserArticlesPage() {
                       : "hover:text-neutral-950"
                   }`}
                 >
-                  {tab}
+                  {tabLabels[tab]}
                 </button>
               ))}
             </nav>

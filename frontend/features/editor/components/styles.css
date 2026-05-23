@@ -3,32 +3,32 @@
 /* CSS Variables for Theme - Framework Agnostic */
 :root,
 .lexkit-editor-wrapper[data-editor-theme="light"] {
-  --lexkit-bg: #ffffff;
-  --lexkit-fg: #0f172a;
-  --lexkit-border: #e2e8f0;
-  --lexkit-border-hover: #cbd5e1;
-  --lexkit-border-active: #94a3b8;
-  --lexkit-accent: #0f172a;
-  --lexkit-accent-hover: #1e293b;
-  --lexkit-shadow: rgba(0, 0, 0, 0.08);
-  --lexkit-muted: #f8fafc;
-  --lexkit-muted-fg: #64748b;
+  --lexkit-bg: #161311;
+  --lexkit-fg: #F1E7D8;
+  --lexkit-border: #3A312C;
+  --lexkit-border-hover: #C89B63;
+  --lexkit-border-active: #D7AE7B;
+  --lexkit-accent: #C89B63;
+  --lexkit-accent-hover: #D7AE7B;
+  --lexkit-shadow: rgba(0, 0, 0, 0.35);
+  --lexkit-muted: #211C19;
+  --lexkit-muted-fg: #B7AA98;
 }
 
 /* Dark Mode - Framework Agnostic */
 [data-theme="dark"],
 .dark,
 .lexkit-editor-wrapper[data-editor-theme="dark"] {
-  --lexkit-bg: #0a0a0a;
-  --lexkit-fg: #ededed;
-  --lexkit-border: #262626;
-  --lexkit-border-hover: #404040;
-  --lexkit-border-active: #525252;
-  --lexkit-accent: #ededed;
-  --lexkit-accent-hover: #d4d4d8;
+  --lexkit-bg: #161311;
+  --lexkit-fg: #F1E7D8;
+  --lexkit-border: #3A312C;
+  --lexkit-border-hover: #C89B63;
+  --lexkit-border-active: #D7AE7B;
+  --lexkit-accent: #C89B63;
+  --lexkit-accent-hover: #D7AE7B;
   --lexkit-shadow: rgba(0, 0, 0, 0.5);
-  --lexkit-muted: #171717;
-  --lexkit-muted-fg: #a3a3a3;
+  --lexkit-muted: #211C19;
+  --lexkit-muted-fg: #B7AA98;
 }
 
 /* Editor Wrapper */
