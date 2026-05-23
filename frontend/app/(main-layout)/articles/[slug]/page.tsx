@@ -243,9 +243,9 @@ export default async function ArticlePage({
                     <div>
                       <Link
                         href={`/${post.author.slug}`}
-                        className="text-[15px] font-medium text-[var(--midnight-text)] transition-colors hover:text-[var(--midnight-accent-hover)]"
+                        className="text-[15px] font-medium text-[var(--midnight-text)] transition-colors hover:text-[var(--midnight-accent-hover)] hover:underline"
                       >
-                        {post.author.slug}
+                        {post.author.fullName}
                       </Link>
 
                       <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-[var(--midnight-muted)]">

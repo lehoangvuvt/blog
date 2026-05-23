@@ -1,9 +1,7 @@
 "use client";
 
-"use client";
-
 import Link from "next/link";
-import { X } from "lucide-react";
+import { X, MoonStar } from "lucide-react";
 import { useForm } from "react-hook-form";
 import type { IAuthFormInput } from "@/features/auth/types";
 import { useLogin } from "@/features/auth/hooks/use-login";
@@ -20,15 +18,15 @@ export default function SignInModal({ open, onClose }: Props) {
     formState: { errors },
   } = useForm<IAuthFormInput>({
     defaultValues: {
-      email: "hoangvule.183@gmail.com",
-      password: "12345",
+      email: "",
+      password: "",
     },
   });
 
   const { mutate: loginMutation, isPending, error } = useLogin();
 
   const onSubmit = (data: IAuthFormInput) => {
-    if(!data.email || !data.password) return;
+    if (!data.email || !data.password) return;
 
     loginMutation(
       {
@@ -38,7 +36,6 @@ export default function SignInModal({ open, onClose }: Props) {
       {
         onSuccess: (response) => {
           localStorage.setItem("accessToken", response.token);
-          //   onClose();
           window.location.reload();
         },
       }
@@ -48,34 +45,74 @@ export default function SignInModal({ open, onClose }: Props) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-md rounded-[2rem] border border-black/5 bg-white p-7 shadow-2xl">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+      className="fixed inset-0 z-[999] flex items-center justify-center bg-black/55 px-4 backdrop-blur-md"
+    >
+      <div
+        className="
+          relative w-full max-w-md overflow-hidden
+          rounded-[2rem]
+          border border-[var(--midnight-border)]/70
+          bg-[var(--midnight-surface)]/95
+          p-7
+          shadow-[0_30px_90px_rgba(0,0,0,0.45)]
+        "
+      >
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-5 top-5 rounded-full p-2 text-black/50 transition hover:bg-black/5 hover:text-black"
+          className="
+            absolute right-5 top-5
+            rounded-full p-2
+            text-[var(--midnight-soft)]
+            transition
+            hover:bg-[var(--midnight-code-bg)]
+            hover:text-[var(--midnight-text)]
+          "
         >
           <X className="h-5 w-5" />
         </button>
 
-        <div className="text-center">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-black text-2xl text-white">
-            ⌨
+        <div>
+          <div
+            className="
+              mb-6 flex h-12 w-12 items-center justify-center
+              rounded-2xl
+              border border-[var(--midnight-border)]
+              bg-[var(--midnight-code-bg)]
+              text-[var(--midnight-accent)]
+            "
+          >
+            <MoonStar className="h-5 w-5" />
           </div>
 
-          <h2 className="font-serif text-4xl tracking-tight text-[#242424]">
+          <p className="text-[11px] tracking-[0.16em] text-[var(--midnight-soft)]">
+            THE MIDNIGHT LETTERS
+          </p>
+
+          <h2
+            className="
+              mt-4 text-4xl font-bold
+              tracking-[-0.055em]
+              text-[var(--midnight-text)]
+            "
+          >
             Welcome back
           </h2>
 
-          <p className="mt-3 text-sm leading-relaxed text-black/60">
-            Sign in to continue reading and writing on The Midnight Letters.
+          <p className="mt-4 text-[15px] leading-7 text-[var(--midnight-muted)]">
+            Sign in to continue reading and writing after dark.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-7 space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
           <div>
-            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-            <label className="mb-2 block text-sm font-medium text-[#242424]">
+            <label className="mb-3 block text-sm font-medium text-[var(--midnight-text)]">
               Email
             </label>
 
@@ -90,19 +127,29 @@ export default function SignInModal({ open, onClose }: Props) {
                   message: "Invalid email address",
                 },
               })}
-              className="w-full rounded-2xl border border-black/10 bg-[#FAFAFA] px-4 py-3 outline-none transition focus:border-black/20 focus:bg-white focus:ring-4 focus:ring-black/5 disabled:opacity-50"
+              className="
+                w-full rounded-2xl
+                border border-[var(--midnight-border)]/70
+                bg-[var(--midnight-code-bg)]
+                px-4 py-3
+                text-[15px]
+                text-[var(--midnight-text)]
+                outline-none transition
+                placeholder:text-[var(--midnight-soft)]
+                focus:border-[var(--midnight-border-strong)]
+                disabled:opacity-50
+              "
             />
 
             {errors.email && (
-              <p className="mt-2 text-sm text-red-500">
+              <p className="mt-2 text-sm text-red-300">
                 {errors.email.message as string}
               </p>
             )}
           </div>
 
           <div>
-            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-            <label className="mb-2 block text-sm font-medium text-[#242424]">
+            <label className="mb-3 block text-sm font-medium text-[var(--midnight-text)]">
               Password
             </label>
 
@@ -113,18 +160,37 @@ export default function SignInModal({ open, onClose }: Props) {
               {...register("password", {
                 required: "Password is required",
               })}
-              className="w-full rounded-2xl border border-black/10 bg-[#FAFAFA] px-4 py-3 outline-none transition focus:border-black/20 focus:bg-white focus:ring-4 focus:ring-black/5 disabled:opacity-50"
+              className="
+                w-full rounded-2xl
+                border border-[var(--midnight-border)]/70
+                bg-[var(--midnight-code-bg)]
+                px-4 py-3
+                text-[15px]
+                text-[var(--midnight-text)]
+                outline-none transition
+                placeholder:text-[var(--midnight-soft)]
+                focus:border-[var(--midnight-border-strong)]
+                disabled:opacity-50
+              "
             />
 
             {errors.password && (
-              <p className="mt-2 text-sm text-red-500">
+              <p className="mt-2 text-sm text-red-300">
                 {errors.password.message as string}
               </p>
             )}
           </div>
 
           {error && (
-            <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            <div
+              className="
+                rounded-2xl
+                border border-red-400/20
+                bg-red-400/10
+                px-4 py-3
+                text-sm text-red-200
+              "
+            >
               {error.message}
             </div>
           )}
@@ -133,7 +199,10 @@ export default function SignInModal({ open, onClose }: Props) {
             <Link
               href="/forgot-password"
               onClick={onClose}
-              className="text-sm text-black/60 transition hover:text-black"
+              className="
+                text-sm text-[var(--midnight-muted)]
+                transition hover:text-[var(--midnight-text)]
+              "
             >
               Forgot password?
             </Link>
@@ -142,18 +211,31 @@ export default function SignInModal({ open, onClose }: Props) {
           <button
             type="submit"
             disabled={isPending}
-            className="w-full rounded-2xl bg-black py-3 text-base font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-50 disabled:hover:translate-y-0"
+            className="
+              w-full rounded-2xl
+              bg-[var(--midnight-accent)]
+              py-3.5
+              text-base font-medium
+              text-[var(--midnight-on-accent)]
+              transition-opacity
+              hover:opacity-90
+              disabled:opacity-40
+            "
           >
             {isPending ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-black/60">
-          Don&apos;t have an account?{" "}
+        <p className="mt-7 text-center text-sm text-[var(--midnight-muted)]">
+          Don&apos;t have an account?
           <Link
             href="/sign-up"
             onClick={onClose}
-            className="font-semibold text-black hover:underline"
+            className="
+              ml-2 font-medium
+              text-[var(--midnight-text)]
+              transition hover:text-[var(--midnight-accent-hover)]
+            "
           >
             Create one
           </Link>
