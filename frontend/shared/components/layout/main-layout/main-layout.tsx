@@ -3,9 +3,14 @@
 import Header from "@/shared/components/layout/header/header";
 import Sidebar from "@/shared/components/layout/sidebar/sidebar";
 
-import { selectSideBarStatus } from "@/features/app-settings/selectors";
+import {
+  selectSideBarStatus,
+  selectSignInModalStatus,
+} from "@/features/app-settings/selectors";
 
-import { useAppSelector } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import SignInModal from "@/features/auth/components/sign-in-modal";
+import { setSignInModalState } from "@/features/app-settings/slice";
 
 export default function MainLayout({
   children,
@@ -13,6 +18,12 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const isOpenSideBar = useAppSelector(selectSideBarStatus);
+  const isOpenSignInModal = useAppSelector(selectSignInModalStatus);
+  const dispatch = useAppDispatch();
+
+  const closeSignInModal = () => {
+    dispatch(setSignInModalState({ isOpen: false }));
+  };
 
   return (
     <div className="min-h-screen bg-transparent text-[var(--midnight-text)] transition-colors duration-300">
@@ -29,6 +40,10 @@ export default function MainLayout({
       >
         <div>{children}</div>
       </main>
+      <SignInModal
+        open={isOpenSignInModal}
+        onClose={() => closeSignInModal()}
+      />
     </div>
   );
 }

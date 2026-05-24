@@ -23,17 +23,19 @@ import AddToCollectionModal from "./add-to-collection-modal";
 import ShareModal from "./share-modal";
 
 import { useMe } from "@/features/auth/hooks/use-me";
-import SignInModal from "@/features/auth/components/sign-in-modal";
 import { CommentsSection } from "./comments-section";
 
 import useSavePost from "@/features/posts/hooks/use-save-post";
 import useUnsavePost from "@/features/posts/hooks/use-unsave-post";
+import { useAppDispatch } from "@/store/hooks";
+import { setSignInModalState } from "@/features/app-settings/slice";
 
 type Props = {
   postId: number;
 };
 
 export function ArticleToolbar({ postId }: Props) {
+  const dispatch = useAppDispatch();
   const { data: myInfo } = useMe();
 
   const savedPostIds = myInfo?.savedPostIds ?? [];
@@ -45,7 +47,6 @@ export function ArticleToolbar({ postId }: Props) {
 
   const [openShareModal, setOpenShareModal] = useState(false);
   const [openCollectionModal, setOpenCollectionModal] = useState(false);
-  const [openLoginModal, setOpenLoginModal] = useState(false);
 
   const { mutate: likePost } = useLikePost();
   const { mutate: unlikePost } = useUnlikePost();
@@ -64,9 +65,13 @@ export function ArticleToolbar({ postId }: Props) {
 
   if (isLoadingStatistics || !postStatistics) return null;
 
+  const openSignInModal = () => {
+    dispatch(setSignInModalState({ isOpen: true }));
+  };
+
   const requireAuth = (callback: () => void) => {
     if (!myInfo) {
-      setOpenLoginModal(true);
+      openSignInModal();
       return;
     }
 
@@ -249,11 +254,6 @@ export function ArticleToolbar({ postId }: Props) {
       {openShareModal && (
         <ShareModal onClose={() => setOpenShareModal(false)} />
       )}
-
-      <SignInModal
-        open={openLoginModal}
-        onClose={() => setOpenLoginModal(false)}
-      />
 
       {showCommentsDrawer && (
         <div className="fixed inset-0 z-[999]">

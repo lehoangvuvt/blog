@@ -10,3 +10,6 @@ export const selectFontSize = (state: RootState) => state.appSettings.fontSize;
 
 export const selectSideBarStatus = (state: RootState) =>
   state.appSettings.isOpenSideBar;
+
+export const selectSignInModalStatus = (state: RootState) =>
+  state.appSettings.isOpenSignInModal;

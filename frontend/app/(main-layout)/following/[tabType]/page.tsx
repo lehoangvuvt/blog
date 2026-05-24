@@ -2,8 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-
-import MainLayout from "@/shared/components/layout/main-layout/main-layout";
 import PostsContainer from "@/features/posts/components/posts-container";
 import { PostItem } from "@/features/posts/components/post-item";
 import { usePosts } from "@/features/posts/hooks/use-posts";
@@ -53,9 +51,9 @@ export default function FollowingPage() {
   const { data: followedTagsData, isLoading: isLoadingFollowedTags } = useTags(
     shouldFetchFollowedTags
       ? {
-        ids: followedTagIds,
-        limit: followedTagIds.length,
-      }
+          ids: followedTagIds,
+          limit: followedTagIds.length,
+        }
       : undefined,
     shouldFetchFollowedTags
   );
@@ -80,9 +78,7 @@ export default function FollowingPage() {
       .filter((tag) => !followedTagIds.includes(tag.id)) ?? [];
 
   const showInitialSkeleton =
-    activeTab === "writers" &&
-    (isLoadingMe || isLoading) &&
-    posts.length === 0;
+    activeTab === "writers" && (isLoadingMe || isLoading) && posts.length === 0;
 
   const hasNoFollowings = !isLoadingMe && followingIds.length === 0;
 
@@ -100,197 +96,195 @@ export default function FollowingPage() {
   }, [activeTab, router]);
 
   return (
-    <MainLayout>
+    <main className="min-h-screen bg-[var(--midnight-bg)] text-[var(--midnight-text)]">
       <NotificationPopover onClose={close} notifications={notifications} />
+      <section className="mx-auto w-full max-w-3xl px-5 pt-12 md:px-6">
+        <header className="border-b border-[var(--midnight-border)]/70 pb-7">
+          <h1 className="mt-4 text-5xl font-bold tracking-[-0.06em] text-[var(--midnight-text)]">
+            Following
+          </h1>
 
-      <main className="min-h-screen bg-[var(--midnight-bg)] text-[var(--midnight-text)]">
-        <section className="mx-auto w-full max-w-3xl px-5 pt-12 md:px-6">
-          <header className="border-b border-[var(--midnight-border)]/70 pb-7">
-            <h1 className="mt-4 text-5xl font-bold tracking-[-0.06em] text-[var(--midnight-text)]">
-              Following
-            </h1>
+          <p className="mt-4 max-w-xl text-[15px] leading-7 text-[var(--midnight-muted)]">
+            Letters from writers and subjects you keep returning to.
+          </p>
 
-            <p className="mt-4 max-w-xl text-[15px] leading-7 text-[var(--midnight-muted)]">
-              Letters from writers and subjects you keep returning to.
-            </p>
-
-            <div className="mt-8 flex gap-2 overflow-x-auto">
-              <button
-                type="button"
-                onClick={() => setActiveTab("writers")}
-                className={`rounded-full border px-4 py-2 text-sm transition ${activeTab === "writers"
-                    ? "border-[var(--midnight-accent)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-text)]"
-                    : "border-transparent text-[var(--midnight-muted)] hover:border-[var(--midnight-border)]/70 hover:text-[var(--midnight-text)]"
-                  }`}
-              >
-                Writers
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab("subjects")}
-                className={`rounded-full border px-4 py-2 text-sm transition ${activeTab === "subjects"
-                    ? "border-[var(--midnight-accent)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-text)]"
-                    : "border-transparent text-[var(--midnight-muted)] hover:border-[var(--midnight-border)]/70 hover:text-[var(--midnight-text)]"
-                  }`}
-              >
-                Subjects
-              </button>
-            </div>
-          </header>
-        </section>
-
-        {activeTab === "writers" && (
-          <section className="mx-auto w-full max-w-3xl px-5 md:px-6">
-            <PostsContainer
-              hasMore={!hasNoFollowings && Boolean(hasNextPage)}
-              isLoading={isFetchingNextPage}
-              onLoadMore={() => fetchNextPage()}
+          <div className="mt-8 flex gap-2 overflow-x-auto">
+            <button
+              type="button"
+              onClick={() => setActiveTab("writers")}
+              className={`rounded-full border px-4 py-2 text-sm transition ${
+                activeTab === "writers"
+                  ? "border-[var(--midnight-accent)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-text)]"
+                  : "border-transparent text-[var(--midnight-muted)] hover:border-[var(--midnight-border)]/70 hover:text-[var(--midnight-text)]"
+              }`}
             >
-              {showInitialSkeleton &&
-                Array.from({ length: 5 }).map((_, index) => (
-                  <PostItem.Skeleton key={`skeleton-loading-${index + 1}`} />
-                ))}
+              Writers
+            </button>
 
-              {!showInitialSkeleton &&
-                !hasNoFollowings &&
-                posts.map((post) => {
-                  const authorName =
-                    post.author?.fullName ||
-                    post.author?.email ||
-                    "Unknown writer";
+            <button
+              type="button"
+              onClick={() => setActiveTab("subjects")}
+              className={`rounded-full border px-4 py-2 text-sm transition ${
+                activeTab === "subjects"
+                  ? "border-[var(--midnight-accent)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-text)]"
+                  : "border-transparent text-[var(--midnight-muted)] hover:border-[var(--midnight-border)]/70 hover:text-[var(--midnight-text)]"
+              }`}
+            >
+              Subjects
+            </button>
+          </div>
+        </header>
+      </section>
 
-                  const authorSlug = post.author?.slug;
-                  const postLink = `/articles/${post.slug}`;
+      {activeTab === "writers" && (
+        <section className="mx-auto w-full max-w-3xl px-5 md:px-6">
+          <PostsContainer
+            hasMore={!hasNoFollowings && Boolean(hasNextPage)}
+            isLoading={isFetchingNextPage}
+            onLoadMore={() => fetchNextPage()}
+          >
+            {showInitialSkeleton &&
+              Array.from({ length: 5 }).map((_, index) => (
+                <PostItem.Skeleton key={`skeleton-loading-${index + 1}`} />
+              ))}
 
-                  return (
-                    <PostItem.Container key={post.id}>
-                      <PostItem.Content>
-                        <PostItem.Header>
-                          <PostItem.Avatar
-                            src={post.author?.avatar}
-                            alt={authorName}
-                          />
+            {!showInitialSkeleton &&
+              !hasNoFollowings &&
+              posts.map((post) => {
+                const authorName =
+                  post.author?.fullName ||
+                  post.author?.email ||
+                  "Unknown writer";
 
-                          {authorSlug ? (
-                            <PostItem.Author link={`/${authorSlug}`}>
-                              {authorName}
-                            </PostItem.Author>
-                          ) : (
-                            <span>{authorName}</span>
-                          )}
+                const authorSlug = post.author?.slug;
+                const postLink = `/articles/${post.slug}`;
 
-                          <PostItem.Dot />
+                return (
+                  <PostItem.Container key={post.id}>
+                    <PostItem.Content>
+                      <PostItem.Header>
+                        <PostItem.Avatar
+                          src={post.author?.avatar}
+                          alt={authorName}
+                        />
 
-                          <PostItem.Date>
-                            {formatTimeAgo(post.postedDate)}
-                          </PostItem.Date>
-                        </PostItem.Header>
-
-                        <PostItem.Title link={postLink}>
-                          {post.title}
-                        </PostItem.Title>
-
-                        {post.subTitle && (
-                          <PostItem.SubTitle>{post.subTitle}</PostItem.SubTitle>
+                        {authorSlug ? (
+                          <PostItem.Author link={`/${authorSlug}`}>
+                            {authorName}
+                          </PostItem.Author>
+                        ) : (
+                          <span>{authorName}</span>
                         )}
 
-                        <PostItem.Footer />
-                      </PostItem.Content>
+                        <PostItem.Dot />
 
-                      <PostItem.Thumbnail
-                        src={post.thumbnailImage ?? undefined}
-                        alt={post.title}
-                        link={postLink}
-                      />
-                    </PostItem.Container>
-                  );
-                })}
+                        <PostItem.Date>
+                          {formatTimeAgo(post.postedDate)}
+                        </PostItem.Date>
+                      </PostItem.Header>
 
-              {!showInitialSkeleton && hasNoFollowings && (
-                <div className="pt-12 pb-16">
-                  <h2 className="text-2xl font-bold tracking-[-0.04em] text-[var(--midnight-text)]">
-                    No writers followed yet.
-                  </h2>
+                      <PostItem.Title link={postLink}>
+                        {post.title}
+                      </PostItem.Title>
 
-                  <p className="mt-3 max-w-md text-[15px] leading-7 text-[var(--midnight-muted)]">
-                    Follow a few voices and their newest letters will appear
-                    here.
-                  </p>
-                </div>
-              )}
-            </PostsContainer>
-          </section>
-        )}
+                      {post.subTitle && (
+                        <PostItem.SubTitle>{post.subTitle}</PostItem.SubTitle>
+                      )}
 
-        {activeTab === "subjects" && (
-          <section className="mx-auto w-full max-w-3xl px-5 py-8 md:px-6">
-            {isLoadingMe || showTopicsSkeleton ? (
-              <TopicSkeleton />
-            ) : followedTopics.length > 0 ? (
-              <TopicList
-                topics={followedTopics}
-                actionLabel="Following"
-                hoverLabel="Unfollow"
-                onAction={(topic) =>
-                  unfollowTag(topic, {
-                    onSuccess: () =>
-                      open("Subject unfollowed successfully", "success"),
-                    onError: () => open("Failed to unfollow subject", "error"),
-                  })
-                }
-                active
-              />
-            ) : (
-              <div className="pt-4 pb-10">
-                <p className="text-2xl font-bold tracking-[-0.04em] text-[var(--midnight-text)]">
-                  No subjects followed yet.
-                </p>
+                      <PostItem.Footer />
+                    </PostItem.Content>
+
+                    <PostItem.Thumbnail
+                      src={post.thumbnailImage ?? undefined}
+                      alt={post.title}
+                      link={postLink}
+                    />
+                  </PostItem.Container>
+                );
+              })}
+
+            {!showInitialSkeleton && hasNoFollowings && (
+              <div className="pt-12 pb-16">
+                <h2 className="text-2xl font-bold tracking-[-0.04em] text-[var(--midnight-text)]">
+                  No writers followed yet.
+                </h2>
 
                 <p className="mt-3 max-w-md text-[15px] leading-7 text-[var(--midnight-muted)]">
-                  Follow subjects to shape the letters you see.
+                  Follow a few voices and their newest letters will appear here.
                 </p>
               </div>
             )}
+          </PostsContainer>
+        </section>
+      )}
 
-            <div className="mt-12 border-t border-[var(--midnight-border)]/70 pt-9">
-              <div className="mb-6 flex items-end justify-between gap-4">
-                <div>
-                  <p className="text-xs tracking-[0.14em] text-[var(--midnight-soft)]">
-                    Suggested
-                  </p>
+      {activeTab === "subjects" && (
+        <section className="mx-auto w-full max-w-3xl px-5 py-8 md:px-6">
+          {isLoadingMe || showTopicsSkeleton ? (
+            <TopicSkeleton />
+          ) : followedTopics.length > 0 ? (
+            <TopicList
+              topics={followedTopics}
+              actionLabel="Following"
+              hoverLabel="Unfollow"
+              onAction={(topic) =>
+                unfollowTag(topic, {
+                  onSuccess: () =>
+                    open("Subject unfollowed successfully", "success"),
+                  onError: () => open("Failed to unfollow subject", "error"),
+                })
+              }
+              active
+            />
+          ) : (
+            <div className="pt-4 pb-10">
+              <p className="text-2xl font-bold tracking-[-0.04em] text-[var(--midnight-text)]">
+                No subjects followed yet.
+              </p>
 
-                  <h2 className="mt-2 text-3xl font-bold tracking-[-0.05em] text-[var(--midnight-text)]">
-                    Subjects to follow
-                  </h2>
-                </div>
-              </div>
-
-              {isLoadingRecommendedTags ? (
-                <TopicSkeleton />
-              ) : recommendedTopics.length > 0 ? (
-                <TopicList
-                  topics={recommendedTopics}
-                  actionLabel="Follow"
-                  hoverLabel="Follow"
-                  onAction={(topic) =>
-                    followTag(topic, {
-                      onSuccess: () =>
-                        open("Subject followed successfully", "success"),
-                      onError: () => open("Failed to follow subject", "error"),
-                    })
-                  }
-                />
-              ) : (
-                <p className="text-sm text-[var(--midnight-muted)]">
-                  No suggested subjects right now.
-                </p>
-              )}
+              <p className="mt-3 max-w-md text-[15px] leading-7 text-[var(--midnight-muted)]">
+                Follow subjects to shape the letters you see.
+              </p>
             </div>
-          </section>
-        )}
-      </main>
-    </MainLayout>
+          )}
+
+          <div className="mt-12 border-t border-[var(--midnight-border)]/70 pt-9">
+            <div className="mb-6 flex items-end justify-between gap-4">
+              <div>
+                <p className="text-xs tracking-[0.14em] text-[var(--midnight-soft)]">
+                  Suggested
+                </p>
+
+                <h2 className="mt-2 text-3xl font-bold tracking-[-0.05em] text-[var(--midnight-text)]">
+                  Subjects to follow
+                </h2>
+              </div>
+            </div>
+
+            {isLoadingRecommendedTags ? (
+              <TopicSkeleton />
+            ) : recommendedTopics.length > 0 ? (
+              <TopicList
+                topics={recommendedTopics}
+                actionLabel="Follow"
+                hoverLabel="Follow"
+                onAction={(topic) =>
+                  followTag(topic, {
+                    onSuccess: () =>
+                      open("Subject followed successfully", "success"),
+                    onError: () => open("Failed to follow subject", "error"),
+                  })
+                }
+              />
+            ) : (
+              <p className="text-sm text-[var(--midnight-muted)]">
+                No suggested subjects right now.
+              </p>
+            )}
+          </div>
+        </section>
+      )}
+    </main>
   );
 }
 
@@ -348,10 +342,11 @@ function TopicList({
           <button
             type="button"
             onClick={() => onAction(topic)}
-            className={`group ml-6 shrink-0 rounded-full border px-5 py-2 text-sm font-medium transition ${active
+            className={`group ml-6 shrink-0 rounded-full border px-5 py-2 text-sm font-medium transition ${
+              active
                 ? "border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-muted)] hover:border-red-400/40 hover:text-red-300"
                 : "border-[var(--midnight-border)]/70 text-[var(--midnight-muted)] hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-accent-hover)]"
-              }`}
+            }`}
           >
             <span className="relative block h-5 overflow-hidden">
               <span className="block transition-transform duration-200 group-hover:-translate-y-full">

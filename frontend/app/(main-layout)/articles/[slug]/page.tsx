@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { MoonStar } from "lucide-react";
 
-import MainLayout from "@/shared/components/layout/main-layout/main-layout";
 import { ArticleContent } from "@/app/(main-layout)/articles/[slug]/components/article-content";
 import HeadingNavigation, {
   type Heading,
@@ -188,154 +187,149 @@ export default async function ArticlePage({
   const tagNames = post.tags?.map((tag) => tag.name).filter(Boolean) ?? [];
 
   return (
-    <MainLayout>
+    <main className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-20 px-5 py-12 text-[var(--midnight-text)] md:py-16 xl:grid-cols-[minmax(0,1fr)_220px]">
       <ViewHandler postId={post.id} />
+      <article className="article-content mx-auto w-full max-w-3xl">
+        <header className="mb-14">
+          <div className="mb-10">
+            <BackButton />
+          </div>
 
-      <main className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-20 px-5 py-12 text-[var(--midnight-text)] md:py-16 xl:grid-cols-[minmax(0,1fr)_220px]">
-        <article className="article-content mx-auto w-full max-w-3xl">
-          <header className="mb-14">
-            <div className="mb-10">
-              <BackButton />
-            </div>
+          <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] px-4 py-2 text-xs tracking-[0.14em] text-[var(--midnight-soft)]">
+            <MoonStar className="h-3.5 w-3.5 text-[var(--midnight-accent)]/80" />
 
-            <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] px-4 py-2 text-xs tracking-[0.14em] text-[var(--midnight-soft)]">
-              <MoonStar className="h-3.5 w-3.5 text-[var(--midnight-accent)]/80" />
+            <span>{tagNames.length > 0 ? tagNames.join(" / ") : "Letter"}</span>
 
-              <span>
-                {tagNames.length > 0 ? tagNames.join(" / ") : "Letter"}
-              </span>
+            <span className="h-px w-8 bg-[var(--midnight-accent)]/50" />
+          </div>
 
-              <span className="h-px w-8 bg-[var(--midnight-accent)]/50" />
-            </div>
+          <div className="space-y-6">
+            <h1 className="text-4xl font-bold leading-[1.04] tracking-[-0.055em] text-[var(--midnight-text)] md:text-6xl">
+              {post.title}
+            </h1>
 
-            <div className="space-y-6">
-              <h1 className="text-4xl font-bold leading-[1.04] tracking-[-0.055em] text-[var(--midnight-text)] md:text-6xl">
-                {post.title}
-              </h1>
+            {post.subTitle && (
+              <p className="max-w-2xl text-xl leading-9 tracking-[-0.02em] text-[var(--midnight-muted)] md:text-2xl">
+                {post.subTitle}
+              </p>
+            )}
+          </div>
 
-              {post.subTitle && (
-                <p className="max-w-2xl text-xl leading-9 tracking-[-0.02em] text-[var(--midnight-muted)] md:text-2xl">
-                  {post.subTitle}
-                </p>
-              )}
-            </div>
+          {(post.author || post.tags?.length) && (
+            <div className="midnight-panel mt-10 rounded-2xl p-5">
+              {post.author && (
+                <div className="flex items-center gap-4">
+                  {post.author.avatar ? (
+                    <img
+                      src={post.author.avatar}
+                      alt={post.author.email}
+                      className="h-11 w-11 rounded-full border border-[var(--midnight-border)] object-cover opacity-95"
+                    />
+                  ) : (
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--midnight-border)] bg-[var(--midnight-code-bg)] text-sm font-medium text-[var(--midnight-accent)]">
+                      {`${post.author.email
+                        .charAt(0)
+                        .toUpperCase()}${post.author.email
+                        .charAt(1)
+                        .toUpperCase()}`}
+                    </div>
+                  )}
 
-            {(post.author || post.tags?.length) && (
-              <div className="midnight-panel mt-10 rounded-2xl p-5">
-                {post.author && (
-                  <div className="flex items-center gap-4">
-                    {post.author.avatar ? (
-                      <img
-                        src={post.author.avatar}
-                        alt={post.author.email}
-                        className="h-11 w-11 rounded-full border border-[var(--midnight-border)] object-cover opacity-95"
-                      />
-                    ) : (
-                      <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--midnight-border)] bg-[var(--midnight-code-bg)] text-sm font-medium text-[var(--midnight-accent)]">
-                        {`${post.author.email
-                          .charAt(0)
-                          .toUpperCase()}${post.author.email
-                          .charAt(1)
-                          .toUpperCase()}`}
-                      </div>
-                    )}
+                  <div>
+                    <Link
+                      href={`/${post.author.slug}`}
+                      className="text-[15px] font-medium text-[var(--midnight-text)] transition-colors hover:text-[var(--midnight-accent-hover)] hover:underline"
+                    >
+                      {post.author.fullName}
+                    </Link>
 
-                    <div>
-                      <Link
-                        href={`/${post.author.slug}`}
-                        className="text-[15px] font-medium text-[var(--midnight-text)] transition-colors hover:text-[var(--midnight-accent-hover)] hover:underline"
-                      >
-                        {post.author.fullName}
-                      </Link>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-[var(--midnight-muted)]">
+                      {post.createdAt && (
+                        <span>
+                          {new Date(post.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            }
+                          )}
+                        </span>
+                      )}
 
-                      <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-[var(--midnight-muted)]">
-                        {post.createdAt && (
-                          <span>
-                            {new Date(post.createdAt).toLocaleDateString(
-                              "en-US",
-                              {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              }
-                            )}
-                          </span>
-                        )}
-
-                        <span>&middot;</span>
-                        <span>{readingTime}</span>
-                        <span>&middot;</span>
-                        <span>written after hours</span>
-                      </div>
+                      <span>&middot;</span>
+                      <span>{readingTime}</span>
+                      <span>&middot;</span>
+                      <span>written after hours</span>
                     </div>
                   </div>
-                )}
+                </div>
+              )}
 
-                {post.tags && post.tags.length > 0 && (
-                  <div className="mt-6 flex flex-wrap gap-2">
-                    {post.tags.map((tag) => (
-                      <Link
-                        key={tag.id}
-                        href={`/tags/${tag.name}`}
-                        className="
+              {post.tags && post.tags.length > 0 && (
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {post.tags.map((tag) => (
+                    <Link
+                      key={tag.id}
+                      href={`/tags/${tag.name}`}
+                      className="
                           rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)]
                           px-3 py-1 text-sm text-[var(--midnight-muted)]
                           transition-colors hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-accent-hover)]
                         "
-                      >
-                        {tag.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="mt-8">
-              <ArticleToolbar postId={post.id} />
-            </div>
-          </header>
-
-          {post.thumbnailImage && (
-            <div className="mb-16 overflow-hidden rounded-[1.5rem] border border-[var(--midnight-border)]/70 bg-[var(--midnight-surface)] shadow-[0_28px_90px_rgba(0,0,0,0.24)]">
-              <div className="relative aspect-video w-full">
-                <Image
-                  src={post.thumbnailImage}
-                  alt={post.title}
-                  fill
-                  className="object-cover opacity-90 saturate-[0.82]"
-                  priority
-                  sizes="(max-width: 768px) 100vw, 1200px"
-                />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(9,11,15,0.56)] via-transparent to-transparent" />
-              </div>
+                    >
+                      {tag.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
-          <div className="relative overflow-visible">
-            <ArticleContent html={htmlWithIds} />
+          <div className="mt-8">
+            <ArticleToolbar postId={post.id} />
           </div>
+        </header>
 
-          {post.author && (
-            <div className="mt-24">
-              <PostsBySameAuthor
-                author={post.author}
-                posts={post.postsByAuthor}
+        {post.thumbnailImage && (
+          <div className="mb-16 overflow-hidden rounded-[1.5rem] border border-[var(--midnight-border)]/70 bg-[var(--midnight-surface)] shadow-[0_28px_90px_rgba(0,0,0,0.24)]">
+            <div className="relative aspect-video w-full">
+              <Image
+                src={post.thumbnailImage}
+                alt={post.title}
+                fill
+                className="object-cover opacity-90 saturate-[0.82]"
+                priority
+                sizes="(max-width: 768px) 100vw, 1200px"
               />
-            </div>
-          )}
-        </article>
 
-        {headings.length > 0 && (
-          <div className="hidden xl:block">
-            <div className="sticky top-28">
-              <HeadingNavigation headings={headings} />
+              <div className="absolute inset-0 bg-gradient-to-t from-[rgba(9,11,15,0.56)] via-transparent to-transparent" />
             </div>
           </div>
         )}
-      </main>
-    </MainLayout>
+
+        <div className="relative overflow-visible">
+          <ArticleContent html={htmlWithIds} />
+        </div>
+
+        {post.author && (
+          <div className="mt-24">
+            <PostsBySameAuthor
+              author={post.author}
+              posts={post.postsByAuthor}
+            />
+          </div>
+        )}
+      </article>
+
+      {headings.length > 0 && (
+        <div className="hidden xl:block">
+          <div className="sticky top-28">
+            <HeadingNavigation headings={headings} />
+          </div>
+        </div>
+      )}
+    </main>
   );
 }
 

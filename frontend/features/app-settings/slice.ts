@@ -6,6 +6,7 @@ const initialState: AppSettingsState = {
   font: "sans-serif",
   fontSize: "medium",
   isOpenSideBar: true,
+  isOpenSignInModal: false,
 };
 
 const appSettingsSlice = createSlice({
@@ -27,6 +28,12 @@ const appSettingsSlice = createSlice({
     setSideBarState: (state, action: PayloadAction<{ isOpen: boolean }>) => {
       state.isOpenSideBar = action.payload.isOpen;
     },
+    setSignInModalState: (
+      state,
+      action: PayloadAction<{ isOpen: boolean }>
+    ) => {
+      state.isOpenSignInModal = action.payload.isOpen;
+    },
   },
 });
 
@@ -36,5 +43,6 @@ export const {
   setFontSize,
   toggleSideBar,
   setSideBarState,
+  setSignInModalState,
 } = appSettingsSlice.actions;
 export default appSettingsSlice.reducer;

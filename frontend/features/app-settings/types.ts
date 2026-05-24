@@ -12,4 +12,5 @@ export type AppSettingsState = {
   font: Font;
   fontSize: FontSize;
   isOpenSideBar: boolean;
+  isOpenSignInModal: boolean;
 };
