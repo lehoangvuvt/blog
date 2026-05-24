@@ -22,7 +22,13 @@ export default function useFollowTag() {
 
         return {
           ...old,
-          followedTagIds: [...old.followedTagIds, tagToFollow.id],
+          followedTags: [
+            ...old.followedTags,
+            {
+              id: tagToFollow.id,
+              isEmailNotify: false,
+            },
+          ],
         };
       });
 

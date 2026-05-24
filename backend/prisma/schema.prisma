@@ -295,6 +295,8 @@ model TagFollow {
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id String
 
+  is_email_notify Boolean @default(false)
+
   created_at DateTime @default(now())
 
   @@unique([tag_id, user_id])

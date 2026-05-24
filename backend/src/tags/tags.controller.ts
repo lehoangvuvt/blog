@@ -51,4 +51,22 @@ export class TagsController {
   ) {
     return this.tagsService.unfollowTag(user.sub, tagId);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':tagId/follow/email-notify')
+  turnOnTagEmailNotify(
+    @CurrentUser() user: { sub: string },
+    @Param('tagId') tagId: string,
+  ) {
+    return this.tagsService.toggleTagFollowEmailNotify(user.sub, tagId, 'on');
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':tagId/follow/email-notify')
+  turnOffTagEmailNotify(
+    @CurrentUser() user: { sub: string },
+    @Param('tagId') tagId: string,
+  ) {
+    return this.tagsService.toggleTagFollowEmailNotify(user.sub, tagId, 'off');
+  }
 }

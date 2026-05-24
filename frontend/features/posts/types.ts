@@ -124,7 +124,10 @@ export type TrendingTimeRange = (typeof trendingTimeRanges)[number];
 
 export type MeQueryData = {
   savedPostIds: number[];
-  followedTagIds: string[];
+  followedTags: {
+    id: string;
+    isEmailNotify: boolean;
+  }[];
   [key: string]: unknown;
 };
 

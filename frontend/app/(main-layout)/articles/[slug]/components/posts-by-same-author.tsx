@@ -45,7 +45,7 @@ export function PostsBySameAuthor({ author, posts }: Props) {
           </div>
 
           <Link
-            href={`/@${author.slug}`}
+            href={`/${author.slug}`}
             className="mt-3 flex items-center gap-3"
           >
             {author.avatar ? (

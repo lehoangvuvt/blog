@@ -23,7 +23,10 @@ const allTag: Tag = {
 export default function Home() {
   const { data: me } = useMe();
 
-  const followedTagIds = useMemo(() => me?.followedTagIds ?? [], [me]);
+  const followedTagIds = useMemo(
+    () => (me?.followedTags ? me.followedTags.map((tag) => tag.id) : []),
+    [me]
+  );
 
   const shouldFetchFollowedTags = followedTagIds.length > 0;
 

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -105,6 +105,34 @@ export class TagsService {
           tag_id: tagId,
           user_id: userId,
         },
+      },
+    });
+  }
+
+  async toggleTagFollowEmailNotify(
+    userId: string,
+    tagId: string,
+    state: 'on' | 'off',
+  ) {
+    const tagFollow = await this.prismaService.tagFollow.findUnique({
+      where: {
+        tag_id_user_id: {
+          tag_id: tagId,
+          user_id: userId,
+        },
+      },
+    });
+
+    if (!tagFollow) {
+      throw new NotFoundException('User not follow this tag');
+    }
+
+    return await this.prismaService.tagFollow.update({
+      where: {
+        id: tagFollow.id,
+      },
+      data: {
+        is_email_notify: state === 'on',
       },
     });
   }

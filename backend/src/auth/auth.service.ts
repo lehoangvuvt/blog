@@ -215,6 +215,7 @@ export class AuthService {
       },
       select: {
         tag_id: true,
+        is_email_notify: true,
       },
     });
 
@@ -229,7 +230,12 @@ export class AuthService {
       followers,
       followings,
       savedPostIds,
-      followedTagIds: followedTagIds.map((tag) => tag.tag_id),
+      followedTags: followedTagIds.map((tag) => {
+        return {
+          id: tag.tag_id,
+          isEmailNotify: tag.is_email_notify,
+        };
+      }),
     };
   }
 

@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from 'src/auth/guards/optional-jwt-guard';
+// import { PostsEmailQueueModule } from 'src/posts-email-queue/posts-email-queue.module';
 
 @Module({
   controllers: [PostsController],
@@ -22,6 +23,7 @@ import { OptionalJwtAuthGuard } from 'src/auth/guards/optional-jwt-guard';
         },
       }),
     }),
+    // PostsEmailQueueModule,
   ],
   providers: [PostsService, PrismaService, JwtAuthGuard, OptionalJwtAuthGuard],
 })

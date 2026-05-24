@@ -22,8 +22,8 @@ export default function useUnfollowTag() {
 
         return {
           ...old,
-          followedTagIds: old.followedTagIds.filter(
-            (id) => id !== tagToUnfollow.id,
+          followedTags: old.followedTags.filter(
+            (tag) => tag.id !== tagToUnfollow.id
           ),
         };
       });

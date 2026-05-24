@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Bell, BellOff, Check, ChevronDown, Mail, Slash } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
+
 import PostsContainer from "@/features/posts/components/posts-container";
 import { PostItem } from "@/features/posts/components/post-item";
 import { usePosts } from "@/features/posts/hooks/use-posts";
@@ -13,6 +15,7 @@ import useUnfollowTag from "@/features/tags/hooks/use-unfollow-tag";
 import NotificationPopover from "@/shared/components/notification-popover";
 import useNotification from "@/hooks/use-notification";
 import type { Tag } from "@/features/tags/types";
+import useToggleTagFollowEmailNotify from "@/features/tags/hooks/use-toggle-tag-follow-email-notify";
 
 type Tab = "writers" | "subjects";
 
@@ -25,9 +28,17 @@ export default function FollowingPage() {
     params.tabType === "writers" ? "writers" : "subjects"
   );
 
+  const [openTopicMenuId, setOpenTopicMenuId] = useState<string | null>(null);
+
   const { data: me, isLoading: isLoadingMe } = useMe();
 
-  const followedTagIds = useMemo(() => me?.followedTagIds ?? [], [me]);
+  const emailEnabledTopicIds =
+    me?.followedTags?.filter((t) => t.isEmailNotify).map((t) => t.id) ?? [];
+
+  const followedTagIds = useMemo(
+    () => (me?.followedTags ? me.followedTags.map((tag) => tag.id) : []),
+    [me]
+  );
 
   const followingIds = useMemo(
     () => me?.followings?.map((user) => user.id) ?? [],
@@ -90,14 +101,47 @@ export default function FollowingPage() {
 
   const { mutate: followTag } = useFollowTag();
   const { mutate: unfollowTag } = useUnfollowTag();
+  const { mutate: toggleEmailNotify } = useToggleTagFollowEmailNotify();
 
   useEffect(() => {
     router.replace(`/following/${activeTab}`);
   }, [activeTab, router]);
 
+  const handleToggleEmail = (topic: Tag, enabled: boolean) => {
+    toggleEmailNotify(
+      {
+        tag: topic,
+        state: enabled ? "on" : "off",
+      },
+      {
+        onSuccess: () => {
+          open(
+            enabled
+              ? `Email notifications on for ${topic.name}`
+              : `Email notifications off for ${topic.name}`,
+            "success"
+          );
+
+          setOpenTopicMenuId(null);
+        },
+      }
+    );
+  };
+
+  const handleUnfollowTopic = (topic: Tag) => {
+    unfollowTag(topic, {
+      onSuccess: () => {
+        open("Subject unfollowed successfully", "success");
+        setOpenTopicMenuId(null);
+      },
+      onError: () => open("Failed to unfollow subject", "error"),
+    });
+  };
+
   return (
     <main className="min-h-screen bg-[var(--midnight-bg)] text-[var(--midnight-text)]">
       <NotificationPopover onClose={close} notifications={notifications} />
+
       <section className="mx-auto w-full max-w-3xl px-5 pt-12 md:px-6">
         <header className="border-b border-[var(--midnight-border)]/70 pb-7">
           <h1 className="mt-4 text-5xl font-bold tracking-[-0.06em] text-[var(--midnight-text)]">
@@ -225,16 +269,12 @@ export default function FollowingPage() {
           ) : followedTopics.length > 0 ? (
             <TopicList
               topics={followedTopics}
-              actionLabel="Following"
-              hoverLabel="Unfollow"
-              onAction={(topic) =>
-                unfollowTag(topic, {
-                  onSuccess: () =>
-                    open("Subject unfollowed successfully", "success"),
-                  onError: () => open("Failed to unfollow subject", "error"),
-                })
-              }
-              active
+              mode="following"
+              openTopicMenuId={openTopicMenuId}
+              setOpenTopicMenuId={setOpenTopicMenuId}
+              emailEnabledTopicIds={emailEnabledTopicIds}
+              onToggleEmail={handleToggleEmail}
+              onUnfollow={handleUnfollowTopic}
             />
           ) : (
             <div className="pt-4 pb-10">
@@ -266,12 +306,18 @@ export default function FollowingPage() {
             ) : recommendedTopics.length > 0 ? (
               <TopicList
                 topics={recommendedTopics}
-                actionLabel="Follow"
-                hoverLabel="Follow"
-                onAction={(topic) =>
+                mode="suggested"
+                openTopicMenuId={openTopicMenuId}
+                setOpenTopicMenuId={setOpenTopicMenuId}
+                emailEnabledTopicIds={emailEnabledTopicIds}
+                onToggleEmail={handleToggleEmail}
+                onUnfollow={handleUnfollowTopic}
+                onFollow={(topic) =>
                   followTag(topic, {
-                    onSuccess: () =>
-                      open("Subject followed successfully", "success"),
+                    onSuccess: () => {
+                      open("Subject followed successfully", "success");
+                      setOpenTopicMenuId(topic.id);
+                    },
                     onError: () => open("Failed to follow subject", "error"),
                   })
                 }
@@ -310,56 +356,141 @@ function TopicSkeleton() {
 
 function TopicList({
   topics,
-  actionLabel,
-  hoverLabel,
-  onAction,
-  active = false,
+  mode,
+  openTopicMenuId,
+  setOpenTopicMenuId,
+  emailEnabledTopicIds,
+  onFollow,
+  onUnfollow,
+  onToggleEmail,
 }: {
   topics: Tag[];
-  actionLabel: string;
-  hoverLabel: string;
-  onAction: (topic: Tag) => void;
-  active?: boolean;
+  mode: "following" | "suggested";
+  openTopicMenuId: string | null;
+  setOpenTopicMenuId: (id: string | null) => void;
+  emailEnabledTopicIds: string[];
+  onFollow?: (topic: Tag) => void;
+  onUnfollow: (topic: Tag) => void;
+  onToggleEmail: (topic: Tag, enabled: boolean) => void;
 }) {
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (!menuRef.current) return;
+
+      if (!menuRef.current.contains(event.target as Node)) {
+        setOpenTopicMenuId(null);
+      }
+    }
+
+    if (openTopicMenuId) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [openTopicMenuId, setOpenTopicMenuId]);
+
   return (
     <div className="divide-y divide-[var(--midnight-border)]/70">
-      {topics.map((topic) => (
-        <div
-          key={topic.id}
-          className="flex w-full items-center justify-between py-5 text-left"
-        >
-          <div className="min-w-0">
-            <h3 className="truncate text-xl font-bold tracking-[-0.035em] text-[var(--midnight-text)]">
-              {topic.name}
-            </h3>
+      {topics.map((topic) => {
+        const isMenuOpen = openTopicMenuId === topic.id;
+        const isEmailEnabled = emailEnabledTopicIds.includes(topic.id);
+        const isFollowing = mode === "following" || isMenuOpen;
 
-            <p className="mt-1 text-sm text-[var(--midnight-muted)]">
-              {topic.postsCount.toLocaleString()} &nbsp;letters ·{" "}
-              {topic.authorsCount.toLocaleString()} &nbsp;&nbsp;writers
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => onAction(topic)}
-            className={`group ml-6 shrink-0 rounded-full border px-5 py-2 text-sm font-medium transition ${
-              active
-                ? "border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-muted)] hover:border-red-400/40 hover:text-red-300"
-                : "border-[var(--midnight-border)]/70 text-[var(--midnight-muted)] hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-accent-hover)]"
-            }`}
+        return (
+          <div
+            key={topic.id}
+            className="flex w-full items-center justify-between py-5 text-left"
           >
-            <span className="relative block h-5 overflow-hidden">
-              <span className="block transition-transform duration-200 group-hover:-translate-y-full">
-                {actionLabel}
-              </span>
+            <div className="min-w-0">
+              <h3 className="truncate text-xl font-bold tracking-[-0.035em] text-[var(--midnight-text)]">
+                {topic.name}
+              </h3>
 
-              <span className="absolute left-0 top-0 block translate-y-full transition-transform duration-200 group-hover:translate-y-0">
-                {hoverLabel}
-              </span>
-            </span>
-          </button>
-        </div>
-      ))}
+              <p className="mt-1 text-sm text-[var(--midnight-muted)]">
+                {topic.postsCount.toLocaleString()} &nbsp;letters ·{" "}
+                {topic.authorsCount.toLocaleString()} &nbsp;&nbsp;writers
+              </p>
+            </div>
+
+            <div
+              ref={isMenuOpen ? menuRef : null}
+              className="relative ml-6 shrink-0"
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  if (isFollowing) {
+                    setOpenTopicMenuId(isMenuOpen ? null : topic.id);
+                    return;
+                  }
+
+                  onFollow?.(topic);
+                }}
+                className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
+                  isFollowing
+                    ? "border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-text)] hover:border-[var(--midnight-accent)]/60"
+                    : "border-[var(--midnight-border)]/70 text-[var(--midnight-muted)] hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-accent-hover)]"
+                }`}
+              >
+                {isFollowing ? "Following" : "Follow"}
+
+                {isFollowing && (
+                  <ChevronDown
+                    className={`h-4 w-4 transition ${
+                      isMenuOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                )}
+              </button>
+
+              {isMenuOpen && (
+                <div className="absolute right-0 top-12 z-50 w-72 overflow-hidden rounded-2xl border border-[var(--midnight-border)]/70 bg-[var(--midnight-surface)] shadow-[0_18px_60px_rgba(0,0,0,0.35)]">
+                  <button
+                    type="button"
+                    onClick={() => onToggleEmail(topic, true)}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-[var(--midnight-text)] transition hover:bg-[var(--midnight-code-bg)]"
+                  >
+                    <Bell className="h-4 w-4 text-[var(--midnight-muted)]" />
+
+                    <span className="flex-1">Email notifications on</span>
+
+                    {isEmailEnabled && (
+                      <Check className="h-4 w-4 text-[var(--midnight-accent)]" />
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => onToggleEmail(topic, false)}
+                    className="flex w-full items-center gap-3 border-t border-[var(--midnight-border)]/70 px-4 py-3 text-left text-sm text-[var(--midnight-muted)] transition hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-text)]"
+                  >
+                    <BellOff className="h-4 w-4" />
+
+                    <span className="flex-1">Email notifications off</span>
+
+                    {!isEmailEnabled && (
+                      <Check className="h-4 w-4 text-[var(--midnight-accent)]" />
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => onUnfollow(topic)}
+                    className="flex w-full items-center gap-3 border-t border-[var(--midnight-border)]/70 px-4 py-3 text-left text-sm text-red-300 transition hover:bg-red-400/10"
+                  >
+                    <Slash className="h-4 w-4" />
+                    Unfollow
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

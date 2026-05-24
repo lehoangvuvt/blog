@@ -1,17 +1,25 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 // biome-ignore lint/style/useImportType: <explanation>
 import { PrismaService } from 'src/prisma.service';
 import type CreatePostDto from './dtos/create-post.dto';
 import type { Prisma } from 'generated/prisma/browser';
 import type { FindManyPostsDto } from './dtos/find-many-posts.dto';
 import { generateSlug, sanitizedHtmlContent } from 'src/shared/utils';
+// import { PostsEmailProducer } from 'src/posts-email-queue/producers/posts-email.producer';
 
 @Injectable()
 export class PostsService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    // private readonly postsEmailProducer: PostsEmailProducer,
+  ) {}
 
   private async ensurePostExists(postId: number) {
     const post = await this.prismaService.post.findUnique({
@@ -173,29 +181,37 @@ export class PostsService {
       tags,
       thumbnailImage,
     } = dto;
-    return await this.prismaService.post.create({
-      data: {
-        title,
-        sub_title: subTitle,
-        json_content: jsonContent,
-        html_content: sanitizedHtmlContent(htmlContent),
-        ...(thumbnailImage && { thumbnail_image: thumbnailImage }),
-        authorId: userId,
-        slug: generateSlug(title),
-        published,
-        tags: {
-          connectOrCreate: tags.map((tag) => ({
-            where: {
-              name: tag.trim().toLowerCase(),
-            },
-            create: {
-              name: tag.trim().toLowerCase(),
-              slug: generateSlug(tag, false),
-            },
-          })),
+    try {
+      const createdPost = await this.prismaService.post.create({
+        data: {
+          title,
+          sub_title: subTitle,
+          json_content: jsonContent,
+          html_content: sanitizedHtmlContent(htmlContent),
+          ...(thumbnailImage && { thumbnail_image: thumbnailImage }),
+          authorId: userId,
+          slug: generateSlug(title),
+          published,
+          tags: {
+            connectOrCreate: tags.map((tag) => ({
+              where: {
+                name: tag.trim().toLowerCase(),
+              },
+              create: {
+                name: tag.trim().toLowerCase(),
+                slug: generateSlug(tag, false),
+              },
+            })),
+          },
         },
-      },
-    });
+      });
+
+      // await this.postsEmailProducer.enqueuePostsEmail(createdPost.id);
+
+      return createdPost;
+    } catch {
+      throw new InternalServerErrorException('Cannot create post');
+    }
   }
 
   async findBySlug(slug: string) {

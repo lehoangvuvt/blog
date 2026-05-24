@@ -77,6 +77,155 @@ export class EmailService {
     });
   }
 
+  async sendNewPostEmail(params: {
+    to: string;
+    name: string;
+    postTitle: string;
+    postSubTitle?: string | null;
+    thumbnailImage?: string | null;
+    postUrl: string;
+    authorName: string;
+  }) {
+    return this.sendEmail({
+      to: params.to,
+      subject: `New letter: ${params.postTitle}`,
+      html: this.baseTemplate(`
+      <div
+        style="
+          max-width: 600px;
+          margin: 0 auto;
+          background: #0b0f14;
+          color: #edf1f7;
+          padding: 40px 24px 56px;
+        "
+      >
+        <div
+          style="
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: #667389;
+            margin-bottom: 32px;
+          "
+        >
+          THE MIDNIGHT LETTERS
+        </div>
+
+        ${
+          params.thumbnailImage
+            ? `
+          <a
+            href="${params.postUrl}"
+            style="
+              display:block;
+              overflow:hidden;
+              border-radius:20px;
+              margin-bottom:28px;
+              text-decoration:none;
+            "
+          >
+            <img
+              src="${params.thumbnailImage}"
+              alt="${params.postTitle}"
+              style="
+                width:100%;
+                display:block;
+                object-fit:cover;
+                max-height:320px;
+              "
+            />
+          </a>
+        `
+            : ''
+        }
+
+        <p
+          style="
+            margin:0 0 12px;
+            font-family: Arial, sans-serif;
+            font-size:14px;
+            line-height:1.7;
+            color:#8ea0ba;
+          "
+        >
+          ${params.authorName} published a new letter
+        </p>
+
+        <h1
+          style="
+            margin:0;
+            font-family: Georgia, serif;
+            font-size:38px;
+            line-height:1.12;
+            font-weight:700;
+            letter-spacing:-1.5px;
+            color:#edf1f7;
+          "
+        >
+          ${params.postTitle}
+        </h1>
+
+        ${
+          params.postSubTitle
+            ? `
+          <p
+            style="
+              margin:20px 0 0;
+              font-family: Arial, sans-serif;
+              font-size:17px;
+              line-height:1.8;
+              color:#a9b4c7;
+            "
+          >
+            ${params.postSubTitle}
+          </p>
+        `
+            : ''
+        }
+
+        <div style="margin-top:40px;">
+          <a
+            href="${params.postUrl}"
+            style="
+              display:inline-block;
+              background:#b7c4d9;
+              color:#0b0f14;
+              text-decoration:none;
+              padding:13px 24px;
+              border-radius:999px;
+              font-family:Arial,sans-serif;
+              font-size:15px;
+              font-weight:600;
+            "
+          >
+            Read letter
+          </a>
+        </div>
+
+        <div
+          style="
+            margin-top:56px;
+            padding-top:24px;
+            border-top:1px solid #1d2430;
+          "
+        >
+          <p
+            style="
+              margin:0;
+              font-family:Arial,sans-serif;
+              font-size:13px;
+              line-height:1.7;
+              color:#667389;
+            "
+          >
+            You received this because you enabled email notifications for topics you follow on The Midnight Letters.
+          </p>
+        </div>
+      </div>
+    `),
+    });
+  }
+
   private baseTemplate(content: string) {
     return `
       <div
