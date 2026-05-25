@@ -83,7 +83,7 @@ export function PostsBySameAuthor({ author, posts }: Props) {
             <div className="grid gap-5 md:grid-cols-[1fr_96px]">
               <div className="min-w-0">
                 <Link
-                  href={`/articles/${post.slug}`}
+                  href={`/letters/${post.slug}`}
                   className="block text-xl font-semibold leading-snug tracking-[-0.035em] text-[var(--midnight-text)] transition-colors hover:text-[var(--midnight-accent-hover)]"
                 >
                   {post.title}
@@ -100,7 +100,7 @@ export function PostsBySameAuthor({ author, posts }: Props) {
                 </div>
               </div>
 
-              <Link href={`/articles/${post.slug}`} className="hidden md:block">
+              <Link href={`/letters/${post.slug}`} className="hidden md:block">
                 <div className="aspect-square overflow-hidden rounded-2xl border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)]">
                   {post.thumbnailImage ? (
                     <img

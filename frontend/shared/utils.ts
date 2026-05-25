@@ -9,7 +9,7 @@ export function formatPostDate(date: string | Date) {
 }
 
 export function getArticleLink(slug: string) {
-  return `/articles/${slug}`;
+  return `/letters/${slug}`;
 }
 
 export function formatTimeAgo(date: string) {

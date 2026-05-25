@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 // biome-ignore lint/style/useImportType: <explanation>
 import { AuthService } from './auth.service';
-import type RegisterDto from './dtos/register.dto';
+import RegisterDto from './dtos/register.dto';
 import { CreatePendingRegistrationDto } from './dtos/create-pending-registration.dto';
 import { VerifyEmailDto } from './dtos/verify-email.dto';
 import LoginDto from './dtos/login.dto';

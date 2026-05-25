@@ -13,17 +13,17 @@ import {
 import { UsersService } from 'src/users/users.service';
 import * as argon2 from 'argon2';
 import * as jwt from 'jsonwebtoken';
-import type RegisterDto from './dtos/register.dto';
+import RegisterDto from './dtos/register.dto';
 // biome-ignore lint/style/useImportType: <explanation>
 import { ConfigService } from '@nestjs/config';
 // biome-ignore lint/style/useImportType: <explanation>
 import { EmailService } from 'src/email/email.service';
-import type { CreatePendingRegistrationDto } from './dtos/create-pending-registration.dto';
+import { CreatePendingRegistrationDto } from './dtos/create-pending-registration.dto';
 // biome-ignore lint/style/useImportType: <explanation>
 import { PrismaService } from 'src/prisma.service';
 import { createHash, randomBytes } from 'node:crypto';
 import { addMinutes } from 'date-fns';
-import type LoginDto from './dtos/login.dto';
+import LoginDto from './dtos/login.dto';
 
 @Injectable()
 export class AuthService {

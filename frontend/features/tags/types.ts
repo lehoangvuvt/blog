@@ -1,3 +1,5 @@
+import type { PublicUserInfo } from "@/features/users/types";
+
 export type GetTagsParams = {
   search?: string;
   page?: number;
@@ -25,3 +27,11 @@ export type GetTagsResponse = {
     nextPage: number | null;
   };
 };
+
+export type FeaturedAuthor = Omit<
+  PublicUserInfo & {
+    postsCount: number;
+    score: number;
+  },
+  "introduction"
+>;

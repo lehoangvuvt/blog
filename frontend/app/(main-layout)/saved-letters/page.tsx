@@ -11,7 +11,7 @@ export default function SavedPostsPage() {
   const savedPosts = data ?? [];
 
   return (
-    <main className="min-h-screen bg-[var(--midnight-bg)] text-[var(--midnight-text)]">
+    <main className="min-h-screen text-[var(--midnight-text)]">
       <section className="mx-auto w-full max-w-3xl px-5 pt-12 md:px-6">
         <header className="border-b border-[var(--midnight-border)]/70 pb-7">
           <h1 className="mt-4 text-5xl font-bold tracking-[-0.06em] text-[var(--midnight-text)]">
@@ -37,7 +37,7 @@ export default function SavedPostsPage() {
                 post.author?.fullName || post.author?.email || "Unknown writer";
 
               const authorSlug = post.author?.slug;
-              const postLink = `/articles/${post.slug}`;
+              const postLink = `/letters/${post.slug}`;
 
               return (
                 <PostItem.Container key={post.id}>

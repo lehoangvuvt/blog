@@ -139,7 +139,7 @@ export default function FollowingPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[var(--midnight-bg)] text-[var(--midnight-text)]">
+    <main className="min-h-screen text-[var(--midnight-text)]">
       <NotificationPopover onClose={close} notifications={notifications} />
 
       <section className="mx-auto w-full max-w-3xl px-5 pt-12 md:px-6">
@@ -201,7 +201,7 @@ export default function FollowingPage() {
                   "Unknown writer";
 
                 const authorSlug = post.author?.slug;
-                const postLink = `/articles/${post.slug}`;
+                const postLink = `/letters/${post.slug}`;
 
                 return (
                   <PostItem.Container key={post.id}>

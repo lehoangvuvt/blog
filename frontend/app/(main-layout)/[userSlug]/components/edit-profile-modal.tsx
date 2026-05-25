@@ -1,5 +1,6 @@
 "use client";
 
+import useUpdateProfile from "@/features/users/hooks/use-update-profile";
 import type { GetUserInfoResponse } from "@/features/users/types";
 import { ImageIcon, Pencil, X } from "lucide-react";
 import { useState } from "react";
@@ -32,6 +33,8 @@ export default function EditProfileModal({
   const [backgroundPreview, setBackgroundPreview] = useState(
     form.backgroundImage
   );
+
+  const { mutate: updateProfile } = useUpdateProfile();
 
   if (!open) return null;
 
@@ -70,7 +73,11 @@ export default function EditProfileModal({
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log(form);
+    updateProfile({
+      fullName: form.fullName,
+      slug: form.slug,
+      introduction: form.introduction,
+    })
     onClose();
   };
 

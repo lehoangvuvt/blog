@@ -3,12 +3,12 @@ import sanitizeHtml from "sanitize-html";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { MoonStar } from "lucide-react";
+import { MoonStar, Plus } from "lucide-react";
 
-import { ArticleContent } from "@/app/(main-layout)/articles/[slug]/components/article-content";
+import { ArticleContent } from "@/app/(main-layout)/letters/[slug]/components/article-content";
 import HeadingNavigation, {
   type Heading,
-} from "@/app/(main-layout)/articles/[slug]/components/headings";
+} from "@/app/(main-layout)/letters/[slug]/components/headings";
 
 import type { PostDetails } from "@/features/posts/types";
 import { PostsBySameAuthor } from "./components/posts-by-same-author";
@@ -16,6 +16,7 @@ import { ArticleToolbar } from "./components/article-toolbar";
 import { BackButton } from "@/shared/components/back-button";
 import ViewHandler from "./components/view-handler";
 import { notFound } from "next/navigation";
+import FollowSubjectsSidebar from "./components/follow-subjects-sidebar";
 
 function slugify(text: string) {
   return text
@@ -48,14 +49,9 @@ function extractHeadings(html: string) {
   const htmlWithIds = html.replace(
     /<h([2-4])([^>]*)>(.*?)<\/h\1>/gi,
     (_, level, attrs, content) => {
-      const text = content
-        .replace(/<[^>]+>/g, "")
-        .replace(/\s+/g, " ")
-        .trim();
+      const text = content.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 
-      if (!text) {
-        return `<h${level}${attrs}>${content}</h${level}>`;
-      }
+      if (!text) return `<h${level}${attrs}>${content}</h${level}>`;
 
       const baseId = slugify(text);
       const count = usedIds.get(baseId) ?? 0;
@@ -73,7 +69,7 @@ function extractHeadings(html: string) {
       const cleanAttrs = attrs.replace(/\s?id=(["']).*?\1/g, "");
 
       return `<h${level}${cleanAttrs} id="${id}">${content}</h${level}>`;
-    }
+    },
   );
 
   return {
@@ -87,12 +83,10 @@ async function getPost(slug: string) {
     `${process.env.NEXT_PUBLIC_BASE_API_URL}/posts/${slug}`,
     {
       next: { revalidate: 60 },
-    }
+    },
   );
 
-  if (res.status === 404) {
-    notFound();
-  }
+  if (res.status === 404) notFound();
 
   if (!res.ok) {
     const text = await res.text();
@@ -109,7 +103,6 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-
   const post = await getPost(slug);
 
   const title = post.title;
@@ -152,7 +145,6 @@ export default async function ArticlePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-
   const post = await getPost(slug);
 
   const sanitizedHtmlContent = sanitizeHtml(post.htmlContent ?? "", {
@@ -185,10 +177,14 @@ export default async function ArticlePage({
   const { headings, htmlWithIds } = extractHeadings(sanitizedHtmlContent);
 
   const tagNames = post.tags?.map((tag) => tag.name).filter(Boolean) ?? [];
+  const suggestedTags = post.tags?.slice(0, 6) ?? [];
 
   return (
-    <main className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-20 px-5 py-12 text-[var(--midnight-text)] md:py-16 xl:grid-cols-[minmax(0,1fr)_220px]">
+    <main className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-16 px-5 py-12 text-[var(--midnight-text)] md:py-16 xl:grid-cols-[220px_minmax(0,1fr)_220px]">
       <ViewHandler postId={post.id} />
+
+      <FollowSubjectsSidebar tags={suggestedTags} />
+
       <article className="article-content mx-auto w-full max-w-3xl">
         <header className="mb-14">
           <div className="mb-10">
@@ -197,9 +193,7 @@ export default async function ArticlePage({
 
           <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] px-4 py-2 text-xs tracking-[0.14em] text-[var(--midnight-soft)]">
             <MoonStar className="h-3.5 w-3.5 text-[var(--midnight-accent)]/80" />
-
             <span>{tagNames.length > 0 ? tagNames.join(" / ") : "Letter"}</span>
-
             <span className="h-px w-8 bg-[var(--midnight-accent)]/50" />
           </div>
 
@@ -227,11 +221,7 @@ export default async function ArticlePage({
                     />
                   ) : (
                     <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--midnight-border)] bg-[var(--midnight-code-bg)] text-sm font-medium text-[var(--midnight-accent)]">
-                      {`${post.author.email
-                        .charAt(0)
-                        .toUpperCase()}${post.author.email
-                        .charAt(1)
-                        .toUpperCase()}`}
+                      {`${post.author.email.charAt(0).toUpperCase()}${post.author.email.charAt(1).toUpperCase()}`}
                     </div>
                   )}
 
@@ -252,7 +242,7 @@ export default async function ArticlePage({
                               year: "numeric",
                               month: "long",
                               day: "numeric",
-                            }
+                            },
                           )}
                         </span>
                       )}
@@ -271,12 +261,8 @@ export default async function ArticlePage({
                   {post.tags.map((tag) => (
                     <Link
                       key={tag.id}
-                      href={`/tags/${tag.name}`}
-                      className="
-                          rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)]
-                          px-3 py-1 text-sm text-[var(--midnight-muted)]
-                          transition-colors hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-accent-hover)]
-                        "
+                      href={`/subjects/${tag.name}`}
+                      className="rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] px-3 py-1 text-sm text-[var(--midnight-muted)] transition-colors hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-accent-hover)]"
                     >
                       {tag.name}
                     </Link>
@@ -314,10 +300,7 @@ export default async function ArticlePage({
 
         {post.author && (
           <div className="mt-24">
-            <PostsBySameAuthor
-              author={post.author}
-              posts={post.postsByAuthor}
-            />
+            <PostsBySameAuthor author={post.author} posts={post.postsByAuthor} />
           </div>
         )}
       </article>

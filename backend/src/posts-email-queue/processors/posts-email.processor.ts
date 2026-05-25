@@ -64,7 +64,7 @@ export default class PostsEmailProcessor extends WorkerHost {
           postTitle: post.title,
           postSubTitle: post.sub_title,
           ...(post.thumbnail_image && { thumbnailImage: post.thumbnail_image }),
-          postUrl: `${process.env.APP_URL}/articles/${post.slug}`,
+          postUrl: `${process.env.APP_URL}/letters/${post.slug}`,
           authorName: post.author?.full_name ?? 'Unknown writer',
         }),
       ),

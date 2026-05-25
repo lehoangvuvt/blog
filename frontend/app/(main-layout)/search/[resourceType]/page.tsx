@@ -6,7 +6,7 @@ import Loading from "@/shared/components/loading";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 const tabs = [
-  { label: "Letters", resource: "articles" },
+  { label: "Letters", resource: "letters" },
   { label: "Writers", resource: "people" },
   { label: "Topics", resource: "topics" },
 ];
@@ -17,14 +17,14 @@ export default function SearchPage() {
   const searchParams = useSearchParams();
 
   const query = searchParams.get("q") ?? "";
-  const resourceType = String(params.resourceType ?? "articles");
+  const resourceType = String(params.resourceType ?? "letters");
 
   const { data: postsData, isLoading } = usePosts(
     {
       search: query,
       limit: 10,
     },
-    resourceType === "articles" && query.length > 0
+    resourceType === "letters" && query.length > 0
   );
 
   const posts = postsData?.pages.flatMap((page) => page.data) ?? [];
@@ -45,7 +45,7 @@ export default function SearchPage() {
             {query}
           </h1>
 
-          {!isLoading && resourceType === "articles" && (
+          {!isLoading && resourceType === "letters" && (
             <p className="mt-4 text-[15px] leading-7 text-[var(--midnight-muted)]">
               {posts.length} {posts.length === 1 ? "letter" : "letters"} found
               in the archive.
@@ -79,7 +79,7 @@ export default function SearchPage() {
         <section className="mt-5">
           {isLoading && <Loading />}
 
-          {!isLoading && resourceType === "articles" && posts.length > 0 && (
+          {!isLoading && resourceType === "letters" && posts.length > 0 && (
             <div className="divide-y divide-[var(--midnight-border)]/70">
               {posts.map((post, index) => (
                 <PostItem.Container key={`${post.id}-${index}`}>
@@ -100,7 +100,7 @@ export default function SearchPage() {
                       </PostItem.Date>
                     </PostItem.Header>
 
-                    <PostItem.Title link={`/articles/${post.slug}`}>
+                    <PostItem.Title link={`/letters/${post.slug}`}>
                       {post.title}
                     </PostItem.Title>
 
@@ -112,14 +112,14 @@ export default function SearchPage() {
                   <PostItem.Thumbnail
                     src={post.thumbnailImage ?? ""}
                     alt={post.title}
-                    link={`/articles/${post.slug}`}
+                    link={`/letters/${post.slug}`}
                   />
                 </PostItem.Container>
               ))}
             </div>
           )}
 
-          {!isLoading && resourceType === "articles" && posts.length === 0 && (
+          {!isLoading && resourceType === "letters" && posts.length === 0 && (
             <div className="pt-10 pb-16">
               <p className="text-2xl font-bold tracking-[-0.04em] text-[var(--midnight-text)]">
                 Nothing surfaced.
@@ -131,7 +131,7 @@ export default function SearchPage() {
             </div>
           )}
 
-          {!isLoading && resourceType !== "articles" && (
+          {!isLoading && resourceType !== "letters" && (
             <div className="py-14">
               <p className="text-2xl font-bold tracking-[-0.04em] text-[var(--midnight-text)]">
                 This room is not open yet.

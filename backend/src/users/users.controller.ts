@@ -1,17 +1,21 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
+  Body,
   Controller,
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
 // biome-ignore lint/style/useImportType: <explanation>
 import { UsersService } from './users.service';
-import type { FindManyPostsDto } from 'src/posts/dtos/find-many-posts.dto';
+import { FindManyPostsDto } from 'src/posts/dtos/find-many-posts.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import UpdateUserProfileDto from './dtos/update-user-profile';
 
 @Controller('users')
 export class UsersController {
@@ -76,5 +80,23 @@ export class UsersController {
     @Param('targetUserId') targetUserId: string,
   ) {
     return await this.usersService.unfollowUser(user.sub, targetUserId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('/me/profile')
+  async updateMyProfile(
+    @CurrentUser()
+    user: {
+      sub: string;
+    },
+    @Body() dto: UpdateUserProfileDto,
+  ) {
+    return await this.usersService.updateUserProfile(user.sub, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/me/reading-histories')
+  async getUserReadingHistories(@CurrentUser() user: { sub: string }) {
+    return await this.usersService.getUserReadingHistories(user.sub);
   }
 }

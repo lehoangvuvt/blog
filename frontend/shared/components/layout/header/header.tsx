@@ -95,7 +95,7 @@ export default function Header() {
     saveRecentSearch(query);
     setIsSearchFocused(false);
 
-    router.push(`/search/articles?q=${encodeURIComponent(query)}`);
+    router.push(`/search/letters?q=${encodeURIComponent(query)}`);
   };
 
   return (
@@ -159,7 +159,7 @@ export default function Header() {
                           saveRecentSearch(item);
                           setIsSearchFocused(false);
                           router.push(
-                            `/search/articles?q=${encodeURIComponent(item)}`
+                            `/search/letters?q=${encodeURIComponent(item)}`
                           );
                         }}
                         className="flex-1 px-3 py-2 text-left text-sm text-[var(--midnight-text)]"

@@ -1,3 +1,5 @@
+import type { Post } from "@/features/posts/types";
+
 export type GetUserInfoResponse = {
   id: string;
   slug: string;
@@ -34,3 +36,16 @@ export type PublicUserInfo = {
   introduction: string;
   createdAt: string;
 };
+
+export type UpdateProfilePayload = {
+  fullName?: string;
+  slug?: string;
+  email?: string;
+  avatarUrl?: string;
+  introduction?: string;
+};
+
+export type ReadingHistoryItem = {
+  readAt: string;
+  post: Post;
+}

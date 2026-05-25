@@ -123,7 +123,7 @@ export default function CollectionBookReader() {
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[var(--midnight-bg)] text-[var(--midnight-text)]">
-        <p className="font-serif text-xl">Opening bundle...</p>
+        <p className="font-serif text-xl">Opening collection...</p>
       </main>
     );
   }
@@ -131,7 +131,7 @@ export default function CollectionBookReader() {
   if (!collection || articles.length === 0) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[var(--midnight-bg)] text-[var(--midnight-text)]">
-        <p className="font-serif text-xl">This bundle went missing.</p>
+        <p className="font-serif text-xl">This collection went missing.</p>
       </main>
     );
   }
@@ -194,7 +194,7 @@ export default function CollectionBookReader() {
                 isIntroPage ? "bg-[var(--midnight-accent)] text-[var(--midnight-on-accent)]" : "hover:bg-[var(--midnight-code-bg)]"
               }`}
             >
-              <p className="text-xs opacity-50">Bundle note</p>
+              <p className="text-xs opacity-50">Collection note</p>
               <p className="mt-1 line-clamp-1 font-serif text-lg">
                 {collection.name}
               </p>
@@ -238,7 +238,7 @@ export default function CollectionBookReader() {
           {isIntroPage ? (
             <div className="flex min-h-[620px] flex-col items-center justify-center text-center">
               <p className="text-xs uppercase tracking-[0.35em] text-[var(--midnight-soft)]">
-                Reading bundle
+                Reading collection
               </p>
 
               <h1 className="mx-auto mt-8 max-w-2xl font-serif text-6xl leading-tight">
@@ -340,7 +340,7 @@ export default function CollectionBookReader() {
             }`}
           >
             {isIntroPage
-              ? "Begin bundle"
+              ? "Begin collection"
               : isLast
               ? "Finished"
               : "Next letter"}

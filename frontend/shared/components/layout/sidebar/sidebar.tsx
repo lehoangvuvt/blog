@@ -12,7 +12,7 @@ import { useMe } from "@/features/auth/hooks/use-me";
 type SidebarItem = {
   label: string;
   href: string;
-  rootPath?: string;  
+  rootPath?: string;
   needAuth: boolean;
 };
 
@@ -20,6 +20,7 @@ const sidebarItems: SidebarItem[] = [
   { label: "Latest letters", href: "/", rootPath: "/", needAuth: false },
   { label: "Following", href: "/following/writers", rootPath: "/following", needAuth: true },
   { label: "Saved letters", href: "/saved-letters", rootPath: "/saved-letters", needAuth: true },
+  { label: "History", href: "/reading-history", rootPath: "/reading-history", needAuth: true },
 ];
 
 export default function Sidebar() {
@@ -93,11 +94,10 @@ export default function Sidebar() {
                   href={item.href}
                   className={`
               block border-l px-4 py-2.5 text-[15px] transition-colors
-              ${
-                isActive
-                  ? "border-[var(--midnight-accent)] text-[var(--midnight-text)]"
-                  : "border-transparent text-[var(--midnight-muted)] hover:border-[var(--midnight-border-strong)] hover:text-[var(--midnight-text)]"
-              }
+              ${isActive
+                      ? "border-[var(--midnight-accent)] text-[var(--midnight-text)]"
+                      : "border-transparent text-[var(--midnight-muted)] hover:border-[var(--midnight-border-strong)] hover:text-[var(--midnight-text)]"
+                    }
             `}
                 >
                   {item.label}

@@ -69,4 +69,19 @@ export class TagsController {
   ) {
     return this.tagsService.toggleTagFollowEmailNotify(user.sub, tagId, 'off');
   }
+
+  @Get(':slug')
+  async getTagBySlug(@Param('slug') slug: string) {
+    return this.tagsService.getTagBySlug(slug);
+  }
+
+  @Get(':slug/featured/posts')
+  async getFeaturedPostsByTagSlug(@Param('slug') slug: string) {
+    return this.tagsService.getFeaturedPostsByTagSlug(slug);
+  }
+
+  @Get(':slug/featured/authors')
+  async getFeaturedAuthorsByTagSlug(@Param('slug') slug: string) {
+    return this.tagsService.getFeaturedAuthorsByTagSlug(slug);
+  }
 }

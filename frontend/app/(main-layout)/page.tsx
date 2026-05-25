@@ -89,7 +89,7 @@ export default function Home() {
   }, [data]);
 
   return (
-    <main className="min-h-screen bg-[var(--midnight-bg)] text-[var(--midnight-text)]">
+    <main className="min-h-screen text-[var(--midnight-text)]">
       <div className="mx-auto max-w-7xl px-5 pt-10 md:px-6 md:pt-14">
         <section className="max-w-3xl pt-4 md:pt-6">
           <p className="text-[11px] tracking-[0.16em] text-[var(--midnight-soft)]">

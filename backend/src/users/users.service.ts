@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   BadRequestException,
   Injectable,
@@ -11,6 +15,7 @@ import { PostsService } from 'src/posts/posts.service';
 // biome-ignore lint/style/useImportType: <explanation>
 import { PrismaService } from 'src/prisma.service';
 import { generateSlug } from 'src/shared/utils';
+import UpdateUserProfileDto from './dtos/update-user-profile';
 
 @Injectable()
 export class UsersService {
@@ -18,6 +23,19 @@ export class UsersService {
     private prisma: PrismaService,
     private postsService: PostsService,
   ) {}
+
+  async ensureUserExisted(userId: string) {
+    const user = await this.prisma.user.findFirst({
+      where: { id: userId },
+      select: { id: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
 
   async findMany(): Promise<User[]> {
     return await this.prisma.user.findMany();
@@ -376,6 +394,87 @@ export class UsersService {
           slug: post.author?.slug,
           avatar: post.author?.avatar,
           email: post.author?.email,
+        },
+      };
+    });
+  }
+
+  async updateUserProfile(userId: string, dto: UpdateUserProfileDto) {
+    await this.ensureUserExisted(userId);
+    console.log(dto instanceof UpdateUserProfileDto);
+    console.log(dto);
+    try {
+      return await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          ...(dto.fullName && { full_name: dto.fullName }),
+          ...(dto.slug && { slug: dto.slug }),
+          ...(dto.email && { email: dto.email }),
+          ...(dto.avatarUrl && { avatar: dto.avatarUrl }),
+          ...(dto.introduction && { introduction: dto.introduction }),
+        },
+      });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        if (err.code === 'P2002') {
+          if (err.message.includes('email')) {
+            throw new BadRequestException('Email already exists');
+          }
+
+          if (err.message.includes('slug')) {
+            throw new BadRequestException('Slug already exists');
+          }
+        }
+      }
+
+      throw new InternalServerErrorException('Failed to update user profile');
+    }
+  }
+
+  async getUserReadingHistories(userId: string) {
+    const histories = await this.prisma.userReadingHistory.findMany({
+      where: {
+        user_id: userId,
+      },
+      include: {
+        post: {
+          include: {
+            author: {
+              select: {
+                avatar: true,
+                full_name: true,
+                email: true,
+                slug: true,
+                id: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        updated_at: 'desc',
+      },
+    });
+
+    return histories.map((h) => {
+      const post = h.post;
+      const author = h.post.author;
+      return {
+        readAt: h.created_at,
+        post: {
+          id: post.id,
+          slug: post.slug,
+          thumbnailImage: post.thumbnail_image,
+          subTitle: post.sub_title,
+          title: post.title,
+          createdAt: post.created_at,
+          updatedAt: post.updated_at,
+          author: {
+            avatar: author?.avatar,
+            fullName: author?.full_name,
+            slug: author?.slug,
+            email: author?.email,
+          },
         },
       };
     });

@@ -12,9 +12,9 @@ import {
 } from '@nestjs/common';
 // biome-ignore lint/style/useImportType: <explanation>
 import { PostsService } from './posts.service';
-import type CreatePostDto from './dtos/create-post.dto';
-import type { FindManyPostsDto } from './dtos/find-many-posts.dto';
-import type { GetRepliesQueryDto } from 'src/post-comments/dtos/get-replies-query.dto';
+import CreatePostDto from './dtos/create-post.dto';
+import { FindManyPostsDto } from './dtos/find-many-posts.dto';
+import { GetRepliesQueryDto } from 'src/post-comments/dtos/get-replies-query.dto';
 // biome-ignore lint/style/useImportType: <explanation>
 import { PostCommentsService } from 'src/post-comments/post-comments.service';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
@@ -136,5 +136,15 @@ export class PostsController {
     @Param('postId', ParseIntPipe) postId: number,
   ) {
     return await this.postsService.unsavePost(user.sub, postId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':postId/read')
+  async updateReadingHistory(
+    @CurrentUser() user: { sub: string },
+    @Param('postId', ParseIntPipe) postId: number,
+  ) {
+    await this.postsService.updateUserReadingHistory(user.sub, postId);
+    return { success: true };
   }
 }

@@ -319,7 +319,7 @@ export default function NewArticlePage() {
                   </div>
 
                   <a
-                    href={`/articles/${
+                    href={`/letters/${
                       publishedPost?.slug ?? publishedPost?.id
                     }`}
                     className="mt-6 inline-flex rounded-full bg-[var(--midnight-accent)] px-5 py-2 text-sm font-medium text-[var(--midnight-on-accent)]"

@@ -160,11 +160,11 @@ export default function UserInfoPage() {
 
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[var(--midnight-soft)]">
             <span>
-              {userInfo?.statistics.followersCount ?? "-"} &nbsp;&nbsp;readers
+              {userInfo?.statistics.followersCount ?? "-"} &nbsp;followers
             </span>
 
             <span>
-              {userInfo?.statistics.postsCount ?? "-"} &nbsp;&nbsp;letters
+              {userInfo?.statistics.postsCount ?? "-"} &nbsp;letters
             </span>
           </div>
 

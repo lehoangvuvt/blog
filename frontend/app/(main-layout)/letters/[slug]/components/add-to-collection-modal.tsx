@@ -55,7 +55,7 @@ export default function AddToCollectionModal({
               </div>
 
               <h3 className="mt-2 text-3xl font-bold tracking-[-0.05em] text-[var(--midnight-text)]">
-                Add to a bundle
+                Add to a collection
               </h3>
 
               <p className="mt-2 max-w-md text-sm leading-6 text-[var(--midnight-muted)]">
@@ -79,7 +79,7 @@ export default function AddToCollectionModal({
             <div className="space-y-4">
               {Array.from({ length: 3 }).map((_, index) => (
                 <div
-                  key={`collection-skeleton-${index}`}
+                  key={`collection-skeleton-${index + 1}`}
                   className="rounded-[22px] border border-[var(--midnight-border)]/70 bg-[var(--midnight-surface-soft)] p-4"
                 >
                   <div className="flex gap-5">
@@ -105,11 +105,11 @@ export default function AddToCollectionModal({
               </div>
 
               <p className="mt-4 text-base font-semibold text-[var(--midnight-text)]">
-                No bundles yet
+                No collections yet
               </p>
 
               <p className="mt-1 max-w-sm text-sm leading-6 text-[var(--midnight-muted)]">
-                Start a bundle for letters that belong in the same late-night
+                Start a collection for letters that belong in the same late-night
                 mood.
               </p>
             </div>
@@ -169,7 +169,7 @@ export default function AddToCollectionModal({
                         <div className="flex items-start justify-between gap-4">
                           <div className="min-w-0">
                             <p className="text-[11px] font-medium tracking-[0.18em] text-[var(--midnight-soft)]">
-                              Letter bundle
+                              Letter collection
                             </p>
 
                             <h3 className="mt-1 line-clamp-1 text-2xl font-bold tracking-[-0.045em] text-[var(--midnight-text)]">
@@ -276,7 +276,7 @@ export default function AddToCollectionModal({
             className="flex w-full items-center justify-center gap-2 rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-surface)] px-4 py-3 text-sm font-medium text-[var(--midnight-muted)] transition hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-accent-hover)]"
           >
             <FolderPlus className="h-4 w-4" />
-            Start a new bundle
+            Start a new collection
           </button>
         </div>
       </div>

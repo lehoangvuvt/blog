@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
-import type CreatePostCollectionDto from './dtos/create-post-collection.dto';
+import CreatePostCollectionDto from './dtos/create-post-collection.dto';
 import { generateSlug } from 'src/shared/utils';
 
 @Injectable()

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -8,9 +9,9 @@ import {
 } from '@nestjs/common';
 // biome-ignore lint/style/useImportType: <explanation>
 import { PrismaService } from 'src/prisma.service';
-import type CreatePostDto from './dtos/create-post.dto';
+import CreatePostDto from './dtos/create-post.dto';
 import type { Prisma } from 'generated/prisma/browser';
-import type { FindManyPostsDto } from './dtos/find-many-posts.dto';
+import { FindManyPostsDto } from './dtos/find-many-posts.dto';
 import { generateSlug, sanitizedHtmlContent } from 'src/shared/utils';
 // import { PostsEmailProducer } from 'src/posts-email-queue/producers/posts-email.producer';
 
@@ -704,5 +705,14 @@ export class PostsService {
     } catch {
       throw new NotFoundException('You have not saved this post yet');
     }
+  }
+
+  async updateUserReadingHistory(userId: string, postId: number) {
+    const now = new Date();
+    await this.prismaService.userReadingHistory.upsert({
+      where: { user_id_post_id: { user_id: userId, post_id: postId } },
+      update: { updated_at: now },
+      create: { user_id: userId, post_id: postId, updated_at: now },
+    });
   }
 }
