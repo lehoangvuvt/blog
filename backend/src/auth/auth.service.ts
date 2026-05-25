@@ -198,6 +198,7 @@ export class AuthService {
         created_at: true,
         introduction: true,
         slug: true,
+        background_image: true,
       },
     });
 
@@ -227,6 +228,7 @@ export class AuthService {
       createdAt: user.created_at,
       introduction: user.introduction,
       slug: user.slug,
+      backgroundImage: user.background_image,
       followers,
       followings,
       savedPostIds,

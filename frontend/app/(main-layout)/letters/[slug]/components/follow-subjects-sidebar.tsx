@@ -28,7 +28,7 @@ export default function FollowSubjectsSidebar({ tags }: { tags: Tag[] }) {
             {tags.map((tag) => (
               <Link
                 key={tag.id}
-                href={`/subjects/${tag.slug ?? tag.name}`}
+                href={`/subjects/${tag.slug}`}
                 className="group flex items-center justify-between py-2 text-sm text-[var(--midnight-muted)] transition hover:text-[var(--midnight-text)]"
               >
                 <span className="truncate">#{tag.name}</span>

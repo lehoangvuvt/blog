@@ -24,5 +24,29 @@ export default class UpdateUserProfileDto {
 
   @IsString()
   @IsOptional()
+  backgroundImage;
+
+  @IsString()
+  @IsOptional()
   introduction?: string;
+
+  @IsString()
+  @IsOptional()
+  facebookLink?: string;
+
+  @IsString()
+  @IsOptional()
+  xLink?: string;
+
+  @IsString()
+  @IsOptional()
+  youtubeLink?: string;
+
+  @IsString()
+  @IsOptional()
+  linkedinLink?: string;
+
+  @IsString()
+  @IsOptional()
+  websiteLink?: string;
 }

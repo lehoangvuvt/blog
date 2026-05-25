@@ -49,7 +49,10 @@ function extractHeadings(html: string) {
   const htmlWithIds = html.replace(
     /<h([2-4])([^>]*)>(.*?)<\/h\1>/gi,
     (_, level, attrs, content) => {
-      const text = content.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+      const text = content
+        .replace(/<[^>]+>/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
 
       if (!text) return `<h${level}${attrs}>${content}</h${level}>`;
 
@@ -69,7 +72,7 @@ function extractHeadings(html: string) {
       const cleanAttrs = attrs.replace(/\s?id=(["']).*?\1/g, "");
 
       return `<h${level}${cleanAttrs} id="${id}">${content}</h${level}>`;
-    },
+    }
   );
 
   return {
@@ -83,7 +86,7 @@ async function getPost(slug: string) {
     `${process.env.NEXT_PUBLIC_BASE_API_URL}/posts/${slug}`,
     {
       next: { revalidate: 60 },
-    },
+    }
   );
 
   if (res.status === 404) notFound();
@@ -221,7 +224,11 @@ export default async function ArticlePage({
                     />
                   ) : (
                     <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--midnight-border)] bg-[var(--midnight-code-bg)] text-sm font-medium text-[var(--midnight-accent)]">
-                      {`${post.author.email.charAt(0).toUpperCase()}${post.author.email.charAt(1).toUpperCase()}`}
+                      {`${post.author.email
+                        .charAt(0)
+                        .toUpperCase()}${post.author.email
+                        .charAt(1)
+                        .toUpperCase()}`}
                     </div>
                   )}
 
@@ -242,7 +249,7 @@ export default async function ArticlePage({
                               year: "numeric",
                               month: "long",
                               day: "numeric",
-                            },
+                            }
                           )}
                         </span>
                       )}
@@ -261,7 +268,7 @@ export default async function ArticlePage({
                   {post.tags.map((tag) => (
                     <Link
                       key={tag.id}
-                      href={`/subjects/${tag.name}`}
+                      href={`/subjects/${tag.slug}`}
                       className="rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] px-3 py-1 text-sm text-[var(--midnight-muted)] transition-colors hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-accent-hover)]"
                     >
                       {tag.name}
@@ -300,7 +307,10 @@ export default async function ArticlePage({
 
         {post.author && (
           <div className="mt-24">
-            <PostsBySameAuthor author={post.author} posts={post.postsByAuthor} />
+            <PostsBySameAuthor
+              author={post.author}
+              posts={post.postsByAuthor}
+            />
           </div>
         )}
       </article>

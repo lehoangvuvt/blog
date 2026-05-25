@@ -42,10 +42,16 @@ export type UpdateProfilePayload = {
   slug?: string;
   email?: string;
   avatarUrl?: string;
+  backgroundImage?: string;
   introduction?: string;
+  facebookLink?: string;
+  xLink?: string;
+  youtubeLink?: string;
+  linkedinLink?: string;
+  websiteLink?: string;
 };
 
 export type ReadingHistoryItem = {
   readAt: string;
   post: Post;
-}
+};

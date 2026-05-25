@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
@@ -124,8 +125,15 @@ export default function UserInfoPage() {
 
   return (
     <main className="min-h-screen bg-[var(--midnight-bg)] text-[var(--midnight-text)]">
-      <section className="border-b border-[var(--midnight-border)]/70">
-        <div className="mx-auto max-w-3xl px-5 py-14">
+      <section className="relative border-b border-[var(--midnight-border)]/70 overflow-hidden">
+        {userInfo?.backgroundImage && (
+          <img
+            src={userInfo.backgroundImage}
+            className="absolute inset-0 z-[1] h-full w-full object-cover object-center blur-xs brightness-50"
+            fetchPriority="high"
+          />
+        )}
+        <div className="mx-auto max-w-3xl px-5 py-14 relative z-2">
           <div className="flex items-start gap-5">
             {avatar ? (
               <img
@@ -163,9 +171,7 @@ export default function UserInfoPage() {
               {userInfo?.statistics.followersCount ?? "-"} &nbsp;followers
             </span>
 
-            <span>
-              {userInfo?.statistics.postsCount ?? "-"} &nbsp;letters
-            </span>
+            <span>{userInfo?.statistics.postsCount ?? "-"} &nbsp;letters</span>
           </div>
 
           {socialLinks.length > 0 && (
@@ -229,7 +235,9 @@ export default function UserInfoPage() {
                 onClick={() => {
                   if (!userInfo) return;
 
-                  openSignInModal();
+                  if (!myInfo || !myInfo.id) {
+                    openSignInModal();
+                  }
 
                   if (isFollowed) {
                     unfollowAUser(userInfo, {
@@ -298,6 +306,7 @@ export default function UserInfoPage() {
           open={isEditProfileOpen}
           onClose={() => setIsEditProfileOpen(false)}
           userInfo={userInfo}
+          refetch={refetchUserInfo}
         />
       )}
 

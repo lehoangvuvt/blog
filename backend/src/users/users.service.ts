@@ -401,8 +401,6 @@ export class UsersService {
 
   async updateUserProfile(userId: string, dto: UpdateUserProfileDto) {
     await this.ensureUserExisted(userId);
-    console.log(dto instanceof UpdateUserProfileDto);
-    console.log(dto);
     try {
       return await this.prisma.user.update({
         where: { id: userId },
@@ -412,6 +410,12 @@ export class UsersService {
           ...(dto.email && { email: dto.email }),
           ...(dto.avatarUrl && { avatar: dto.avatarUrl }),
           ...(dto.introduction && { introduction: dto.introduction }),
+          ...(dto.facebookLink && { facebook_link: dto.facebookLink }),
+          ...(dto.xLink && { x_link: dto.xLink }),
+          ...(dto.youtubeLink && { youtube_link: dto.youtubeLink }),
+          ...(dto.linkedinLink && { linkedin_link: dto.linkedinLink }),
+          ...(dto.websiteLink && { website_link: dto.websiteLink }),
+          ...(dto.backgroundImage && { background_image: dto.backgroundImage }),
         },
       });
     } catch (err) {
