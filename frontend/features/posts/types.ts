@@ -38,6 +38,7 @@ export type Post = {
     fullName?: string;
     avatar?: string;
   };
+  tags: Tag[];
 };
 
 export type PostDetails = {

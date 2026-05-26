@@ -11,6 +11,7 @@ import { SidebarPostSkeleton } from "@/shared/components/sidebar-post-skeleton";
 import { formatPostDate, getArticleLink } from "@/shared/utils";
 import useTrendingPosts from "@/features/posts/hooks/use-trending-posts";
 import { useMe } from "@/features/auth/hooks/use-me";
+import Link from "next/link";
 
 const allTag: Tag = {
   id: "0",
@@ -189,7 +190,15 @@ export default function Home() {
                       )}
 
                       <PostItem.Footer>
-                        <span>5 min read</span>
+                        {post.tags.map((tag) => (
+                          <Link
+                            className="hover:underline cursor-pointer hover:brightness-200 transition-all"
+                            href={`/subjects/${tag.slug}`}
+                            key={tag.slug}
+                          >
+                            #{tag.name}
+                          </Link>
+                        ))}
                       </PostItem.Footer>
                     </PostItem.Content>
 
