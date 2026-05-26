@@ -18,16 +18,16 @@ It is built for people who still pause to think.
 
 ## Home
 
-[![Home](./assets/home.png)](https://themidnightletters.com)
+[![Home](./assets/home.png)]
 
 ---
 
 ## Writing Experience
 
-[![Writing](./assets/writing.png)](https://themidnightletters.com/write)
+[![Writing](./assets/editor.png)]
 
 ---
 
 ## Reading Experience
 
-[![Reading](./assets/reading.png)](https://themidnightletters.com)
+[![Reading](./assets/reading.png)]
