@@ -18,16 +18,16 @@ It is built for people who still pause to think.
 
 ## Home
 
-[![Home](./assets/home.png)]
+![Home](./assets/home.png)
 
 ---
 
 ## Writing Experience
 
-[![Writing](./assets/editor.png)]
+![Writing](./assets/editor.png)
 
 ---
 
 ## Reading Experience
 
-[![Reading](./assets/reading.png)]
+![Reading](./assets/reading.png)
