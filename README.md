@@ -22,7 +22,7 @@ It is built for people who still pause to think.
 
 ## Writing Experience
 
-<img src="./assets/writing.png" width="100%" />
+<img src="./assets/editor.png" width="100%" />
 
 ---
 
