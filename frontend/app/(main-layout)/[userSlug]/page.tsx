@@ -4,7 +4,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Globe } from "lucide-react";
+import { Globe, Check } from "lucide-react";
 import {
   FaFacebookF,
   FaLinkedinIn,
@@ -64,7 +64,7 @@ export default function UserInfoPage() {
     refetch: refetchUserInfo,
   } = useUserInfo(userSlug);
 
-  const { data: myInfo, isLoading: isLoadingMe } = useMe();
+  const { data: myInfo } = useMe();
 
   const isMyProfile = Boolean(
     myInfo?.id && userInfo?.id && myInfo.id === userInfo.id
@@ -77,13 +77,11 @@ export default function UserInfoPage() {
 
   const dispatch = useAppDispatch();
 
-  const isLoading = isLoadingMe || isLoadingUserInfo;
-
   const openSignInModal = () => {
     dispatch(setSignInModalState({ isOpen: true }));
   };
 
-  if (isLoading) {
+  if (isLoadingUserInfo) {
     return <Loading />;
   }
 
@@ -262,7 +260,11 @@ export default function UserInfoPage() {
             ) : (
               <button
                 type="button"
-                className="rounded-full bg-[var(--midnight-accent)] px-5 py-2 text-sm font-medium text-[var(--midnight-on-accent)] transition hover:opacity-90"
+                className={`group inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 ${
+                  isFollowed
+                    ? "border border-[var(--midnight-border)] bg-[var(--midnight-code-bg)] text-[var(--midnight-text)] hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-300"
+                    : "bg-[var(--midnight-accent)] text-[var(--midnight-on-accent)] shadow-[0_0_30px_rgba(255,255,255,0.08)] hover:scale-[1.02] hover:opacity-95"
+                }`}
                 onClick={() => {
                   if (!myInfo?.id) {
                     openSignInModal();
@@ -281,7 +283,22 @@ export default function UserInfoPage() {
                   });
                 }}
               >
-                {isFollowed ? "Following" : "Follow"}
+                {isFollowed ? (
+                  <>
+                    <span className="flex items-center gap-2 transition-all group-hover:hidden">
+                      <Check className="h-4 w-4" />
+                      Following
+                    </span>
+
+                    <span className="hidden transition-all group-hover:inline">
+                      Unfollow
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span>Follow</span>
+                  </>
+                )}
               </button>
             )}
           </div>
@@ -296,10 +313,11 @@ export default function UserInfoPage() {
                 type="button"
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`shrink-0 border-b py-4 transition-colors ${activeTab === tab
+                className={`shrink-0 border-b py-4 transition-colors ${
+                  activeTab === tab
                     ? "border-[var(--midnight-accent)] font-medium text-[var(--midnight-text)]"
                     : "border-transparent hover:text-[var(--midnight-accent-hover)]"
-                  }`}
+                }`}
               >
                 {tabLabels[tab]}
               </button>

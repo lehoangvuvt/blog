@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 // biome-ignore lint/style/useImportType: <explanation>
 import { AuthService } from './auth.service';
 import RegisterDto from './dtos/register.dto';
@@ -7,6 +7,8 @@ import { VerifyEmailDto } from './dtos/verify-email.dto';
 import LoginDto from './dtos/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
+import { ResetPasswordDto } from './dtos/reset-password.dto';
+import { CreateResetPasswordRequestDto } from './dtos/create-request-password-request.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -33,9 +35,39 @@ export class AuthController {
     return await this.authService.createPendingRegistration(dto);
   }
 
+  @Get('/verify-email/check')
+  async checkVerifyEmailToken(
+    @Query('token')
+    token: string,
+  ) {
+    return await this.authService.checkVerifyEmailToken(token);
+  }
+
   @Post('/verify-email')
   async verifyEmail(@Body() dto: VerifyEmailDto) {
     return await this.authService.verifyEmail(dto.token);
+  }
+
+  @Post('/reset-password/request')
+  async createResetPasswordRequest(@Body() dto: CreateResetPasswordRequestDto) {
+    return await this.authService.createPendingResetPasswordRequest(dto.email);
+  }
+
+  @Get('/reset-password/check')
+  async checkResetPasswordToken(
+    @Query('token')
+    token: string,
+  ) {
+    return await this.authService.checkResetPasswordToken(token);
+  }
+
+  @Post('/reset-password')
+  async resetPassword(
+    @Body() dto: ResetPasswordDto,
+    @Query('token')
+    token: string,
+  ) {
+    return await this.authService.resetPassword(token, dto.password);
   }
 
   @Post('/login')

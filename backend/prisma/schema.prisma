@@ -45,6 +45,8 @@ model User {
   followedTags   TagFollow[]
 
   readingHistories UserReadingHistory[]
+
+  pendingResetPasswordRequests PendingResetPasswordRequest[]
 }
 
 model PendingRegistration {
@@ -58,6 +60,24 @@ model PendingRegistration {
   updated_at DateTime? @updatedAt
 
   @@index([email])
+}
+
+model PendingResetPasswordRequest {
+  id Int @id @default(autoincrement())
+
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id String
+
+  hashed_token String @unique
+
+  used_at    DateTime?
+  expires_at DateTime
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([user_id])
+  @@index([expires_at])
 }
 
 model Post {

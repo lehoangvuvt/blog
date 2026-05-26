@@ -4,11 +4,23 @@ import PostsContainer from "@/features/posts/components/posts-container";
 import { PostItem } from "@/features/posts/components/post-item";
 import { formatTimeAgo } from "@/shared/utils";
 import useUserSavedPosts from "@/features/users/hooks/use-user-saved-posts";
+import { useMe } from "@/features/auth/hooks/use-me";
+import ForbiddenPage from "@/app/forbbiden";
+import Loading from "@/shared/components/loading";
 
 export default function SavedPostsPage() {
-  const { data, isLoading } = useUserSavedPosts();
+  const { data: meData, isLoading: isLoadingMe } = useMe();
+  const { data, isLoading } = useUserSavedPosts(Boolean(meData));
 
   const savedPosts = data ?? [];
+
+  if (isLoadingMe) {
+    return <Loading />;
+  }
+
+  if (!meData && !isLoadingMe) {
+    return <ForbiddenPage />;
+  }
 
   return (
     <main className="min-h-screen text-[var(--midnight-text)]">

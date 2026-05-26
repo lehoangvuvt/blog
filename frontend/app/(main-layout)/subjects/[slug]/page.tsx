@@ -4,8 +4,8 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { Check, ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { notFound, useParams } from "next/navigation";
+import { Check, ChevronLeft, ChevronRight, Globe, Plus } from "lucide-react";
+import { useParams } from "next/navigation";
 import useEmblaCarousel from "embla-carousel-react";
 
 import { useMe } from "@/features/auth/hooks/use-me";
@@ -16,6 +16,8 @@ import Loading from "@/shared/components/loading";
 import useTagBySlug from "@/features/tags/hooks/use-tag-by-slug";
 import useTagFeaturedPosts from "@/features/tags/hooks/use-tag-featured-posts";
 import useTagFeaturedAuthors from "@/features/tags/hooks/use-tag-featured-authors";
+import { useAppDispatch } from "@/store/hooks";
+import { setSignInModalState } from "@/features/app-settings/slice";
 
 export default function SubjectExplorePage() {
   const params = useParams();
@@ -25,12 +27,18 @@ export default function SubjectExplorePage() {
 
   const followedTagIds = useMemo(
     () => me?.followedTags?.map((tag) => tag.id) ?? [],
-    [me],
+    [me]
   );
 
-  const { data: tagData, isLoading: isLoadingTag, error: errorLoadingTag } = useTagBySlug(slug);
+  const {
+    data: tagData,
+    isLoading: isLoadingTag,
+    error: errorLoadingTag,
+  } = useTagBySlug(slug);
+
   const { data: featuredPosts = [], isLoading: isLoadingFeaturedPosts } =
     useTagFeaturedPosts(slug, Boolean(slug) && Boolean(tagData));
+
   const { data: featuredAuthors = [], isLoading: isLoadingFeaturedAuthors } =
     useTagFeaturedAuthors(slug, Boolean(slug) && Boolean(tagData));
 
@@ -38,6 +46,8 @@ export default function SubjectExplorePage() {
   const { mutate: unfollowTag } = useUnfollowTag();
 
   const isFollowed = tagData ? followedTagIds.includes(tagData.id) : false;
+
+  const dispatch = useAppDispatch();
 
   if (isLoadingTag || isLoadingMe) return <Loading />;
 
@@ -92,24 +102,36 @@ export default function SubjectExplorePage() {
           {tagData && (
             <button
               type="button"
-              onClick={() =>
-                isFollowed ? unfollowTag(tagData) : followTag(tagData)
-              }
-              className={`mt-8 inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-medium transition ${isFollowed
-                ? "border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-text)] hover:border-red-400/40 hover:text-red-300"
-                : "border-[var(--midnight-accent)]/70 bg-[var(--midnight-accent)] text-[var(--midnight-on-accent)] hover:opacity-90"
-                }`}
+              onClick={() => {
+                if (isFollowed) {
+                  unfollowTag(tagData);
+                } else {
+                  if (!me) {
+                    dispatch(setSignInModalState({ isOpen: true }));
+                    return;
+                  }
+                  followTag(tagData);
+                }
+              }}
+              className={`group mt-8 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-200 ${
+                isFollowed
+                  ? "border border-[var(--midnight-border)] bg-[var(--midnight-code-bg)] text-[var(--midnight-text)] hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-300"
+                  : "bg-[var(--midnight-accent)] text-[var(--midnight-on-accent)] shadow-[0_0_30px_rgba(255,255,255,0.08)] hover:scale-[1.02] hover:opacity-95"
+              }`}
             >
               {isFollowed ? (
                 <>
-                  <Check className="h-4 w-4" />
-                  Following
+                  <span className="flex items-center gap-2 transition-all group-hover:hidden">
+                    <Check className="h-4 w-4" />
+                    Following
+                  </span>
+
+                  <span className="hidden transition-all group-hover:inline">
+                    Unfollow
+                  </span>
                 </>
               ) : (
-                <>
-                  <Plus className="h-4 w-4" />
-                  Follow subject
-                </>
+                <>Follow</>
               )}
             </button>
           )}
@@ -203,6 +225,7 @@ function FeaturedPostsCarousel({
         <div className="flex gap-5">
           {posts.map((post) => {
             const articleLink = getArticleLink(post.slug);
+
             const authorName =
               post.author?.fullName || post.author?.email || "Unknown writer";
 

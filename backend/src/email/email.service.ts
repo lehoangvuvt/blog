@@ -361,30 +361,118 @@ export class EmailService {
   }
   private resetPasswordTemplate(resetUrl: string) {
     return this.baseTemplate(`
-      <h1>Reset your password</h1>
-
-      <p>
-        Click the button below to reset your password.
-      </p>
-
-      <a
-        href="${resetUrl}"
+    <div
+      style="
+        max-width: 560px;
+        margin: 0 auto;
+        padding: 48px 28px;
+        background: #0b0f14;
+        color: #edf1f7;
+      "
+    >
+      <div
         style="
-          display: inline-block;
-          margin-top: 20px;
-          background: black;
-          color: white;
-          text-decoration: none;
-          padding: 12px 20px;
-          border-radius: 8px;
+          margin-bottom: 52px;
+          font-family: Arial, sans-serif;
+          font-size: 13px;
+          letter-spacing: 2px;
+          color: #667389;
         "
       >
-        Reset Password
-      </a>
+        THE MIDNIGHT LETTERS
+      </div>
 
-      <p style="margin-top: 24px; color: #666;">
-        If you didn't request this, you can ignore this email.
+      <p
+        style="
+          margin: 0 0 14px;
+          font-family: Arial, sans-serif;
+          font-size: 14px;
+          line-height: 1.7;
+          color: #8ea0ba;
+        "
+      >
+        Password recovery request
       </p>
-    `);
+
+      <h1
+        style="
+          margin: 0;
+          font-family: Georgia, serif;
+          font-size: 42px;
+          line-height: 1.08;
+          font-weight: 700;
+          letter-spacing: -1.8px;
+          color: #edf1f7;
+        "
+      >
+        Reset your password.
+      </h1>
+
+      <p
+        style="
+          margin: 24px 0 0;
+          font-family: Arial, sans-serif;
+          font-size: 17px;
+          line-height: 1.85;
+          color: #a9b4c7;
+        "
+      >
+        Someone requested a new password for your account.
+        If that was you, continue below and choose a new password.
+      </p>
+
+      <div style="margin-top: 42px;">
+        <a
+          href="${resetUrl}"
+          style="
+            display:inline-block;
+            background:#b7c4d9;
+            color:#0b0f14;
+            text-decoration:none;
+            padding:13px 24px;
+            border-radius:999px;
+            font-family:Arial,sans-serif;
+            font-size:15px;
+            font-weight:600;
+          "
+        >
+          Reset password
+        </a>
+      </div>
+
+      <div
+        style="
+          margin-top: 60px;
+          padding-top: 24px;
+          border-top: 1px solid #1d2430;
+        "
+      >
+        <p
+          style="
+            margin: 0 0 14px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #697b76;
+          "
+        >
+          This reset link will expire in 30 minutes.
+        </p>
+
+        <p
+          style="
+            margin: 0;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #697b76;
+          "
+        >
+          If you didn’t request this, you can safely ignore this email.
+          Your password will remain unchanged.
+        </p>
+      </div>
+    </div>
+  `);
   }
 }

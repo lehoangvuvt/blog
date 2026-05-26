@@ -42,6 +42,17 @@ export class AuthService {
     this.jwtAccessTokenSecret = secret;
   }
 
+  private async _getHashedPassword(password: string) {
+    const hashedPassword = await argon2.hash(password, {
+      type: argon2.argon2id,
+      memoryCost: 2 ** 16,
+      timeCost: 3,
+      parallelism: 1,
+    });
+
+    return hashedPassword;
+  }
+
   verifyToken(token: string) {
     return jwt.verify(token, this.jwtAccessTokenSecret);
   }
@@ -73,6 +84,39 @@ export class AuthService {
 
     return {
       message: 'Verification email sent',
+    };
+  }
+
+  async checkVerifyEmailToken(token: string) {
+    const hashedToken = createHash('sha256').update(token).digest('hex');
+
+    const verification =
+      await this.prismaService.pendingRegistration.findUnique({
+        where: {
+          hashed_token: hashedToken,
+        },
+      });
+
+    if (!verification) {
+      throw new BadRequestException('Invalid verification token');
+    }
+
+    if (verification.expires_at < new Date()) {
+      throw new BadRequestException('Verification token expired');
+    }
+
+    if (verification.verified_at) {
+      return {
+        message: 'Email already verified',
+        email: verification.email,
+        status: 'already_verified',
+      };
+    }
+
+    return {
+      message: 'Verification token valid',
+      email: verification.email,
+      status: 'valid',
     };
   }
 
@@ -127,6 +171,122 @@ export class AuthService {
     };
   }
 
+  async createPendingResetPasswordRequest(email: string) {
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await this.prismaService.user.findUnique({
+      where: { email: normalizedEmail },
+    });
+    if (!user) {
+      return {
+        message:
+          'If an account with that email exists, a reset link has been sent.',
+      };
+    }
+    await this.prismaService.pendingResetPasswordRequest.deleteMany({
+      where: { user_id: user.id, used_at: null },
+    });
+    const rawToken = randomBytes(32).toString('hex');
+    const hashedToken = createHash('sha256').update(rawToken).digest('hex');
+    await this.prismaService.pendingResetPasswordRequest.create({
+      data: {
+        user_id: user.id,
+        hashed_token: hashedToken,
+        expires_at: addMinutes(new Date(), 30),
+      },
+    });
+    await this.emailService.sendResetPasswordEmail(normalizedEmail, rawToken);
+    return {
+      message:
+        'If an account with that email exists, a reset link has been sent.',
+    };
+  }
+
+  async checkResetPasswordToken(token: string) {
+    const hashedToken = createHash('sha256').update(token).digest('hex');
+
+    const resetRequest =
+      await this.prismaService.pendingResetPasswordRequest.findUnique({
+        where: {
+          hashed_token: hashedToken,
+        },
+        include: {
+          user: true,
+        },
+      });
+
+    if (!resetRequest) {
+      throw new BadRequestException('Invalid reset password token');
+    }
+
+    if (resetRequest.expires_at < new Date()) {
+      throw new BadRequestException('Reset password token expired');
+    }
+
+    if (resetRequest.used_at) {
+      throw new BadRequestException('Reset password link already used');
+    }
+
+    return {
+      message: 'Reset password token valid',
+      user: {
+        id: resetRequest.user.id,
+        email: resetRequest.user.email,
+      },
+    };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const hashedToken = createHash('sha256').update(token).digest('hex');
+
+    const resetRequest =
+      await this.prismaService.pendingResetPasswordRequest.findUnique({
+        where: {
+          hashed_token: hashedToken,
+        },
+        include: {
+          user: true,
+        },
+      });
+
+    if (!resetRequest) {
+      throw new BadRequestException('Invalid reset password token');
+    }
+
+    if (resetRequest.expires_at < new Date()) {
+      throw new BadRequestException('Reset password token expired');
+    }
+
+    if (resetRequest.used_at) {
+      throw new BadRequestException('Reset password link already used');
+    }
+
+    const hashedPassword = await this._getHashedPassword(newPassword);
+
+    await this.prismaService.$transaction([
+      this.prismaService.user.update({
+        where: {
+          id: resetRequest.user_id,
+        },
+        data: {
+          password: hashedPassword,
+        },
+      }),
+
+      this.prismaService.pendingResetPasswordRequest.update({
+        where: {
+          id: resetRequest.id,
+        },
+        data: {
+          used_at: new Date(),
+        },
+      }),
+    ]);
+
+    return {
+      message: 'Password reset successfully',
+    };
+  }
+
   async register(dto: RegisterDto) {
     const { token, password, fullName } = dto;
 
@@ -159,12 +319,7 @@ export class AuthService {
       throw new ConflictException('Email already exists');
     }
 
-    const hashedPassword = await argon2.hash(password, {
-      type: argon2.argon2id,
-      memoryCost: 2 ** 16,
-      timeCost: 3,
-      parallelism: 1,
-    });
+    const hashedPassword = await this._getHashedPassword(password);
 
     const response = await this.usersService.create(
       verification.email,

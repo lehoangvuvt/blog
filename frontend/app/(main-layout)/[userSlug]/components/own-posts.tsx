@@ -49,7 +49,7 @@ export default function OwnPosts({ userId }: { userId: string }) {
             const articleLink = getArticleLink(post.slug);
             const authorName = post.author?.fullName ?? "Unknown author";
             const authorSlug = post.author?.slug;
-            const authorLink = authorSlug ? `/@${authorSlug}` : "#";
+            const authorLink = authorSlug ? `/${authorSlug}` : "#";
 
             return (
               <PostItem.Container key={post.id}>

@@ -6,71 +6,66 @@ import EmptyState from "./empty-state";
 import useUserRepostedPosts from "@/features/users/hooks/use-user-reposted-posts";
 
 export default function RepostedPosts({ slug }: { slug: string }) {
-    const { data: posts, isLoading } = useUserRepostedPosts(slug);
+  const { data: posts, isLoading } = useUserRepostedPosts(slug);
 
-    return (
-        <PostsContainer hasMore={false} isLoading={isLoading} onLoadMore={() => { }}>
-            {isLoading &&
-                Array.from({ length: 5 }).map((_, index) => (
-                    <PostItem.Skeleton key={`initial-skeleton-${index + 1}`} />
-                ))}
+  return (
+    <PostsContainer hasMore={false} isLoading={isLoading} onLoadMore={() => {}}>
+      {isLoading &&
+        Array.from({ length: 5 }).map((_, index) => (
+          <PostItem.Skeleton key={`initial-skeleton-${index + 1}`} />
+        ))}
 
-            {!isLoading && posts?.length === 0 && <EmptyState icon={<Repeat2 />} title="No reposted  posts yet" />}
+      {!isLoading && posts?.length === 0 && (
+        <EmptyState icon={<Repeat2 />} title="No reposted  posts yet" />
+      )}
 
-            <div className="divide-y divide-neutral-200">
-                {posts?.map((post) => {
-                    const articleLink = getArticleLink(post.slug);
-                    const authorName =
-                        post.author?.fullName ?? "Unknown author";
-                    const authorSlug = post.author?.slug;
-                    const authorLink = authorSlug
-                        ? `/users/${authorSlug}`
-                        : "#";
+      <div className="divide-y divide-neutral-200">
+        {posts?.map((post) => {
+          const articleLink = getArticleLink(post.slug);
+          const authorName = post.author?.fullName ?? "Unknown author";
+          const authorSlug = post.author?.slug;
+          const authorLink = authorSlug ? `/${authorSlug}` : "#";
 
-                    return (
-                        <PostItem.Container key={post.id}>
-                            <PostItem.Content>
-                                <PostItem.Header>
-                                    <PostItem.Avatar
-                                        src={post.author?.avatar ?? ""}
-                                        alt={authorName}
-                                    />
+          return (
+            <PostItem.Container key={post.id}>
+              <PostItem.Content>
+                <PostItem.Header>
+                  <PostItem.Avatar
+                    src={post.author?.avatar ?? ""}
+                    alt={authorName}
+                  />
 
-                                    <PostItem.Author link={authorLink}>
-                                        {authorName}
-                                    </PostItem.Author>
+                  <PostItem.Author link={authorLink}>
+                    {authorName}
+                  </PostItem.Author>
 
-                                    <PostItem.Dot />
+                  <PostItem.Dot />
 
-                                    <PostItem.Date>
-                                        {formatPostDate(post.postedDate)}
-                                    </PostItem.Date>
-                                </PostItem.Header>
+                  <PostItem.Date>
+                    {formatPostDate(post.postedDate)}
+                  </PostItem.Date>
+                </PostItem.Header>
 
-                                <PostItem.Title link={articleLink}>
-                                    {post.title}
-                                </PostItem.Title>
+                <PostItem.Title link={articleLink}>{post.title}</PostItem.Title>
 
-                                {post.subTitle && (
-                                    <PostItem.SubTitle>
-                                        {post.subTitle}
-                                    </PostItem.SubTitle>
-                                )}
+                {post.subTitle && (
+                  <PostItem.SubTitle>{post.subTitle}</PostItem.SubTitle>
+                )}
 
-                                <PostItem.Footer>
-                                    <span>5 min read</span>
-                                </PostItem.Footer>
-                            </PostItem.Content>
+                <PostItem.Footer>
+                  <span>5 min read</span>
+                </PostItem.Footer>
+              </PostItem.Content>
 
-                            <PostItem.Thumbnail
-                                src={post.thumbnailImage ?? ""}
-                                alt={post.title}
-                                link={articleLink}
-                            />
-                        </PostItem.Container>
-                    );
-                })}
-            </div>
-        </PostsContainer>
-    )
+              <PostItem.Thumbnail
+                src={post.thumbnailImage ?? ""}
+                alt={post.title}
+                link={articleLink}
+              />
+            </PostItem.Container>
+          );
+        })}
+      </div>
+    </PostsContainer>
+  );
 }
