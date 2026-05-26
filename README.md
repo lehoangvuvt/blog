@@ -1,4 +1,3 @@
-```md
 # The Midnight Letters
 
 A quiet place for thoughtful writing, slow reading, and midnight reflections.
@@ -30,4 +29,3 @@ It is built for people who still pause to think.
 ## Reading Experience
 
 <img src="./assets/reading.png" width="100%" />
-```
