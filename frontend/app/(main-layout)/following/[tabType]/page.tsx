@@ -12,18 +12,17 @@ import { useTags } from "@/features/tags/hooks/use-tags";
 import { formatTimeAgo } from "@/shared/utils";
 import useFollowTag from "@/features/tags/hooks/use-follow-tag";
 import useUnfollowTag from "@/features/tags/hooks/use-unfollow-tag";
-import NotificationPopover from "@/shared/components/notification-popover";
-import useNotification from "@/hooks/use-notification";
 import type { Tag } from "@/features/tags/types";
 import useToggleTagFollowEmailNotify from "@/features/tags/hooks/use-toggle-tag-follow-email-notify";
 import Link from "next/link";
 import ForbiddenPage from "@/app/forbbiden";
 import Loading from "@/shared/components/loading";
+import { useNotification } from "@/hooks/use-notification";
 
 type Tab = "writers" | "subjects";
 
 export default function FollowingPage() {
-  const { close, open, notifications } = useNotification();
+  const { pushNotification } = useNotification();
   const router = useRouter();
   const params = useParams();
 
@@ -118,7 +117,7 @@ export default function FollowingPage() {
       },
       {
         onSuccess: () => {
-          open(
+          pushNotification(
             enabled
               ? `Email notifications on for ${topic.name}`
               : `Email notifications off for ${topic.name}`,
@@ -134,10 +133,10 @@ export default function FollowingPage() {
   const handleUnfollowTopic = (topic: Tag) => {
     unfollowTag(topic, {
       onSuccess: () => {
-        open("Subject unfollowed successfully", "success");
+        pushNotification("Subject unfollowed successfully", "success");
         setOpenTopicMenuId(null);
       },
-      onError: () => open("Failed to unfollow subject", "error"),
+      onError: () => pushNotification("Failed to unfollow subject", "error"),
     });
   };
 
@@ -151,8 +150,6 @@ export default function FollowingPage() {
 
   return (
     <main className="min-h-screen text-[var(--midnight-text)]">
-      <NotificationPopover onClose={close} notifications={notifications} />
-
       <section className="mx-auto w-full max-w-3xl px-5 pt-12 md:px-6">
         <header className="border-b border-[var(--midnight-border)]/70 pb-7">
           <h1 className="mt-4 text-5xl font-bold tracking-[-0.06em] text-[var(--midnight-text)]">
@@ -326,10 +323,14 @@ export default function FollowingPage() {
                 onFollow={(topic) =>
                   followTag(topic, {
                     onSuccess: () => {
-                      open("Subject followed successfully", "success");
+                      pushNotification(
+                        "Subject followed successfully",
+                        "success"
+                      );
                       setOpenTopicMenuId(topic.id);
                     },
-                    onError: () => open("Failed to follow subject", "error"),
+                    onError: () =>
+                      pushNotification("Failed to follow subject", "error"),
                   })
                 }
               />

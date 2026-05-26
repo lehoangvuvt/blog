@@ -9,9 +9,8 @@ import type { GetUserInfoResponse } from "@/features/users/types";
 import { ImageIcon, Pencil, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import Cropper, { type Area } from "react-easy-crop";
-import useNotification from "@/hooks/use-notification";
-import NotificationPopover from "@/shared/components/notification-popover";
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
+import { useNotification } from "@/hooks/use-notification";
 
 type TextField =
   | "slug"
@@ -44,14 +43,14 @@ export default function EditProfileModal({
     options?: RefetchOptions
   ) => Promise<QueryObserverResult<GetUserInfoResponse, Error>>;
 }) {
-  const { close, open: openNotification, notifications } = useNotification();
+  const { pushNotification } = useNotification();
 
   const notifySuccess = (message: string) => {
-    openNotification(message, "success");
+    pushNotification(message, "success");
   };
 
   const notifyError = (message: string) => {
-    openNotification(message, "error");
+    pushNotification(message, "error");
   };
 
   const [form, setForm] = useState({
@@ -316,7 +315,6 @@ export default function EditProfileModal({
 
   return (
     <>
-      <NotificationPopover onClose={close} notifications={notifications} />
       <div className="fixed inset-0 z-50 bg-black/60 px-4 backdrop-blur-[3px]">
         <div className="flex min-h-screen items-center justify-center">
           <div className="flex h-[82vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-[var(--midnight-border)]/70 bg-[var(--midnight-surface)] shadow-[0_28px_90px_rgba(0,0,0,0.38)]">

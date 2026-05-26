@@ -383,3 +383,13 @@ body::after {
 
   color: #f4faf8;
 }
+
+@keyframes midnight-progress {
+  from {
+    transform: scaleX(1);
+  }
+
+  to {
+    transform: scaleX(0);
+  }
+}

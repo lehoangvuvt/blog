@@ -29,8 +29,7 @@ import { useAppDispatch } from "@/store/hooks";
 import { setSignInModalState } from "@/features/app-settings/slice";
 import Loading from "@/shared/components/loading";
 import UpdatePasswordModal from "./components/update-password-modal";
-import NotificationPopover from "@/shared/components/notification-popover";
-import useNotification from "@/hooks/use-notification";
+import { useNotification } from "@/hooks/use-notification";
 
 type Tab = "Posts" | "Collections" | "Reposts" | "Likes";
 
@@ -58,7 +57,7 @@ export default function UserInfoPage() {
   const [isUpdatePasswordOpen, setIsUpdatePasswordOpen] = useState(false);
   const [isCreateCollectionOpen, setIsCreateCollectionOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("Posts");
-  const { notifications, open: openNotification, close } = useNotification();
+  const { pushNotification } = useNotification();
 
   const params = useParams();
   const userSlug = params.userSlug as string;
@@ -167,7 +166,6 @@ export default function UserInfoPage() {
 
   return (
     <main className="min-h-screen bg-[var(--midnight-bg)] text-[var(--midnight-text)]">
-      <NotificationPopover notifications={notifications} onClose={close} />
       <section className="relative overflow-hidden border-b border-[var(--midnight-border)]/70">
         {userInfo.backgroundImage && (
           <img
@@ -360,10 +358,10 @@ export default function UserInfoPage() {
       <UpdatePasswordModal
         open={isUpdatePasswordOpen}
         onSuccess={() => {
-          openNotification("Update password success", "success");
+          pushNotification("Update password success", "success");
         }}
         onError={(errMsg) => {
-          openNotification(errMsg, "error");
+          pushNotification(errMsg, "error");
         }}
         onClose={() => setIsUpdatePasswordOpen(false)}
       />

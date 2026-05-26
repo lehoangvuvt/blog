@@ -29,17 +29,19 @@ import useSavePost from "@/features/posts/hooks/use-save-post";
 import useUnsavePost from "@/features/posts/hooks/use-unsave-post";
 import { useAppDispatch } from "@/store/hooks";
 import { setSignInModalState } from "@/features/app-settings/slice";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNotification } from "@/hooks/use-notification";
 
 type Props = {
   postId: number;
 };
 
 export function ArticleToolbar({ postId }: Props) {
+  const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
   const { data: myInfo } = useMe();
 
   const savedPostIds = myInfo?.savedPostIds ?? [];
-
   const isSaved = savedPostIds.includes(postId);
 
   const [showCommentsDrawer, setShowCommentsDrawer] = useState(false);
@@ -56,6 +58,8 @@ export function ArticleToolbar({ postId }: Props) {
 
   const { mutate: savePost } = useSavePost();
   const { mutate: unsavePost } = useUnsavePost();
+
+  const { pushNotification } = useNotification();
 
   const {
     data: postStatistics,
@@ -118,13 +122,45 @@ export function ArticleToolbar({ postId }: Props) {
               }
               onClick={() =>
                 requireAuth(() => {
+                  if (!myInfo) return;
+
                   if (postStatistics.liked) {
                     unlikePost(postId, {
-                      onSuccess: () => refetch(),
+                      onSuccess: () => {
+                        refetch();
+                        queryClient.invalidateQueries({
+                          queryKey: ["user-liked-posts", myInfo.slug],
+                        });
+                        pushNotification(
+                          "Post removed from your appreciated list",
+                          "success"
+                        );
+                      },
+                      onError: () => {
+                        pushNotification(
+                          "Error when trying to remove appreciation",
+                          "error"
+                        );
+                      },
                     });
                   } else {
                     likePost(postId, {
-                      onSuccess: () => refetch(),
+                      onSuccess: () => {
+                        refetch();
+                        queryClient.invalidateQueries({
+                          queryKey: ["user-liked-posts", myInfo.slug],
+                        });
+                        pushNotification(
+                          "Post added to your appreciated list",
+                          "success"
+                        );
+                      },
+                      onError: () => {
+                        pushNotification(
+                          "Error when trying to appreciate post",
+                          "error"
+                        );
+                      },
                     });
                   }
                 })
@@ -165,13 +201,45 @@ export function ArticleToolbar({ postId }: Props) {
               }
               onClick={() =>
                 requireAuth(() => {
+                  if (!myInfo) return;
+
                   if (postStatistics.reposted) {
                     unRepost(postId, {
-                      onSuccess: () => refetch(),
+                      onSuccess: () => {
+                        refetch();
+                        queryClient.invalidateQueries({
+                          queryKey: ["user-reposted-posts", myInfo.slug],
+                        });
+                        pushNotification(
+                          "Post removed from your reposted list",
+                          "success"
+                        );
+                      },
+                      onError: () => {
+                        pushNotification(
+                          "Error when trying to remove post from your reposted list",
+                          "error"
+                        );
+                      },
                     });
                   } else {
                     repost(postId, {
-                      onSuccess: () => refetch(),
+                      onSuccess: () => {
+                        refetch();
+                        queryClient.invalidateQueries({
+                          queryKey: ["user-reposted-posts", myInfo.slug],
+                        });
+                        pushNotification(
+                          "Post added to your reposted list",
+                          "success"
+                        );
+                      },
+                      onError: () => {
+                        pushNotification(
+                          "Error when trying to repost post",
+                          "error"
+                        );
+                      },
                     });
                   }
                 })
@@ -197,9 +265,35 @@ export function ArticleToolbar({ postId }: Props) {
               onClick={() =>
                 requireAuth(() => {
                   if (isSaved) {
-                    unsavePost(postId);
+                    unsavePost(postId, {
+                      onSuccess: () => {
+                        pushNotification(
+                          "Post removed from your saved list",
+                          "success"
+                        );
+                      },
+                      onError: () => {
+                        pushNotification(
+                          "Error when trying to remove post from your saved list",
+                          "error"
+                        );
+                      },
+                    });
                   } else {
-                    savePost(postId);
+                    savePost(postId, {
+                      onSuccess: () => {
+                        pushNotification(
+                          "Post added to your saved list",
+                          "success"
+                        );
+                      },
+                      onError: () => {
+                        pushNotification(
+                          "Error when trying to save post",
+                          "error"
+                        );
+                      },
+                    });
                   }
                 })
               }
