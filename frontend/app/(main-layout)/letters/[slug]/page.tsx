@@ -119,7 +119,7 @@ export async function generateMetadata({
   const title = post.title;
   const description = post.subTitle ?? "Read this article.";
   const image = post.thumbnailImage ?? "/default-og-image.png";
-  const url = `https://themidnightletters.com/articles/${slug}`;
+  const url = `https://themidnightletters.com/letters/${slug}`;
 
   return {
     title,
