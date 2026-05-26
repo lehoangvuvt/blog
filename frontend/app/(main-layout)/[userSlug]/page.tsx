@@ -27,6 +27,7 @@ import RepostedPosts from "./components/reposted-posts";
 import OwnPosts from "./components/own-posts";
 import { useAppDispatch } from "@/store/hooks";
 import { setSignInModalState } from "@/features/app-settings/slice";
+import Loading from "@/shared/components/loading";
 
 type Tab = "Posts" | "Collections" | "Reposts" | "Likes";
 
@@ -65,68 +66,106 @@ export default function UserInfoPage() {
 
   const { data: myInfo, isLoading: isLoadingMe } = useMe();
 
-  const displayName = userInfo?.fullName ?? "Untitled writer";
-  const introduction =
-    userInfo?.introduction || "No introduction has been written yet.";
-  const avatar = userInfo?.avatar;
-
-  const socialLinks = [
-    {
-      label: "Website",
-      href: normalizeUrl(userInfo?.social?.website),
-      icon: Globe,
-    },
-    {
-      label: "Facebook",
-      href: normalizeUrl(userInfo?.social?.facebook),
-      icon: FaFacebookF,
-    },
-    {
-      label: "X",
-      href: normalizeUrl(userInfo?.social?.x),
-      icon: FaXTwitter,
-    },
-    {
-      label: "LinkedIn",
-      href: normalizeUrl(userInfo?.social?.linkedin),
-      icon: FaLinkedinIn,
-    },
-    {
-      label: "YouTube",
-      href: normalizeUrl(userInfo?.social?.youtube),
-      icon: FaYoutube,
-    },
-  ].filter((item) => Boolean(item.href));
-
-  const isCheckingOwner = isLoadingUserInfo || isLoadingMe;
   const isMyProfile = Boolean(
     myInfo?.id && userInfo?.id && myInfo.id === userInfo.id
   );
 
   const { data: collections } = usePostCollections(userInfo?.id, isMyProfile);
 
-  const tabs = allTabs.filter((tab) => {
-    if (tab === "Collections" && !isMyProfile) return false;
-    return true;
-  });
-
   const { mutate: followAUser } = useFollowAUser();
   const { mutate: unfollowAUser } = useUnfollowAUser();
 
-  const isFollowed = isMyProfile
-    ? false
-    : myInfo?.followings.some((following) => following.id === userInfo?.id);
-
   const dispatch = useAppDispatch();
+
+  const isLoading = isLoadingMe || isLoadingUserInfo;
 
   const openSignInModal = () => {
     dispatch(setSignInModalState({ isOpen: true }));
   };
 
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (!userInfo) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[var(--midnight-bg)] px-5 text-[var(--midnight-text)]">
+        <section className="mx-auto max-w-2xl text-center">
+          <p className="text-xs tracking-[0.18em] text-[var(--midnight-soft)]">
+            WRITER NOT FOUND
+          </p>
+
+          <h1 className="mt-4 text-5xl font-bold tracking-[-0.07em] md:text-7xl">
+            This writer vanished
+          </h1>
+
+          <p className="mt-6 text-lg leading-8 text-[var(--midnight-muted)]">
+            We could not find a writer called{" "}
+            <span className="font-medium text-[var(--midnight-text)]">
+              {userSlug}
+            </span>
+            . The profile may have been removed, renamed, or never existed.
+          </p>
+
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/"
+              className="rounded-full border border-[var(--midnight-border)]/70 px-5 py-2.5 text-sm font-medium text-[var(--midnight-muted)] transition hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-text)]"
+            >
+              Return home
+            </Link>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  const displayName = userInfo.fullName ?? "Untitled writer";
+  const introduction =
+    userInfo.introduction || "No introduction has been written yet.";
+  const avatar = userInfo.avatar;
+
+  const socialLinks = [
+    {
+      label: "Website",
+      href: normalizeUrl(userInfo.social?.website),
+      icon: Globe,
+    },
+    {
+      label: "Facebook",
+      href: normalizeUrl(userInfo.social?.facebook),
+      icon: FaFacebookF,
+    },
+    {
+      label: "X",
+      href: normalizeUrl(userInfo.social?.x),
+      icon: FaXTwitter,
+    },
+    {
+      label: "LinkedIn",
+      href: normalizeUrl(userInfo.social?.linkedin),
+      icon: FaLinkedinIn,
+    },
+    {
+      label: "YouTube",
+      href: normalizeUrl(userInfo.social?.youtube),
+      icon: FaYoutube,
+    },
+  ].filter((item) => Boolean(item.href));
+
+  const tabs = allTabs.filter((tab) => {
+    if (tab === "Collections" && !isMyProfile) return false;
+    return true;
+  });
+
+  const isFollowed = isMyProfile
+    ? false
+    : myInfo?.followings.some((following) => following.id === userInfo.id);
+
   return (
     <main className="min-h-screen bg-[var(--midnight-bg)] text-[var(--midnight-text)]">
-      <section className="relative border-b border-[var(--midnight-border)]/70 overflow-hidden">
-        {userInfo?.backgroundImage && (
+      <section className="relative overflow-hidden border-b border-[var(--midnight-border)]/70">
+        {userInfo.backgroundImage && (
           <img
             alt="user-info-background"
             src={userInfo.backgroundImage}
@@ -134,7 +173,8 @@ export default function UserInfoPage() {
             fetchPriority="high"
           />
         )}
-        <div className="mx-auto max-w-3xl px-5 py-14 relative z-2">
+
+        <div className="relative z-2 mx-auto max-w-3xl px-5 py-14">
           <div className="flex items-start gap-5">
             {avatar ? (
               <img
@@ -158,7 +198,7 @@ export default function UserInfoPage() {
               </h1>
 
               <p className="mt-2 text-sm text-[var(--midnight-muted)]">
-                @{userInfo?.slug}
+                @{userInfo.slug}
               </p>
             </div>
           </div>
@@ -168,11 +208,8 @@ export default function UserInfoPage() {
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[var(--midnight-soft)]">
-            <span>
-              {userInfo?.statistics.followersCount ?? "-"} &nbsp;followers
-            </span>
-
-            <span>{userInfo?.statistics.postsCount ?? "-"} &nbsp;letters</span>
+            <span>{userInfo.statistics.followersCount} &nbsp;followers</span>
+            <span>{userInfo.statistics.postsCount} &nbsp;letters</span>
           </div>
 
           {socialLinks.length > 0 && (
@@ -188,12 +225,7 @@ export default function UserInfoPage() {
                     rel="noreferrer"
                     className="inline-flex items-center gap-2 rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)]/70 px-3 py-1.5 text-sm text-[var(--midnight-muted)] transition hover:border-[var(--midnight-accent)]/60 hover:text-[var(--midnight-text)]"
                   >
-                    {Icon ? (
-                      <Icon className="h-4 w-4" />
-                    ) : (
-                      <span className="text-[13px] font-semibold">𝕏</span>
-                    )}
-
+                    <Icon className="h-4 w-4" />
                     {item.label}
                   </a>
                 );
@@ -202,9 +234,7 @@ export default function UserInfoPage() {
           )}
 
           <div className="mt-8 flex min-h-9 flex-wrap items-center gap-3">
-            {isCheckingOwner ? (
-              <div className="h-9 w-28 animate-pulse rounded-full bg-[var(--midnight-code-bg)]" />
-            ) : isMyProfile ? (
+            {isMyProfile ? (
               <>
                 <Link
                   href="/new-letter"
@@ -234,25 +264,20 @@ export default function UserInfoPage() {
                 type="button"
                 className="rounded-full bg-[var(--midnight-accent)] px-5 py-2 text-sm font-medium text-[var(--midnight-on-accent)] transition hover:opacity-90"
                 onClick={() => {
-                  if (!userInfo) return;
-
-                  if (!myInfo || !myInfo.id) {
+                  if (!myInfo?.id) {
                     openSignInModal();
+                    return;
                   }
 
                   if (isFollowed) {
                     unfollowAUser(userInfo, {
-                      onSuccess: () => {
-                        refetchUserInfo();
-                      },
+                      onSuccess: () => refetchUserInfo(),
                     });
                     return;
                   }
 
                   followAUser(userInfo, {
-                    onSuccess: () => {
-                      refetchUserInfo();
-                    },
+                    onSuccess: () => refetchUserInfo(),
                   });
                 }}
               >
@@ -271,11 +296,10 @@ export default function UserInfoPage() {
                 type="button"
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`shrink-0 border-b py-4 transition-colors ${
-                  activeTab === tab
+                className={`shrink-0 border-b py-4 transition-colors ${activeTab === tab
                     ? "border-[var(--midnight-accent)] font-medium text-[var(--midnight-text)]"
                     : "border-transparent hover:text-[var(--midnight-accent-hover)]"
-                }`}
+                  }`}
               >
                 {tabLabels[tab]}
               </button>
@@ -283,33 +307,25 @@ export default function UserInfoPage() {
           </nav>
 
           <section className="py-8">
-            {activeTab === "Posts" && userInfo?.id && (
-              <OwnPosts userId={userInfo.id} />
-            )}
+            {activeTab === "Posts" && <OwnPosts userId={userInfo.id} />}
 
             {activeTab === "Collections" && (
               <ArticleCollectionsSection collections={collections ?? []} />
             )}
 
-            {activeTab === "Reposts" && (
-              <RepostedPosts slug={userInfo?.slug ?? ""} />
-            )}
+            {activeTab === "Reposts" && <RepostedPosts slug={userInfo.slug} />}
 
-            {activeTab === "Likes" && (
-              <LikedPosts slug={userInfo?.slug ?? ""} />
-            )}
+            {activeTab === "Likes" && <LikedPosts slug={userInfo.slug} />}
           </section>
         </div>
       </section>
 
-      {userInfo && (
-        <EditProfileModal
-          open={isEditProfileOpen}
-          onClose={() => setIsEditProfileOpen(false)}
-          userInfo={userInfo}
-          refetch={refetchUserInfo}
-        />
-      )}
+      <EditProfileModal
+        open={isEditProfileOpen}
+        onClose={() => setIsEditProfileOpen(false)}
+        userInfo={userInfo}
+        refetch={refetchUserInfo}
+      />
 
       <CreateCollectionModal
         open={isCreateCollectionOpen}

@@ -5,7 +5,7 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import { Check, ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { useParams } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import useEmblaCarousel from "embla-carousel-react";
 
 import { useMe } from "@/features/auth/hooks/use-me";
@@ -21,25 +21,56 @@ export default function SubjectExplorePage() {
   const params = useParams();
   const slug = params.slug as string;
 
-  const { data: me } = useMe();
+  const { data: me, isLoading: isLoadingMe } = useMe();
 
   const followedTagIds = useMemo(
     () => me?.followedTags?.map((tag) => tag.id) ?? [],
     [me],
   );
 
-  const { data: tagData, isLoading: isLoadingTag } = useTagBySlug(slug);
+  const { data: tagData, isLoading: isLoadingTag, error: errorLoadingTag } = useTagBySlug(slug);
   const { data: featuredPosts = [], isLoading: isLoadingFeaturedPosts } =
-    useTagFeaturedPosts(slug);
+    useTagFeaturedPosts(slug, Boolean(slug) && Boolean(tagData));
   const { data: featuredAuthors = [], isLoading: isLoadingFeaturedAuthors } =
-    useTagFeaturedAuthors(slug);
+    useTagFeaturedAuthors(slug, Boolean(slug) && Boolean(tagData));
 
   const { mutate: followTag } = useFollowTag();
   const { mutate: unfollowTag } = useUnfollowTag();
 
   const isFollowed = tagData ? followedTagIds.includes(tagData.id) : false;
 
-  if (isLoadingTag) return <Loading />;
+  if (isLoadingTag || isLoadingMe) return <Loading />;
+
+  if (errorLoadingTag || !tagData) {
+    return (
+      <main className="min-h-screen text-[var(--midnight-text)]">
+        <section className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center px-5 text-center">
+          <p className="text-xs tracking-[0.18em] text-[var(--midnight-soft)]">
+            SUBJECT NOT FOUND
+          </p>
+
+          <h1 className="mt-4 text-5xl font-bold tracking-[-0.07em] md:text-7xl">
+            No such subject
+          </h1>
+
+          <p className="mt-6 max-w-xl text-base leading-8 text-[var(--midnight-muted)]">
+            We could not find a subject called{" "}
+            <span className="font-medium text-[var(--midnight-text)]">
+              {slug}
+            </span>
+            . It may have been removed, renamed, or never existed.
+          </p>
+
+          <Link
+            href="/"
+            className="mt-8 rounded-full border border-[var(--midnight-border)]/70 px-5 py-2.5 text-sm font-medium text-[var(--midnight-muted)] transition hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-text)]"
+          >
+            Back Home
+          </Link>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen text-[var(--midnight-text)]">
@@ -64,11 +95,10 @@ export default function SubjectExplorePage() {
               onClick={() =>
                 isFollowed ? unfollowTag(tagData) : followTag(tagData)
               }
-              className={`mt-8 inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-medium transition ${
-                isFollowed
-                  ? "border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-text)] hover:border-red-400/40 hover:text-red-300"
-                  : "border-[var(--midnight-accent)]/70 bg-[var(--midnight-accent)] text-[var(--midnight-on-accent)] hover:opacity-90"
-              }`}
+              className={`mt-8 inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-medium transition ${isFollowed
+                ? "border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-text)] hover:border-red-400/40 hover:text-red-300"
+                : "border-[var(--midnight-accent)]/70 bg-[var(--midnight-accent)] text-[var(--midnight-on-accent)] hover:opacity-90"
+                }`}
             >
               {isFollowed ? (
                 <>
@@ -231,7 +261,7 @@ function FeaturedAuthorsCarousel({
       <div className="grid gap-4 md:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
           <div
-            key={index}
+            key={`skeleton-author-item-${index + 1}`}
             className="h-32 animate-pulse rounded-2xl bg-[var(--midnight-code-bg)]"
           />
         ))}

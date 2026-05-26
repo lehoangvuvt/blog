@@ -16,6 +16,7 @@ import NotificationPopover from "@/shared/components/notification-popover";
 import useNotification from "@/hooks/use-notification";
 import type { Tag } from "@/features/tags/types";
 import useToggleTagFollowEmailNotify from "@/features/tags/hooks/use-toggle-tag-follow-email-notify";
+import Link from "next/link";
 
 type Tab = "writers" | "subjects";
 
@@ -62,9 +63,9 @@ export default function FollowingPage() {
   const { data: followedTagsData, isLoading: isLoadingFollowedTags } = useTags(
     shouldFetchFollowedTags
       ? {
-          ids: followedTagIds,
-          limit: followedTagIds.length,
-        }
+        ids: followedTagIds,
+        limit: followedTagIds.length,
+      }
       : undefined,
     shouldFetchFollowedTags
   );
@@ -156,11 +157,10 @@ export default function FollowingPage() {
             <button
               type="button"
               onClick={() => setActiveTab("writers")}
-              className={`rounded-full border px-4 py-2 text-sm transition ${
-                activeTab === "writers"
+              className={`rounded-full border px-4 py-2 text-sm transition ${activeTab === "writers"
                   ? "border-[var(--midnight-accent)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-text)]"
                   : "border-transparent text-[var(--midnight-muted)] hover:border-[var(--midnight-border)]/70 hover:text-[var(--midnight-text)]"
-              }`}
+                }`}
             >
               Writers
             </button>
@@ -168,11 +168,10 @@ export default function FollowingPage() {
             <button
               type="button"
               onClick={() => setActiveTab("subjects")}
-              className={`rounded-full border px-4 py-2 text-sm transition ${
-                activeTab === "subjects"
+              className={`rounded-full border px-4 py-2 text-sm transition ${activeTab === "subjects"
                   ? "border-[var(--midnight-accent)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-text)]"
                   : "border-transparent text-[var(--midnight-muted)] hover:border-[var(--midnight-border)]/70 hover:text-[var(--midnight-text)]"
-              }`}
+                }`}
             >
               Subjects
             </button>
@@ -406,9 +405,9 @@ function TopicList({
             className="flex w-full items-center justify-between py-5 text-left"
           >
             <div className="min-w-0">
-              <h3 className="truncate text-xl font-bold tracking-[-0.035em] text-[var(--midnight-text)]">
+              <Link href={`/subjects/${topic.slug}`} className="truncate text-xl font-bold tracking-[-0.035em] text-[var(--midnight-text)]">
                 {topic.name}
-              </h3>
+              </Link>
 
               <p className="mt-1 text-sm text-[var(--midnight-muted)]">
                 {topic.postsCount.toLocaleString()} &nbsp;letters ·{" "}
@@ -430,19 +429,17 @@ function TopicList({
 
                   onFollow?.(topic);
                 }}
-                className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
-                  isFollowing
+                className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${isFollowing
                     ? "border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-text)] hover:border-[var(--midnight-accent)]/60"
                     : "border-[var(--midnight-border)]/70 text-[var(--midnight-muted)] hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-accent-hover)]"
-                }`}
+                  }`}
               >
                 {isFollowing ? "Following" : "Follow"}
 
                 {isFollowing && (
                   <ChevronDown
-                    className={`h-4 w-4 transition ${
-                      isMenuOpen ? "rotate-180" : ""
-                    }`}
+                    className={`h-4 w-4 transition ${isMenuOpen ? "rotate-180" : ""
+                      }`}
                   />
                 )}
               </button>

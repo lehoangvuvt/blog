@@ -3,7 +3,7 @@ import sanitizeHtml from "sanitize-html";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { MoonStar, Plus } from "lucide-react";
+import { MoonStar } from "lucide-react";
 
 import { ArticleContent } from "@/app/(main-layout)/letters/[slug]/components/article-content";
 import HeadingNavigation, {
@@ -15,7 +15,6 @@ import { PostsBySameAuthor } from "./components/posts-by-same-author";
 import { ArticleToolbar } from "./components/article-toolbar";
 import { BackButton } from "@/shared/components/back-button";
 import ViewHandler from "./components/view-handler";
-import { notFound } from "next/navigation";
 import FollowSubjectsSidebar from "./components/follow-subjects-sidebar";
 
 function slugify(text: string) {
@@ -89,7 +88,9 @@ async function getPost(slug: string) {
     }
   );
 
-  if (res.status === 404) notFound();
+  if (res.status === 404) {
+    return null;
+  }
 
   if (!res.ok) {
     const text = await res.text();
@@ -107,6 +108,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPost(slug);
+
+  if (!post) {
+    return {
+      title: "Letter Not Found",
+      description: "This letter could not be found.",
+    };
+  }
 
   const title = post.title;
   const description = post.subTitle ?? "Read this article.";
@@ -149,6 +157,36 @@ export default async function ArticlePage({
 }) {
   const { slug } = await params;
   const post = await getPost(slug);
+
+  if (!post) {
+    return (
+      <main className="flex min-h-screen items-center justify-center px-5 text-[var(--midnight-text)]">
+        <section className="mx-auto max-w-2xl text-center">
+          <p className="text-xs tracking-[0.18em] text-[var(--midnight-soft)]">
+            LETTER NOT FOUND
+          </p>
+
+          <h1 className="mt-4 text-5xl font-bold tracking-[-0.07em] md:text-7xl">
+            This letter vanished
+          </h1>
+
+          <p className="mt-6 text-lg leading-8 text-[var(--midnight-muted)]">
+            The letter you are looking for may have been removed, renamed,
+            unpublished, or perhaps never existed in the first place.
+          </p>
+
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/"
+              className="rounded-full border border-[var(--midnight-border)]/70 px-5 py-2.5 text-sm font-medium transition hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-text)]"
+            >
+              Return home
+            </Link>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   const sanitizedHtmlContent = sanitizeHtml(post.htmlContent ?? "", {
     allowedTags: sanitizeHtml.defaults.allowedTags.concat([
