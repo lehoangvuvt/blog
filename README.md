@@ -1,5 +1,7 @@
 # The Midnight Letters
 
+Website: https://themidnightletters.com
+
 A quiet place for thoughtful writing, slow reading, and midnight reflections.
 
 The Midnight Letters is an editorial-style writing platform built for people who still enjoy long-form thoughts in a fast-moving world. Instead of noisy feeds, endless scrolling, and algorithm-driven attention loops, the platform focuses on atmosphere, typography, calm interactions, and meaningful words.
@@ -16,16 +18,16 @@ It is built for people who still pause to think.
 
 ## Home
 
-<img src="./assets/home.png" width="100%" />
+[![Home](./assets/home.png)](https://themidnightletters.com)
 
 ---
 
 ## Writing Experience
 
-<img src="./assets/editor.png" width="100%" />
+[![Writing](./assets/writing.png)](https://themidnightletters.com/write)
 
 ---
 
 ## Reading Experience
 
-<img src="./assets/reading.png" width="100%" />
+[![Reading](./assets/reading.png)](https://themidnightletters.com)
