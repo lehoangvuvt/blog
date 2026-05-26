@@ -6,6 +6,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -24,6 +25,7 @@ import { PrismaService } from 'src/prisma.service';
 import { createHash, randomBytes } from 'node:crypto';
 import { addMinutes } from 'date-fns';
 import LoginDto from './dtos/login.dto';
+import UpdatePasswordDto from './dtos/update-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -354,6 +356,11 @@ export class AuthService {
         introduction: true,
         slug: true,
         background_image: true,
+        facebook_link: true,
+        x_link: true,
+        linkedin_link: true,
+        youtube_link: true,
+        website_link: true,
       },
     });
 
@@ -385,6 +392,13 @@ export class AuthService {
       slug: user.slug,
       backgroundImage: user.background_image,
       followers,
+      social: {
+        facebook: user.facebook_link,
+        x: user.x_link,
+        linkedin: user.linkedin_link,
+        website: user.website_link,
+        youtube: user.youtube_link,
+      },
       followings,
       savedPostIds,
       followedTags: followedTagIds.map((tag) => {
@@ -426,5 +440,50 @@ export class AuthService {
         createdAt: user.created_at,
       },
     };
+  }
+
+  async updatePassword(userId: string, dto: UpdatePasswordDto) {
+    const { currentPassword, newPassword } = dto;
+
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isMatched = await argon2.verify(user.password, currentPassword);
+
+    if (!isMatched) {
+      throw new BadRequestException('Current password is not correct');
+    }
+
+    const isSamePassword = await argon2.verify(user.password, newPassword);
+
+    if (isSamePassword) {
+      throw new BadRequestException(
+        'New password must be different from current password',
+      );
+    }
+
+    const hashedNewPassword = await this._getHashedPassword(newPassword);
+
+    try {
+      await this.prismaService.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          password: hashedNewPassword,
+        },
+      });
+
+      return { success: true };
+    } catch {
+      throw new InternalServerErrorException('Cannot update password');
+    }
   }
 }

@@ -28,6 +28,9 @@ import OwnPosts from "./components/own-posts";
 import { useAppDispatch } from "@/store/hooks";
 import { setSignInModalState } from "@/features/app-settings/slice";
 import Loading from "@/shared/components/loading";
+import UpdatePasswordModal from "./components/update-password-modal";
+import NotificationPopover from "@/shared/components/notification-popover";
+import useNotification from "@/hooks/use-notification";
 
 type Tab = "Posts" | "Collections" | "Reposts" | "Likes";
 
@@ -52,8 +55,10 @@ function normalizeUrl(url?: string | null) {
 
 export default function UserInfoPage() {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [isUpdatePasswordOpen, setIsUpdatePasswordOpen] = useState(false);
   const [isCreateCollectionOpen, setIsCreateCollectionOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("Posts");
+  const { notifications, open: openNotification, close } = useNotification();
 
   const params = useParams();
   const userSlug = params.userSlug as string;
@@ -162,6 +167,7 @@ export default function UserInfoPage() {
 
   return (
     <main className="min-h-screen bg-[var(--midnight-bg)] text-[var(--midnight-text)]">
+      <NotificationPopover notifications={notifications} onClose={close} />
       <section className="relative overflow-hidden border-b border-[var(--midnight-border)]/70">
         {userInfo.backgroundImage && (
           <img
@@ -256,6 +262,14 @@ export default function UserInfoPage() {
                 >
                   Edit profile
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsUpdatePasswordOpen(true)}
+                  className="rounded-full border border-[var(--midnight-border)]/70 px-5 py-2 text-sm font-medium text-[var(--midnight-muted)] transition hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-accent-hover)]"
+                >
+                  Update password
+                </button>
               </>
             ) : (
               <button
@@ -295,9 +309,7 @@ export default function UserInfoPage() {
                     </span>
                   </>
                 ) : (
-                  <>
-                    <span>Follow</span>
-                  </>
+                  <span>Follow</span>
                 )}
               </button>
             )}
@@ -343,6 +355,17 @@ export default function UserInfoPage() {
         onClose={() => setIsEditProfileOpen(false)}
         userInfo={userInfo}
         refetch={refetchUserInfo}
+      />
+
+      <UpdatePasswordModal
+        open={isUpdatePasswordOpen}
+        onSuccess={() => {
+          openNotification("Update password success", "success");
+        }}
+        onError={(errMsg) => {
+          openNotification(errMsg, "error");
+        }}
+        onClose={() => setIsUpdatePasswordOpen(false)}
       />
 
       <CreateCollectionModal

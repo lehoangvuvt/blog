@@ -163,7 +163,7 @@ export default function ResetPasswordPage() {
               id="password"
               type="password"
               required
-              minLength={6}
+              minLength={5}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter new password"

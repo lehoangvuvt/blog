@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 // biome-ignore lint/style/useImportType: <explanation>
 import { AuthService } from './auth.service';
 import RegisterDto from './dtos/register.dto';
@@ -9,6 +17,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { ResetPasswordDto } from './dtos/reset-password.dto';
 import { CreateResetPasswordRequestDto } from './dtos/create-request-password-request.dto';
+import UpdatePasswordDto from './dtos/update-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -80,5 +89,14 @@ export class AuthController {
     const decoded = this.authService.verifyToken(body.token);
     const userId = decoded.sub;
     return userId;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('/password')
+  async updatePassword(
+    @Body() body: UpdatePasswordDto,
+    @CurrentUser() user: { sub: string },
+  ) {
+    return this.authService.updatePassword(user.sub, body);
   }
 }

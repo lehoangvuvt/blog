@@ -402,7 +402,7 @@ export class UsersService {
   async updateUserProfile(userId: string, dto: UpdateUserProfileDto) {
     await this.ensureUserExisted(userId);
     try {
-      return await this.prisma.user.update({
+      const user = await this.prisma.user.update({
         where: { id: userId },
         data: {
           ...(dto.fullName && { full_name: dto.fullName }),
@@ -418,6 +418,23 @@ export class UsersService {
           ...(dto.backgroundImage && { background_image: dto.backgroundImage }),
         },
       });
+
+      return {
+        id: user.id,
+        slug: user.slug,
+        avatar: user.avatar,
+        introduction: user.introduction,
+        fullName: user.full_name,
+        createdAt: user.created_at,
+        backgroundImage: user.background_image,
+        social: {
+          facebook: user.facebook_link,
+          x: user.x_link,
+          linkedin: user.linkedin_link,
+          website: user.website_link,
+          youtube: user.youtube_link,
+        },
+      };
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === 'P2002') {

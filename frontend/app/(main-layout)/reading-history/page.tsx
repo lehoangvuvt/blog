@@ -57,7 +57,7 @@ export default function ReadingHistoryPage() {
                   "Unknown writer";
 
                 const authorLink = post.author?.slug
-                  ? `/@${post.author.slug}`
+                  ? `/${post.author.slug}`
                   : "#";
 
                 return (
