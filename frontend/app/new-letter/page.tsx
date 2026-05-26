@@ -1,8 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useRef, useState } from "react";
-import { Check, ImagePlus, Loader2, Send, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Check, ImagePlus, Loader2, Search, Send, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { DefaultTemplate } from "@/features/editor/components/default-template";
@@ -14,8 +14,9 @@ import {
 import { useMe } from "@/features/auth/hooks/use-me";
 import Loading from "@/shared/components/loading";
 import ForbiddenPage from "../forbbiden";
+import { useTags } from "@/features/tags/hooks/use-tags";
 
-export default function NewArticlePage() {
+export default function NewLetterPage() {
   const router = useRouter();
   const { data: me, isLoading: isLoadingMe } = useMe();
 
@@ -23,6 +24,8 @@ export default function NewArticlePage() {
 
   const [tags, setTags] = useState<string[]>(["Journal", "Ideas"]);
   const [tagInput, setTagInput] = useState("");
+  const [debouncedTagSearch, setDebouncedTagSearch] = useState("");
+  const [isTagInputFocused, setIsTagInputFocused] = useState(false);
 
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
@@ -46,15 +49,55 @@ export default function NewArticlePage() {
 
   const canPublish = title.trim().length > 0 && htmlContent.trim().length > 0;
 
-  const addTag = () => {
-    const nextTag = tagInput.trim();
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setDebouncedTagSearch(tagInput.trim());
+    }, 300);
+
+    return () => window.clearTimeout(timeout);
+  }, [tagInput]);
+
+  const shouldSearchTags =
+    isTagInputFocused && debouncedTagSearch.length >= 2;
+
+  const {
+    data: searchedTagsData,
+    isFetching: isFetchingTags,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useTags(
+    {
+      search: debouncedTagSearch,
+      limit: 8,
+    },
+    shouldSearchTags
+  );
+
+  const suggestedTags = useMemo(() => {
+    const selected = new Set(tags.map((tag) => tag.toLowerCase()));
+
+    return (
+      searchedTagsData?.pages
+        .flatMap((page) => page.data)
+        .filter((tag) => !selected.has(tag.name.toLowerCase())) ?? []
+    );
+  }, [searchedTagsData, tags]);
+
+  const addTag = (value?: string) => {
+    const nextTag = (value ?? tagInput).trim();
     if (!nextTag) return;
 
-    if (!tags.includes(nextTag)) {
+    const exists = tags.some(
+      (tag) => tag.toLowerCase() === nextTag.toLowerCase()
+    );
+
+    if (!exists) {
       setTags((prev) => [...prev, nextTag]);
     }
 
     setTagInput("");
+    setDebouncedTagSearch("");
   };
 
   const removeTag = (tag: string) => {
@@ -153,7 +196,7 @@ export default function NewArticlePage() {
           </div>
         </section>
 
-        <section className="mt-10 mx-auto w-full max-w-3xl border-y border-[var(--midnight-border)]/70 py-6">
+        <section className="mx-auto mt-10 w-full max-w-3xl border-y border-[var(--midnight-border)]/70 py-6">
           <p className="mb-3 text-xs tracking-[0.14em] text-[var(--midnight-soft)]">
             Subjects
           </p>
@@ -170,22 +213,117 @@ export default function NewArticlePage() {
               </button>
             ))}
 
-            <input
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  addTag();
-                }
-              }}
-              placeholder="Add subject..."
-              className="min-w-36 rounded-full border border-[var(--midnight-border)]/70 bg-transparent px-3 py-1 text-sm text-[var(--midnight-text)] outline-none placeholder:text-[var(--midnight-soft)] focus:border-[var(--midnight-accent)]/70"
-            />
+            <div className="relative">
+              <input
+                value={tagInput}
+                onFocus={() => setIsTagInputFocused(true)}
+                onBlur={() => {
+                  window.setTimeout(() => setIsTagInputFocused(false), 150);
+                }}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+
+                    if (suggestedTags[0]) {
+                      addTag(suggestedTags[0].name);
+                      return;
+                    }
+
+                    addTag();
+                  }
+
+                  if (e.key === "Escape") {
+                    setIsTagInputFocused(false);
+                  }
+                }}
+                placeholder="Add subject..."
+                className="min-w-44 rounded-full border border-[var(--midnight-border)]/70 bg-transparent px-3 py-1 text-sm text-[var(--midnight-text)] outline-none placeholder:text-[var(--midnight-soft)] focus:border-[var(--midnight-accent)]/70"
+              />
+
+              {isTagInputFocused && tagInput.trim().length > 0 && (
+                <div className="absolute left-0 top-[calc(100%+0.5rem)] z-50 w-72 overflow-hidden rounded-2xl border border-[var(--midnight-border)]/70 bg-[var(--midnight-surface)] shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+                  <div className="flex items-center gap-2 border-b border-[var(--midnight-border)]/70 px-4 py-3 text-xs text-[var(--midnight-soft)]">
+                    <Search className="h-3.5 w-3.5" />
+                    Suggested subjects
+                  </div>
+
+                  <div className="max-h-72 overflow-y-auto p-2">
+                    {tagInput.trim().length < 2 && (
+                      <div className="px-3 py-3 text-sm text-[var(--midnight-muted)]">
+                        Type at least 2 characters...
+                      </div>
+                    )}
+
+                    {tagInput.trim().length >= 2 &&
+                      isFetchingTags &&
+                      suggestedTags.length === 0 && (
+                        <div className="flex items-center gap-2 px-3 py-3 text-sm text-[var(--midnight-muted)]">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Searching...
+                        </div>
+                      )}
+
+                    {tagInput.trim().length >= 2 &&
+                      !isFetchingTags &&
+                      suggestedTags.length === 0 && (
+                        <button
+                          type="button"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => addTag()}
+                          className="w-full rounded-xl px-3 py-3 text-left text-sm text-[var(--midnight-muted)] transition hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-text)]"
+                        >
+                          Create “{tagInput.trim()}”
+                        </button>
+                      )}
+
+                    {tagInput.trim().length >= 2 &&
+                      suggestedTags.map((tag) => (
+                        <button
+                          key={tag.id}
+                          type="button"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => addTag(tag.name)}
+                          className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-[var(--midnight-code-bg)]"
+                        >
+                          <div>
+                            <p className="text-sm font-medium text-[var(--midnight-text)]">
+                              {tag.name}
+                            </p>
+                            <p className="mt-0.5 text-xs text-[var(--midnight-soft)]">
+                              {tag.postsCount} posts · {tag.authorsCount}{" "}
+                              authors
+                            </p>
+                          </div>
+
+                          <span className="shrink-0 text-xs text-[var(--midnight-soft)]">
+                            Add
+                          </span>
+                        </button>
+                      ))}
+
+                    {tagInput.trim().length >= 2 && hasNextPage && (
+                      <button
+                        type="button"
+                        disabled={isFetchingNextPage}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => fetchNextPage()}
+                        className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs text-[var(--midnight-muted)] transition hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-text)] disabled:opacity-50"
+                      >
+                        {isFetchingNextPage && (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        )}
+                        Load more
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </section>
 
-        <section className="mt-10  mx-auto w-full max-w-3xl">
+        <section className="mx-auto mt-10 w-full max-w-3xl">
           <p className="mb-3 text-xs tracking-[0.14em] text-[var(--midnight-soft)]">
             Cover image
           </p>
@@ -228,7 +366,7 @@ export default function NewArticlePage() {
           </label>
         </section>
 
-        <section className="mt-14 max-w-3xl mx-auto w-full">
+        <section className="mx-auto mt-14 w-full max-w-3xl">
           <DefaultTemplate
             onContentChange={(json, html) => {
               setJsonContent(json);
@@ -282,16 +420,16 @@ export default function NewArticlePage() {
                   {publishStatus === "success"
                     ? "Published"
                     : publishStatus === "publishing"
-                    ? "Publishing"
-                    : "Ready to publish?"}
+                      ? "Publishing"
+                      : "Ready to publish?"}
                 </h2>
 
                 <p className="mt-2 text-sm leading-6 text-[var(--midnight-muted)]">
                   {publishStatus === "success"
                     ? "Your article is now publicly available."
                     : publishStatus === "publishing"
-                    ? "Sending your article to the archive."
-                    : "Review the subjects before publishing."}
+                      ? "Sending your article to the archive."
+                      : "Review the subjects before publishing."}
                 </p>
               </div>
 

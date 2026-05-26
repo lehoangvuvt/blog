@@ -464,7 +464,7 @@ export class UsersService {
       const post = h.post;
       const author = h.post.author;
       return {
-        readAt: h.created_at,
+        readAt: h.updated_at,
         post: {
           id: post.id,
           slug: post.slug,

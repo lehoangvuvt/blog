@@ -128,6 +128,7 @@ export default function UserInfoPage() {
       <section className="relative border-b border-[var(--midnight-border)]/70 overflow-hidden">
         {userInfo?.backgroundImage && (
           <img
+            alt="user-info-background"
             src={userInfo.backgroundImage}
             className="absolute inset-0 z-[1] h-full w-full object-cover object-center blur-xs brightness-50"
             fetchPriority="high"
@@ -206,7 +207,7 @@ export default function UserInfoPage() {
             ) : isMyProfile ? (
               <>
                 <Link
-                  href="/new-article"
+                  href="/new-letter"
                   className="rounded-full bg-[var(--midnight-accent)] px-5 py-2 text-sm font-medium text-[var(--midnight-on-accent)] transition hover:opacity-90"
                 >
                   Write a letter

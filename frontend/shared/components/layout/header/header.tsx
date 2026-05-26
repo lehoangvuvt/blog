@@ -9,7 +9,6 @@ import {
   Menu,
   MoonStar,
   Search,
-  Settings2,
   User2,
   PenSquare,
   LogOut,
@@ -183,18 +182,18 @@ export default function Header() {
           </div>
 
           <nav className="flex shrink-0 items-center gap-2 md:gap-3">
-            <button
+            {/* <button
               type="button"
               onClick={() => setIsSettingsOpen(true)}
               className="hidden items-center gap-2 text-sm text-[var(--midnight-muted)] transition hover:text-[var(--midnight-accent-hover)] sm:flex"
             >
               <Settings2 className="h-4 w-4" />
               <span className="hidden md:inline">Reading mood</span>
-            </button>
+            </button> */}
 
             {isLoggedIn && (
               <Link
-                href="/new-article"
+                href="/new-letter"
                 className="hidden items-center gap-2 text-sm text-[var(--midnight-muted)] transition hover:text-[var(--midnight-accent-hover)] md:flex"
               >
                 <PenSquare className="h-4 w-4" />
@@ -263,14 +262,14 @@ export default function Header() {
                           Profile
                         </Link>
 
-                        <Link
+                        {/* <Link
                           href="/settings"
                           onClick={() => setIsProfileOpen(false)}
                           className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[var(--midnight-text)] transition-colors hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-accent-hover)]"
                         >
                           <Settings2 className="h-4 w-4" />
                           Settings
-                        </Link>
+                        </Link> */}
 
                         <button
                           type="button"
