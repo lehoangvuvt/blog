@@ -20,6 +20,7 @@ import { PostCommentsService } from 'src/post-comments/post-comments.service';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from 'src/auth/guards/optional-jwt-guard';
+import { CreatePostHighlightDto } from './dtos/create-post-highlight.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -146,5 +147,24 @@ export class PostsController {
   ) {
     await this.postsService.updateUserReadingHistory(user.sub, postId);
     return { success: true };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':postId/highlights')
+  async getPostHighlights(
+    @CurrentUser() user: { sub: string },
+    @Param('postId', ParseIntPipe) postId: number,
+  ) {
+    return await this.postsService.getUserPostHighlights(user.sub, postId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':postId/highlights')
+  async createPostHighlight(
+    @CurrentUser() user: { sub: string },
+    @Param('postId', ParseIntPipe) postId: number,
+    @Body() body: CreatePostHighlightDto,
+  ) {
+    return await this.postsService.createPostHighlight(user.sub, postId, body);
   }
 }

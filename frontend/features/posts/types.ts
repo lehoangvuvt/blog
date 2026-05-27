@@ -135,3 +135,10 @@ export type MeQueryData = {
 export type MutationContext = {
   previousMe?: MeQueryData;
 };
+
+export type HighlightRect = {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+};

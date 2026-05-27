@@ -1,23 +1,44 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Highlighter, MessageCircle, Share2, StickyNote } from "lucide-react";
+import { Highlighter } from "lucide-react";
 
 import { useAppSelector } from "@/store/hooks";
 import { selectFont, selectFontSize } from "@/features/app-settings/selectors";
+import type { HighlightRect } from "@/features/posts/types";
+import { createHighlight } from "@/features/posts/api/create-post-highlight";
+import { getUserPostHighlights } from "@/features/users/api/get-user-post-highlights";
 
 type Props = {
   html: string;
+  postId: number;
 };
 
-type HighlightRect = {
-  top: number;
-  left: number;
-  width: number;
-  height: number;
+type SavedHighlight = {
+  id: string;
+  text: string;
+  note?: string;
+  url: string;
+  createdAt: string;
+  rects: HighlightRect[];
 };
 
-export function ArticleContent({ html }: Props) {
+const getHighlightBox = (rects: HighlightRect[]) => {
+  const top = Math.min(...rects.map((rect) => rect.top));
+  const left = Math.min(...rects.map((rect) => rect.left));
+  const right = Math.max(...rects.map((rect) => rect.left + rect.width));
+  const bottom = Math.max(...rects.map((rect) => rect.top + rect.height));
+
+  return {
+    top,
+    left,
+    width: right - left,
+    height: bottom - top,
+  };
+};
+
+export function ArticleContent({ html, postId }: Props) {
   const articleRef = useRef<HTMLElement | null>(null);
   const popoverRef = useRef<HTMLDivElement | null>(null);
 
@@ -27,6 +48,10 @@ export function ArticleContent({ html }: Props) {
   const [selectedText, setSelectedText] = useState("");
   const [popoverPos, setPopoverPos] = useState({ top: 0, left: 0 });
   const [highlightRects, setHighlightRects] = useState<HighlightRect[]>([]);
+  const [savedHighlights, setSavedHighlights] = useState<SavedHighlight[]>([]);
+  const [activeHighlight, setActiveHighlight] =
+    useState<SavedHighlight | null>(null);
+  const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
   const [showNoteBox, setShowNoteBox] = useState(false);
   const [note, setNote] = useState("");
 
@@ -34,15 +59,15 @@ export function ArticleContent({ html }: Props) {
     font === "serif"
       ? "font-serif"
       : font === "monospace"
-      ? "font-mono"
-      : "font-sans";
+        ? "font-mono"
+        : "font-sans";
 
   const sizeClass =
     fontSize === "small"
       ? "text-base prose-base"
       : fontSize === "large"
-      ? "text-xl prose-xl"
-      : "text-lg prose-lg";
+        ? "text-xl prose-xl"
+        : "text-lg prose-lg";
 
   const closePopover = () => {
     setSelectedText("");
@@ -98,16 +123,52 @@ export function ArticleContent({ html }: Props) {
     }, 0);
   };
 
-  const shareFacebook = () => {
-    window.open(
-      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-        window.location.href
-      )}`,
-      "_blank",
-      "noopener,noreferrer"
-    );
+  const saveHighlight = async (highlightNote?: string) => {
+    const safeNote =
+      typeof highlightNote === "string" ? highlightNote.trim() : "";
+
+    const createdHighlight = await createHighlight({
+      postId,
+      text: selectedText,
+      note: safeNote || undefined,
+      rects: highlightRects,
+    });
+
+    setSavedHighlights((prev) => [
+      {
+        id: createdHighlight.id,
+        text: createdHighlight.text,
+        note: createdHighlight.note || undefined,
+        createdAt: createdHighlight.createdAt,
+        rects: createdHighlight.rects,
+        url: window.location.href,
+      },
+      ...prev,
+    ]);
+
+    closePopover();
   };
 
+  useEffect(() => {
+    getUserPostHighlights(postId)
+      .then((highlights) => {
+        setSavedHighlights(
+          highlights.map((item: SavedHighlight) => ({
+            id: item.id,
+            text: item.text,
+            note: item.note,
+            rects: item.rects,
+            createdAt: item.createdAt,
+            url: window.location.href,
+          }))
+        );
+      })
+      .catch(() => {
+        setSavedHighlights([]);
+      });
+  }, [postId]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -123,32 +184,12 @@ export function ArticleContent({ html }: Props) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const saveNote = () => {
-    const notes = JSON.parse(localStorage.getItem("article_notes") || "[]");
-
-    localStorage.setItem(
-      "article_notes",
-      JSON.stringify([
-        {
-          id: crypto.randomUUID(),
-          text: selectedText,
-          note,
-          url: window.location.href,
-          createdAt: new Date().toISOString(),
-        },
-        ...notes,
-      ])
-    );
-
-    closePopover();
-  };
-
   return (
-    <div className="relative overflow-visible">
+    <div className="relative isolate overflow-visible">
       {highlightRects.map((rect, index) => (
         <div
-          key={index}
-          className="pointer-events-none absolute z-0 rounded-[3px] bg-[rgba(143,164,194,0.24)]"
+          key={`current-highlight-${index + 1}`}
+          className="pointer-events-none absolute z-20 rounded-[3px] bg-[rgba(143,164,194,0.24)]"
           style={{
             top: rect.top,
             left: rect.left,
@@ -157,6 +198,53 @@ export function ArticleContent({ html }: Props) {
           }}
         />
       ))}
+
+      {savedHighlights.map((highlight) => {
+        const box = getHighlightBox(highlight.rects);
+
+        return (
+          <div
+            key={highlight.id}
+            onMouseEnter={() => {
+              const articleRect = articleRef.current?.getBoundingClientRect();
+              if (!articleRect) return;
+
+              setActiveHighlight(highlight);
+              setTooltipPos({
+                top: articleRect.top + box.top - 12,
+                left: articleRect.left + box.left + box.width / 2,
+              });
+            }}
+            onMouseLeave={() => setActiveHighlight(null)}
+            className="group absolute z-20"
+            style={{
+              top: box.top,
+              left: box.left,
+              width: box.width,
+              height: box.height,
+            }}
+          >
+            {highlight.rects.map((rect, index) => (
+              <div
+                key={`${highlight.id}-${index}`}
+                className="
+                  absolute rounded-[3px]
+                  bg-[rgba(212,185,122,0.22)]
+                  transition-all duration-200
+                  group-hover:bg-[rgba(245,214,140,0.42)]
+                  group-hover:shadow-[0_0_12px_rgba(245,214,140,0.18)]
+                "
+                style={{
+                  top: rect.top - box.top,
+                  left: rect.left - box.left,
+                  width: rect.width,
+                  height: rect.height,
+                }}
+              />
+            ))}
+          </div>
+        );
+      })}
 
       <section
         ref={articleRef}
@@ -217,8 +305,37 @@ export function ArticleContent({ html }: Props) {
           prose-pre:text-sm
           prose-pre:text-[var(--midnight-text)]
         `}
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
         dangerouslySetInnerHTML={{ __html: html }}
       />
+
+
+      {activeHighlight?.note && (
+        <div
+          style={{
+            top: tooltipPos.top,
+            left: tooltipPos.left,
+            transform: "translate(-50%, -100%)",
+          }}
+          className="pointer-events-none fixed z-[2147483647]
+          w-[260px]
+          rounded-2xl border border-[var(--midnight-border)]/70
+          bg-[var(--midnight-surface)] p-3
+          text-xs leading-6 text-[var(--midnight-text)]
+          shadow-[0_24px_80px_rgba(0,0,0,0.55)]
+          backdrop-blur-xl
+        "
+        >
+          <p className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[var(--midnight-soft)]">
+            Private note
+          </p>
+
+          <p className="whitespace-pre-wrap break-words">
+            {activeHighlight.note}
+          </p>
+        </div>
+      )}
+
 
       {selectedText && (
         <div
@@ -230,72 +347,56 @@ export function ArticleContent({ html }: Props) {
             transform: "translateX(-50%)",
           }}
           className="
-            absolute z-[9999]
-            w-auto
-            overflow-hidden
-            rounded-full
-            border border-[var(--midnight-border)]/70
-            bg-[var(--midnight-surface)]/95
-            px-1.5 py-1.5
-            shadow-[0_18px_60px_rgba(0,0,0,0.35)]
-            backdrop-blur-xl
-          "
+              absolute z-[9999]
+              w-auto
+              overflow-hidden
+              rounded-2xl
+              border border-[var(--midnight-border)]/70
+              bg-[var(--midnight-surface)]/95
+              p-2
+              shadow-[0_18px_60px_rgba(0,0,0,0.35)]
+              backdrop-blur-xl
+            "
         >
           {!showNoteBox ? (
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                title="Highlight"
-                aria-label="Highlight"
-                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[var(--midnight-text)] transition-colors hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-accent-hover)]"
-              >
-                <Highlighter className="h-3.5 w-3.5" />
-                Highlight
-              </button>
-
-              <button
-                type="button"
-                title="Respond"
-                aria-label="Respond"
-                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[var(--midnight-text)] transition-colors hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-accent-hover)]"
-              >
-                <MessageCircle className="h-3.5 w-3.5" />
-                Respond
-              </button>
-
-              <button
-                type="button"
-                title="Share"
-                aria-label="Share"
-                onClick={shareFacebook}
-                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[var(--midnight-text)] transition-colors hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-accent-hover)]"
-              >
-                <Share2 className="h-3.5 w-3.5" />
-                Share
-              </button>
-
-              <button
-                type="button"
-                title="Private note"
-                aria-label="Private note"
-                onClick={() => setShowNoteBox(true)}
-                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[var(--midnight-text)] transition-colors hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-accent-hover)]"
-              >
-                <StickyNote className="h-3.5 w-3.5" />
-                Note
-              </button>
-            </div>
+            <button
+              type="button"
+              title="Highlight"
+              aria-label="Highlight"
+              onClick={() => setShowNoteBox(true)}
+              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[var(--midnight-text)] transition-colors hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-accent-hover)]"
+            >
+              <Highlighter className="h-3.5 w-3.5" />
+              Highlight
+            </button>
           ) : (
-            <div className="w-[280px] space-y-3 rounded-2xl p-2">
+            <div className="w-[320px] space-y-3">
+              <div className="rounded-xl border border-[var(--midnight-border)]/60 bg-[var(--midnight-code-bg)]/70 p-3">
+                <p className="line-clamp-3 text-xs leading-5 text-[var(--midnight-muted)]">
+                  “{selectedText}”
+                </p>
+              </div>
+
               <textarea
                 value={note}
+                // biome-ignore lint/a11y/noAutofocus: <explanation>
+                autoFocus
                 onMouseDown={(e) => e.stopPropagation()}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Leave a quiet note..."
-                className="h-24 w-full resize-none rounded-xl border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] p-3 text-sm text-[var(--midnight-text)] outline-none placeholder:text-[var(--midnight-soft)] focus:border-[var(--midnight-accent)]/70"
+                placeholder="Add a note for this highlight..."
+                className="
+                  h-28 w-full resize-none rounded-xl
+                  border border-[var(--midnight-border)]/70
+                  bg-[var(--midnight-code-bg)]
+                  p-3 text-sm leading-6
+                  text-[var(--midnight-text)]
+                  outline-none
+                  placeholder:text-[var(--midnight-soft)]
+                  focus:border-[var(--midnight-accent)]/70
+                "
               />
 
-              <div className="flex justify-end gap-2">
+              <div className="flex items-center justify-between gap-2">
                 <button
                   type="button"
                   onClick={closePopover}
@@ -306,11 +407,10 @@ export function ArticleContent({ html }: Props) {
 
                 <button
                   type="button"
-                  disabled={!note.trim()}
-                  onClick={saveNote}
-                  className="rounded-full bg-[var(--midnight-accent)] px-3 py-1.5 text-xs font-medium text-[var(--midnight-on-accent)] transition-opacity disabled:opacity-40"
+                  onClick={() => saveHighlight(note)}
+                  className="rounded-full bg-[var(--midnight-accent)] px-4 py-1.5 text-xs font-medium text-[var(--midnight-on-accent)] transition-opacity hover:opacity-90"
                 >
-                  Save note
+                  Save highlight
                 </button>
               </div>
             </div>

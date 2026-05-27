@@ -13,6 +13,7 @@ import CreatePostDto from './dtos/create-post.dto';
 import type { Prisma } from 'generated/prisma/browser';
 import { FindManyPostsDto } from './dtos/find-many-posts.dto';
 import { generateSlug, sanitizedHtmlContent } from 'src/shared/utils';
+import { CreatePostHighlightDto } from './dtos/create-post-highlight.dto';
 // import { PostsEmailProducer } from 'src/posts-email-queue/producers/posts-email.producer';
 
 @Injectable()
@@ -713,6 +714,58 @@ export class PostsService {
       where: { user_id_post_id: { user_id: userId, post_id: postId } },
       update: { updated_at: now },
       create: { user_id: userId, post_id: postId, updated_at: now },
+    });
+  }
+
+  async getUserPostHighlights(userId: string, postId: number) {
+    const postHighlights = await this.prismaService.postHighlight.findMany({
+      where: {
+        user_id: userId,
+        post_id: postId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return postHighlights.map((h) => {
+      return {
+        id: h.id,
+        rects: h.rects,
+        note: h.note,
+        createdAt: h.createdAt,
+        updatedAt: h.updatedAt,
+        text: h.text,
+      };
+    });
+  }
+
+  async createPostHighlight(
+    userId: string,
+    postId: number,
+    dto: CreatePostHighlightDto,
+  ) {
+    const post = await this.prismaService.post.findUnique({
+      where: {
+        id: postId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    return await this.prismaService.postHighlight.create({
+      data: {
+        user_id: userId,
+        post_id: postId,
+        text: dto.text.trim(),
+        note: dto.note?.trim() || null,
+        rects: dto.rects as unknown as Prisma.InputJsonValue,
+      },
     });
   }
 }

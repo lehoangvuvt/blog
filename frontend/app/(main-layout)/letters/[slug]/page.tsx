@@ -340,7 +340,7 @@ export default async function ArticlePage({
         )}
 
         <div className="relative overflow-visible">
-          <ArticleContent html={htmlWithIds} />
+          <ArticleContent html={htmlWithIds} postId={post.id} />
         </div>
 
         {post.author && (
