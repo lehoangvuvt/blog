@@ -38,30 +38,30 @@ const getHighlightBox = (rects: HighlightRect[]) => {
   };
 };
 
-export async function updateReadingProgress(payload: {
-  postId: number;
-  progress: number;
-}) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_API_URL}/posts/${payload.postId}/reading-progress`,
-    {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        progress: payload.progress,
-      }),
-    }
-  );
+// export async function updateReadingProgress(payload: {
+//   postId: number;
+//   progress: number;
+// }) {
+//   const res = await fetch(
+//     `${process.env.NEXT_PUBLIC_BASE_API_URL}/posts/${payload.postId}/reading-progress`,
+//     {
+//       method: "POST",
+//       credentials: "include",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({
+//         progress: payload.progress,
+//       }),
+//     }
+//   );
 
-  if (!res.ok) {
-    throw new Error("Failed to update reading progress");
-  }
+//   if (!res.ok) {
+//     throw new Error("Failed to update reading progress");
+//   }
 
-  return res.json();
-}
+//   return res.json();
+// }
 
 export function ArticleContent({ html, postId }: Props) {
   const articleRef = useRef<HTMLElement | null>(null);
@@ -231,7 +231,7 @@ export function ArticleContent({ html, postId }: Props) {
   }, []);
 
   useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    // let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     function updateProgress() {
       if (!articleRef.current) return;
@@ -247,14 +247,14 @@ export function ArticleContent({ html, postId }: Props) {
 
       setReadingProgress(progress);
 
-      if (timeoutId) clearTimeout(timeoutId);
+      // if (timeoutId) clearTimeout(timeoutId);
 
-      timeoutId = setTimeout(() => {
-        updateReadingProgress({
-          postId,
-          progress: Math.round(progress),
-        }).catch(() => {});
-      }, 800);
+      // timeoutId = setTimeout(() => {
+      //   updateReadingProgress({
+      //     postId,
+      //     progress: Math.round(progress),
+      //   }).catch(() => {});
+      // }, 800);
     }
 
     window.addEventListener("scroll", updateProgress, { passive: true });
@@ -266,7 +266,7 @@ export function ArticleContent({ html, postId }: Props) {
       window.removeEventListener("scroll", updateProgress);
       window.removeEventListener("resize", updateProgress);
 
-      if (timeoutId) clearTimeout(timeoutId);
+      // if (timeoutId) clearTimeout(timeoutId);
     };
   }, [postId]);
 
@@ -410,10 +410,6 @@ export function ArticleContent({ html, postId }: Props) {
             <div>
               <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-[var(--midnight-soft)]">
                 Highlight note
-              </p>
-
-              <p className="mt-1 text-xs text-[var(--midnight-muted)]">
-                Private reflection
               </p>
             </div>
 
