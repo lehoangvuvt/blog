@@ -38,6 +38,31 @@ const getHighlightBox = (rects: HighlightRect[]) => {
   };
 };
 
+export async function updateReadingProgress(payload: {
+  postId: number;
+  progress: number;
+}) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_API_URL}/posts/${payload.postId}/reading-progress`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        progress: payload.progress,
+      }),
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to update reading progress");
+  }
+
+  return res.json();
+}
+
 export function ArticleContent({ html, postId }: Props) {
   const articleRef = useRef<HTMLElement | null>(null);
   const popoverRef = useRef<HTMLDivElement | null>(null);
@@ -54,6 +79,7 @@ export function ArticleContent({ html, postId }: Props) {
   );
   const [showNoteBox, setShowNoteBox] = useState(false);
   const [note, setNote] = useState("");
+  const [readingProgress, setReadingProgress] = useState(0);
 
   const fontClass =
     font === "serif"
@@ -168,9 +194,8 @@ export function ArticleContent({ html, postId }: Props) {
       });
   }, [postId]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    function handleClickOutsidePopover(event: MouseEvent) {
       if (
         popoverRef.current &&
         !popoverRef.current.contains(event.target as Node)
@@ -179,10 +204,71 @@ export function ArticleContent({ html, postId }: Props) {
       }
     }
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutsidePopover);
 
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutsidePopover);
   }, []);
+
+  useEffect(() => {
+    function handleCloseActiveHighlight(event: MouseEvent) {
+      const target = event.target as HTMLElement;
+
+      if (
+        target.closest("[data-highlight-layer]") ||
+        target.closest("[data-highlight-sidebar]")
+      ) {
+        return;
+      }
+
+      setActiveHighlight(null);
+    }
+
+    document.addEventListener("mousedown", handleCloseActiveHighlight);
+
+    return () =>
+      document.removeEventListener("mousedown", handleCloseActiveHighlight);
+  }, []);
+
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    function updateProgress() {
+      if (!articleRef.current) return;
+
+      const rect = articleRef.current.getBoundingClientRect();
+      const articleTop = window.scrollY + rect.top;
+      const articleHeight = rect.height;
+      const viewportBottom = window.scrollY + window.innerHeight;
+
+      const rawProgress = ((viewportBottom - articleTop) / articleHeight) * 100;
+
+      const progress = Math.min(Math.max(rawProgress, 0), 100);
+
+      setReadingProgress(progress);
+
+      if (timeoutId) clearTimeout(timeoutId);
+
+      timeoutId = setTimeout(() => {
+        updateReadingProgress({
+          postId,
+          progress: Math.round(progress),
+        }).catch(() => {});
+      }, 800);
+    }
+
+    window.addEventListener("scroll", updateProgress, { passive: true });
+    window.addEventListener("resize", updateProgress);
+
+    updateProgress();
+
+    return () => {
+      window.removeEventListener("scroll", updateProgress);
+      window.removeEventListener("resize", updateProgress);
+
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [postId]);
 
   return (
     <div className="relative isolate overflow-visible">
@@ -201,13 +287,20 @@ export function ArticleContent({ html, postId }: Props) {
 
       {savedHighlights.map((highlight) => {
         const box = getHighlightBox(highlight.rects);
+        const isActive = activeHighlight?.id === highlight.id;
 
         return (
           <div
+            data-highlight-layer
             key={highlight.id}
-            onMouseEnter={() => setActiveHighlight(highlight)}
-            onMouseLeave={() => setActiveHighlight(null)}
-            className="group absolute z-20"
+            onClick={(event) => {
+              event.stopPropagation();
+
+              setActiveHighlight((prev) =>
+                prev?.id === highlight.id ? null : highlight
+              );
+            }}
+            className="group absolute z-20 cursor-pointer"
             style={{
               top: box.top,
               left: box.left,
@@ -218,13 +311,15 @@ export function ArticleContent({ html, postId }: Props) {
             {highlight.rects.map((rect, index) => (
               <div
                 key={`${highlight.id}-${index}`}
-                className="
+                className={`
                   absolute rounded-[3px]
-                  bg-[rgba(212,185,122,0.22)]
                   transition-all duration-200
-                  group-hover:bg-[rgba(245,214,140,0.42)]
-                  group-hover:shadow-[0_0_12px_rgba(245,214,140,0.18)]
-                "
+                  ${
+                    isActive
+                      ? "bg-[rgba(245,214,140,0.46)] shadow-[0_0_14px_rgba(245,214,140,0.2)]"
+                      : "bg-[rgba(212,185,122,0.22)] group-hover:bg-[rgba(245,214,140,0.34)] group-hover:shadow-[0_0_12px_rgba(245,214,140,0.14)]"
+                  }
+                `}
                 style={{
                   top: rect.top - box.top,
                   left: rect.left - box.left,
@@ -296,41 +391,50 @@ export function ArticleContent({ html, postId }: Props) {
           prose-pre:text-sm
           prose-pre:text-[var(--midnight-text)]
         `}
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
         dangerouslySetInnerHTML={{ __html: html }}
       />
 
       {activeHighlight && (
         <aside
+          data-highlight-sidebar
           className="
-          fixed right-0 top-0 z-[2147483647]
-          flex h-screen w-[380px] flex-col
-          border-l border-white/5 
-          shadow-[-24px_0_80px_rgba(0,0,0,0.45)]"
+            fixed right-0 top-0 z-[2147483647]
+            flex h-screen w-[380px] flex-col
+            border-l border-white/5
+            bg-[linear-gradient(to_bottom,rgba(15,15,15,0.96),rgba(10,10,10,0.98))]
+            shadow-[-24px_0_80px_rgba(0,0,0,0.45)]
+            backdrop-blur-2xl
+          "
         >
-          <div className="flex items-center justify-between px-6 py-5">
+          <div className="flex items-center justify-between border-b border-white/5 px-6 py-5">
             <div>
               <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-[var(--midnight-soft)]">
                 Highlight note
               </p>
+
+              <p className="mt-1 text-xs text-[var(--midnight-muted)]">
+                Private reflection
+              </p>
             </div>
+
+            <div className="h-2 w-2 rounded-full bg-[var(--midnight-accent)]/70 shadow-[0_0_12px_rgba(212,185,122,0.5)]" />
           </div>
 
-          <div className="flex-1 overflow-y-auto px-6 py-6">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-6 py-6">
             <div
               className="
-          relative overflow-hidden
-          rounded-3xl
-          border border-[var(--midnight-border)]/50
-          bg-[rgba(255,255,255,0.02)]
-          p-5
-        "
+                relative max-h-[32vh] shrink-0 overflow-y-auto
+                rounded-3xl
+                border border-[var(--midnight-border)]/50
+                bg-[rgba(255,255,255,0.02)]
+                p-5
+              "
             >
               <div
                 className="
-            absolute left-0 top-0 h-full w-1
-            bg-[linear-gradient(to_bottom,rgba(245,214,140,0.9),rgba(245,214,140,0.1))]
-          "
+                  absolute left-0 top-0 h-full w-1
+                  bg-[linear-gradient(to_bottom,rgba(245,214,140,0.9),rgba(245,214,140,0.1))]
+                "
               />
 
               <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[var(--midnight-soft)]">
@@ -339,18 +443,18 @@ export function ArticleContent({ html, postId }: Props) {
 
               <p
                 className="
-            whitespace-pre-wrap
-            text-[15px]
-            italic
-            leading-8
-            text-[var(--midnight-muted)]
-          "
+                  whitespace-pre-wrap
+                  text-[15px]
+                  italic
+                  leading-8
+                  text-[var(--midnight-muted)]
+                "
               >
                 “{activeHighlight.text}”
               </p>
             </div>
 
-            <div className="mt-8">
+            <div className="mt-8 flex min-h-0 flex-1 flex-col">
               <div className="mb-4 flex items-center gap-2">
                 <div className="h-1.5 w-1.5 rounded-full bg-[var(--midnight-accent)]/80" />
 
@@ -361,19 +465,20 @@ export function ArticleContent({ html, postId }: Props) {
 
               <div
                 className="
-            rounded-3xl
-            border border-[var(--midnight-border)]/50
-            bg-[rgba(255,255,255,0.015)]
-            p-5
-          "
+                  min-h-0 flex-1 overflow-y-auto
+                  rounded-3xl
+                  border border-[var(--midnight-border)]/50
+                  bg-[rgba(255,255,255,0.015)]
+                  p-5
+                "
               >
                 <p
                   className="
-              whitespace-pre-wrap break-words
-              text-[15px]
-              leading-8
-              text-[var(--midnight-text)]
-            "
+                    whitespace-pre-wrap break-words
+                    text-[15px]
+                    leading-8
+                    text-[var(--midnight-text)]
+                  "
                 >
                   {activeHighlight.note || "No note added for this highlight."}
                 </p>
@@ -381,14 +486,9 @@ export function ArticleContent({ html, postId }: Props) {
             </div>
           </div>
 
-          <div
-            className="
-        border-t border-white/5
-        px-6 py-4
-      "
-          >
+          <div className="border-t border-white/5 px-6 py-4">
             <p className="text-[11px] text-[var(--midnight-soft)]">
-              Hover over highlighted passages to revisit your thoughts.
+              Click a highlighted passage to revisit your thoughts.
             </p>
           </div>
         </aside>
@@ -436,7 +536,6 @@ export function ArticleContent({ html, postId }: Props) {
 
               <textarea
                 value={note}
-                // biome-ignore lint/a11y/noAutofocus: <explanation>
                 autoFocus
                 onMouseDown={(e) => e.stopPropagation()}
                 onChange={(e) => setNote(e.target.value)}
@@ -474,6 +573,36 @@ export function ArticleContent({ html, postId }: Props) {
           )}
         </div>
       )}
+
+      <div className="fixed bottom-0 left-0 z-[2147483646] w-full">
+        <div className="relative h-1 w-full bg-black/20">
+          <div
+            className="h-full bg-[var(--midnight-accent)] transition-[width] duration-150"
+            style={{
+              width: `${readingProgress}%`,
+            }}
+          />
+        </div>
+
+        <div
+          className="
+          pointer-events-none
+          absolute right-4 bottom-3
+          rounded-full
+          border border-white/5
+          bg-[rgba(10,10,10,0.75)]
+          px-3 py-1
+          text-sm
+          font-medium
+          tracking-[0.08em]
+          text-[white]
+          shadow-[0_8px_30px_rgba(0,0,0,0.35)]
+          backdrop-blur-xl
+        "
+        >
+          {Math.round(readingProgress)}%
+        </div>
+      </div>
     </div>
   );
 }
