@@ -9,6 +9,7 @@ import { selectFont, selectFontSize } from "@/features/app-settings/selectors";
 import type { HighlightRect } from "@/features/posts/types";
 import { createHighlight } from "@/features/posts/api/create-post-highlight";
 import { getUserPostHighlights } from "@/features/users/api/get-user-post-highlights";
+import { apiClient } from "@/shared/api/client";
 
 type Props = {
   html: string;
@@ -38,34 +39,19 @@ const getHighlightBox = (rects: HighlightRect[]) => {
   };
 };
 
-// export async function updateReadingProgress(payload: {
-//   postId: number;
-//   progress: number;
-// }) {
-//   const res = await fetch(
-//     `${process.env.NEXT_PUBLIC_BASE_API_URL}/posts/${payload.postId}/reading-progress`,
-//     {
-//       method: "POST",
-//       credentials: "include",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({
-//         progress: payload.progress,
-//       }),
-//     }
-//   );
-
-//   if (!res.ok) {
-//     throw new Error("Failed to update reading progress");
-//   }
-
-//   return res.json();
-// }
+export async function updateReadingProgress(payload: {
+  postId: number;
+  progress: number;
+}) {
+  const data = { progress: payload.progress };
+  const res = await apiClient.post(`/posts/${payload.postId}/read`, data);
+  return res.data;
+}
 
 export function ArticleContent({ html, postId }: Props) {
   const articleRef = useRef<HTMLElement | null>(null);
   const popoverRef = useRef<HTMLDivElement | null>(null);
+  const savedProgressRef = useRef(0);
 
   const font = useAppSelector(selectFont);
   const fontSize = useAppSelector(selectFontSize);
@@ -231,7 +217,7 @@ export function ArticleContent({ html, postId }: Props) {
   }, []);
 
   useEffect(() => {
-    // let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     function updateProgress() {
       if (!articleRef.current) return;
@@ -242,19 +228,24 @@ export function ArticleContent({ html, postId }: Props) {
       const viewportBottom = window.scrollY + window.innerHeight;
 
       const rawProgress = ((viewportBottom - articleTop) / articleHeight) * 100;
+      const currentProgress = Math.min(Math.max(rawProgress, 0), 100);
 
-      const progress = Math.min(Math.max(rawProgress, 0), 100);
+      setReadingProgress(currentProgress);
 
-      setReadingProgress(progress);
+      const progressToSave = Math.round(
+        Math.max(savedProgressRef.current, currentProgress)
+      );
 
-      // if (timeoutId) clearTimeout(timeoutId);
+      savedProgressRef.current = progressToSave;
 
-      // timeoutId = setTimeout(() => {
-      //   updateReadingProgress({
-      //     postId,
-      //     progress: Math.round(progress),
-      //   }).catch(() => {});
-      // }, 800);
+      if (timeoutId) clearTimeout(timeoutId);
+
+      timeoutId = setTimeout(() => {
+        updateReadingProgress({
+          postId,
+          progress: progressToSave,
+        }).catch(() => {});
+      }, 800);
     }
 
     window.addEventListener("scroll", updateProgress, { passive: true });
@@ -266,7 +257,7 @@ export function ArticleContent({ html, postId }: Props) {
       window.removeEventListener("scroll", updateProgress);
       window.removeEventListener("resize", updateProgress);
 
-      // if (timeoutId) clearTimeout(timeoutId);
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, [postId]);
 

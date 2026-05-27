@@ -53,5 +53,6 @@ export type UpdateProfilePayload = {
 
 export type ReadingHistoryItem = {
   readAt: string;
+  progress: number;
   post: Post;
 };

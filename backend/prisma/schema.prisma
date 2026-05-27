@@ -338,6 +338,8 @@ model UserReadingHistory {
   post    Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
   post_id Int
 
+  progress Int @default(0)
+
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
 

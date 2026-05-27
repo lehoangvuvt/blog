@@ -4,6 +4,7 @@ import { formatPostDate, getArticleLink } from "@/shared/utils";
 import { Repeat2 } from "lucide-react";
 import EmptyState from "./empty-state";
 import useUserRepostedPosts from "@/features/users/hooks/use-user-reposted-posts";
+import Link from "next/link";
 
 export default function RepostedPosts({ slug }: { slug: string }) {
   const { data: posts, isLoading } = useUserRepostedPosts(slug);
@@ -53,7 +54,15 @@ export default function RepostedPosts({ slug }: { slug: string }) {
                 )}
 
                 <PostItem.Footer>
-                  <span>5 min read</span>
+                  {post.tags.map((tag) => (
+                    <Link
+                      className="hover:underline cursor-pointer hover:brightness-200 transition-all"
+                      href={`/subjects/${tag.slug}`}
+                      key={tag.slug}
+                    >
+                      #{tag.name}
+                    </Link>
+                  ))}
                 </PostItem.Footer>
               </PostItem.Content>
 

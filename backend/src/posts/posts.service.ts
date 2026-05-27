@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
@@ -708,12 +709,47 @@ export class PostsService {
     }
   }
 
-  async updateUserReadingHistory(userId: string, postId: number) {
+  async updateUserReadingHistory(
+    userId: string,
+    postId: number,
+    progress?: number,
+  ) {
     const now = new Date();
-    await this.prismaService.userReadingHistory.upsert({
-      where: { user_id_post_id: { user_id: userId, post_id: postId } },
-      update: { updated_at: now },
-      create: { user_id: userId, post_id: postId, updated_at: now },
+
+    const safeProgress =
+      typeof progress === 'number'
+        ? Math.min(Math.max(Math.round(progress), 0), 100)
+        : 0;
+
+    const existing = await this.prismaService.userReadingHistory.findUnique({
+      where: {
+        user_id_post_id: {
+          user_id: userId,
+          post_id: postId,
+        },
+      },
+      select: {
+        progress: true,
+      },
+    });
+
+    return this.prismaService.userReadingHistory.upsert({
+      where: {
+        user_id_post_id: {
+          user_id: userId,
+          post_id: postId,
+        },
+      },
+      update: {
+        updated_at: now,
+        progress: Math.max(existing?.progress ?? 0, safeProgress),
+      },
+      create: {
+        user_id: userId,
+        post_id: postId,
+        updated_at: now,
+        progress: safeProgress,
+      },
     });
   }
 

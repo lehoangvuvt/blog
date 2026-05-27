@@ -4,6 +4,7 @@ import { PostItem } from "@/features/posts/components/post-item";
 import PostsContainer from "@/features/posts/components/posts-container";
 import { usePosts } from "@/features/posts/hooks/use-posts";
 import { formatPostDate, getArticleLink } from "@/shared/utils";
+import Link from "next/link";
 
 export default function OwnPosts({ userId }: { userId: string }) {
   const {
@@ -80,7 +81,15 @@ export default function OwnPosts({ userId }: { userId: string }) {
                   )}
 
                   <PostItem.Footer>
-                    <span>5 min read</span>
+                    {post.tags.map((tag) => (
+                      <Link
+                        className="hover:underline cursor-pointer hover:brightness-200 transition-all"
+                        href={`/subjects/${tag.slug}`}
+                        key={tag.slug}
+                      >
+                        #{tag.name}
+                      </Link>
+                    ))}
                   </PostItem.Footer>
                 </PostItem.Content>
 

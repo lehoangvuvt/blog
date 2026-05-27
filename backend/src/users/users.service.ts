@@ -142,6 +142,13 @@ export class UsersService {
             thumbnail_image: true,
             slug: true,
             created_at: true,
+            tags: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
             author: {
               select: {
                 slug: true,
@@ -163,6 +170,7 @@ export class UsersService {
         thumbnailImage: repost.post.thumbnail_image,
         slug: repost.post.slug,
         postedDate: repost.post.created_at,
+        tags: repost.post.tags,
         author: {
           slug: repost.post.author?.slug,
           avatar: repost.post.author?.avatar,
@@ -190,6 +198,13 @@ export class UsersService {
             thumbnail_image: true,
             slug: true,
             created_at: true,
+            tags: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
             author: {
               select: {
                 slug: true,
@@ -203,19 +218,20 @@ export class UsersService {
       },
     });
 
-    return posts.map((repost) => {
+    return posts.map((liked) => {
       return {
-        id: repost.post.id,
-        title: repost.post.title,
-        subTitle: repost.post.sub_title,
-        thumbnailImage: repost.post.thumbnail_image,
-        slug: repost.post.slug,
-        postedDate: repost.post.created_at,
+        id: liked.post.id,
+        title: liked.post.title,
+        subTitle: liked.post.sub_title,
+        thumbnailImage: liked.post.thumbnail_image,
+        slug: liked.post.slug,
+        postedDate: liked.post.created_at,
+        tags: liked.post.tags,
         author: {
-          slug: repost.post.author?.slug,
-          avatar: repost.post.author?.avatar,
-          fullName: repost.post.author?.full_name,
-          email: repost.post.author?.email,
+          slug: liked.post.author?.slug,
+          avatar: liked.post.author?.avatar,
+          fullName: liked.post.author?.full_name,
+          email: liked.post.author?.email,
         },
       };
     });
@@ -482,6 +498,7 @@ export class UsersService {
       const author = h.post.author;
       return {
         readAt: h.updated_at,
+        progress: h.progress,
         post: {
           id: post.id,
           slug: post.slug,

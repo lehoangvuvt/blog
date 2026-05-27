@@ -144,8 +144,14 @@ export class PostsController {
   async updateReadingHistory(
     @CurrentUser() user: { sub: string },
     @Param('postId', ParseIntPipe) postId: number,
+    @Body() body: { progress?: number },
   ) {
-    await this.postsService.updateUserReadingHistory(user.sub, postId);
+    await this.postsService.updateUserReadingHistory(
+      user.sub,
+      postId,
+      body.progress,
+    );
+
     return { success: true };
   }
 
