@@ -49,9 +49,9 @@ export function ArticleContent({ html, postId }: Props) {
   const [popoverPos, setPopoverPos] = useState({ top: 0, left: 0 });
   const [highlightRects, setHighlightRects] = useState<HighlightRect[]>([]);
   const [savedHighlights, setSavedHighlights] = useState<SavedHighlight[]>([]);
-  const [activeHighlight, setActiveHighlight] =
-    useState<SavedHighlight | null>(null);
-  const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
+  const [activeHighlight, setActiveHighlight] = useState<SavedHighlight | null>(
+    null
+  );
   const [showNoteBox, setShowNoteBox] = useState(false);
   const [note, setNote] = useState("");
 
@@ -59,15 +59,15 @@ export function ArticleContent({ html, postId }: Props) {
     font === "serif"
       ? "font-serif"
       : font === "monospace"
-        ? "font-mono"
-        : "font-sans";
+      ? "font-mono"
+      : "font-sans";
 
   const sizeClass =
     fontSize === "small"
       ? "text-base prose-base"
       : fontSize === "large"
-        ? "text-xl prose-xl"
-        : "text-lg prose-lg";
+      ? "text-xl prose-xl"
+      : "text-lg prose-lg";
 
   const closePopover = () => {
     setSelectedText("");
@@ -205,16 +205,7 @@ export function ArticleContent({ html, postId }: Props) {
         return (
           <div
             key={highlight.id}
-            onMouseEnter={() => {
-              const articleRect = articleRef.current?.getBoundingClientRect();
-              if (!articleRect) return;
-
-              setActiveHighlight(highlight);
-              setTooltipPos({
-                top: articleRect.top + box.top - 12,
-                left: articleRect.left + box.left + box.width / 2,
-              });
-            }}
+            onMouseEnter={() => setActiveHighlight(highlight)}
             onMouseLeave={() => setActiveHighlight(null)}
             className="group absolute z-20"
             style={{
@@ -309,33 +300,99 @@ export function ArticleContent({ html, postId }: Props) {
         dangerouslySetInnerHTML={{ __html: html }}
       />
 
-
-      {activeHighlight?.note && (
-        <div
-          style={{
-            top: tooltipPos.top,
-            left: tooltipPos.left,
-            transform: "translate(-50%, -100%)",
-          }}
-          className="pointer-events-none fixed z-[2147483647]
-          w-[260px]
-          rounded-2xl border border-[var(--midnight-border)]/70
-          bg-[var(--midnight-surface)] p-3
-          text-xs leading-6 text-[var(--midnight-text)]
-          shadow-[0_24px_80px_rgba(0,0,0,0.55)]
-          backdrop-blur-xl
-        "
+      {activeHighlight && (
+        <aside
+          className="
+          fixed right-0 top-0 z-[2147483647]
+          flex h-screen w-[380px] flex-col
+          border-l border-white/5 
+          shadow-[-24px_0_80px_rgba(0,0,0,0.45)]"
         >
-          <p className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[var(--midnight-soft)]">
-            Private note
-          </p>
+          <div className="flex items-center justify-between px-6 py-5">
+            <div>
+              <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-[var(--midnight-soft)]">
+                Highlight note
+              </p>
+            </div>
+          </div>
 
-          <p className="whitespace-pre-wrap break-words">
-            {activeHighlight.note}
-          </p>
-        </div>
+          <div className="flex-1 overflow-y-auto px-6 py-6">
+            <div
+              className="
+          relative overflow-hidden
+          rounded-3xl
+          border border-[var(--midnight-border)]/50
+          bg-[rgba(255,255,255,0.02)]
+          p-5
+        "
+            >
+              <div
+                className="
+            absolute left-0 top-0 h-full w-1
+            bg-[linear-gradient(to_bottom,rgba(245,214,140,0.9),rgba(245,214,140,0.1))]
+          "
+              />
+
+              <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[var(--midnight-soft)]">
+                Highlighted passage
+              </p>
+
+              <p
+                className="
+            whitespace-pre-wrap
+            text-[15px]
+            italic
+            leading-8
+            text-[var(--midnight-muted)]
+          "
+              >
+                “{activeHighlight.text}”
+              </p>
+            </div>
+
+            <div className="mt-8">
+              <div className="mb-4 flex items-center gap-2">
+                <div className="h-1.5 w-1.5 rounded-full bg-[var(--midnight-accent)]/80" />
+
+                <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--midnight-soft)]">
+                  Note
+                </p>
+              </div>
+
+              <div
+                className="
+            rounded-3xl
+            border border-[var(--midnight-border)]/50
+            bg-[rgba(255,255,255,0.015)]
+            p-5
+          "
+              >
+                <p
+                  className="
+              whitespace-pre-wrap break-words
+              text-[15px]
+              leading-8
+              text-[var(--midnight-text)]
+            "
+                >
+                  {activeHighlight.note || "No note added for this highlight."}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="
+        border-t border-white/5
+        px-6 py-4
+      "
+          >
+            <p className="text-[11px] text-[var(--midnight-soft)]">
+              Hover over highlighted passages to revisit your thoughts.
+            </p>
+          </div>
+        </aside>
       )}
-
 
       {selectedText && (
         <div
@@ -347,16 +404,16 @@ export function ArticleContent({ html, postId }: Props) {
             transform: "translateX(-50%)",
           }}
           className="
-              absolute z-[9999]
-              w-auto
-              overflow-hidden
-              rounded-2xl
-              border border-[var(--midnight-border)]/70
-              bg-[var(--midnight-surface)]/95
-              p-2
-              shadow-[0_18px_60px_rgba(0,0,0,0.35)]
-              backdrop-blur-xl
-            "
+            absolute z-[9999]
+            w-auto
+            overflow-hidden
+            rounded-2xl
+            border border-[var(--midnight-border)]/70
+            bg-[var(--midnight-surface)]/95
+            p-2
+            shadow-[0_18px_60px_rgba(0,0,0,0.35)]
+            backdrop-blur-xl
+          "
         >
           {!showNoteBox ? (
             <button

@@ -353,13 +353,13 @@ export default async function ArticlePage({
         )}
       </article>
 
-      {headings.length > 0 && (
+      {/* {headings.length > 0 && (
         <div className="hidden xl:block">
           <div className="sticky top-28">
             <HeadingNavigation headings={headings} />
           </div>
         </div>
-      )}
+      )} */}
     </main>
   );
 }
