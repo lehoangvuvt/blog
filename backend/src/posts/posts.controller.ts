@@ -149,7 +149,7 @@ export class PostsController {
     await this.postsService.updateUserReadingHistory(
       user.sub,
       postId,
-      body.progress,
+      body.progress || 0,
     );
 
     return { success: true };

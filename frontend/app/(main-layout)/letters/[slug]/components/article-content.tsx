@@ -9,7 +9,9 @@ import { selectFont, selectFontSize } from "@/features/app-settings/selectors";
 import type { HighlightRect } from "@/features/posts/types";
 import { createHighlight } from "@/features/posts/api/create-post-highlight";
 import { getUserPostHighlights } from "@/features/users/api/get-user-post-highlights";
-import { apiClient } from "@/shared/api/client";
+import { useMe } from "@/features/auth/hooks/use-me";
+import useUpdateReadHistory from "@/features/posts/hooks/use-update-read-history";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Props = {
   html: string;
@@ -39,16 +41,9 @@ const getHighlightBox = (rects: HighlightRect[]) => {
   };
 };
 
-export async function updateReadingProgress(payload: {
-  postId: number;
-  progress: number;
-}) {
-  const data = { progress: payload.progress };
-  const res = await apiClient.post(`/posts/${payload.postId}/read`, data);
-  return res.data;
-}
-
 export function ArticleContent({ html, postId }: Props) {
+  const queryClient = useQueryClient();
+  const { data: meData } = useMe();
   const articleRef = useRef<HTMLElement | null>(null);
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const savedProgressRef = useRef(0);
@@ -66,6 +61,7 @@ export function ArticleContent({ html, postId }: Props) {
   const [showNoteBox, setShowNoteBox] = useState(false);
   const [note, setNote] = useState("");
   const [readingProgress, setReadingProgress] = useState(0);
+  const { mutate: updateReadHistory } = useUpdateReadHistory();
 
   const fontClass =
     font === "serif"
@@ -162,23 +158,25 @@ export function ArticleContent({ html, postId }: Props) {
   };
 
   useEffect(() => {
-    getUserPostHighlights(postId)
-      .then((highlights) => {
-        setSavedHighlights(
-          highlights.map((item: SavedHighlight) => ({
-            id: item.id,
-            text: item.text,
-            note: item.note,
-            rects: item.rects,
-            createdAt: item.createdAt,
-            url: window.location.href,
-          }))
-        );
-      })
-      .catch(() => {
-        setSavedHighlights([]);
-      });
-  }, [postId]);
+    if (meData) {
+      getUserPostHighlights(postId)
+        .then((highlights) => {
+          setSavedHighlights(
+            highlights.map((item: SavedHighlight) => ({
+              id: item.id,
+              text: item.text,
+              note: item.note,
+              rects: item.rects,
+              createdAt: item.createdAt,
+              url: window.location.href,
+            }))
+          );
+        })
+        .catch(() => {
+          setSavedHighlights([]);
+        });
+    }
+  }, [postId, meData]);
 
   useEffect(() => {
     function handleClickOutsidePopover(event: MouseEvent) {
@@ -240,12 +238,22 @@ export function ArticleContent({ html, postId }: Props) {
 
       if (timeoutId) clearTimeout(timeoutId);
 
-      timeoutId = setTimeout(() => {
-        updateReadingProgress({
-          postId,
-          progress: progressToSave,
-        }).catch(() => {});
-      }, 800);
+      if (meData) {
+        timeoutId = setTimeout(() => {
+          updateReadHistory(
+            {
+              postId,
+              progress: progressToSave,
+            },
+            {
+              onSuccess: () =>
+                queryClient.invalidateQueries({
+                  queryKey: ["me-reading-histories"],
+                }),
+            }
+          );
+        }, 800);
+      }
     }
 
     window.addEventListener("scroll", updateProgress, { passive: true });
@@ -259,7 +267,7 @@ export function ArticleContent({ html, postId }: Props) {
 
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [postId]);
+  }, [postId, meData]);
 
   return (
     <div className="relative isolate overflow-visible">
