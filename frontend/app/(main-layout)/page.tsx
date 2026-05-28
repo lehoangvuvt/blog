@@ -1,93 +1,94 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+
 import PostsContainer from "@/features/posts/components/posts-container";
 import { PostItem } from "@/features/posts/components/post-item";
-import { usePosts } from "@/features/posts/hooks/use-posts";
-import { useTags } from "@/features/tags/hooks/use-tags";
-import type { Tag } from "@/features/tags/types";
-import useEmblaCarousel from "embla-carousel-react";
 import { SidebarPostSkeleton } from "@/shared/components/sidebar-post-skeleton";
 import { formatPostDate, getArticleLink } from "@/shared/utils";
 import useTrendingPosts from "@/features/posts/hooks/use-trending-posts";
 import { useMe } from "@/features/auth/hooks/use-me";
-import Link from "next/link";
+import useMePreferredPosts from "@/features/posts/hooks/use-me-preferred-posts";
+import { usePosts } from "@/features/posts/hooks/use-posts";
 
-const allTag: Tag = {
-  id: "0",
-  name: "All",
-  slug: "all",
-  postsCount: 0,
-  authorsCount: 0,
-};
+type FeedTab = "for-you" | "latest";
 
 export default function Home() {
   const { data: me } = useMe();
-
-  const followedTagIds = useMemo(
-    () => (me?.followedTags ? me.followedTags.map((tag) => tag.id) : []),
-    [me]
-  );
-
-  const shouldFetchFollowedTags = followedTagIds.length > 0;
-
-  const { data: followedTagsData, isLoading: isLoadingFollowedTags } = useTags(
-    {
-      ids: followedTagIds,
-      limit: Math.max(followedTagIds.length, 1),
-    },
-    shouldFetchFollowedTags
-  );
-
-  const followedTopics = useMemo(() => {
-    const topics = followedTagsData?.pages.flatMap((page) => page.data) ?? [];
-
-    return [allTag, ...topics];
-  }, [followedTagsData]);
-
-  const [selectedTopic, setSelectedTopic] = useState<Tag>(allTag);
-
-  const [emblaRef] = useEmblaCarousel({
-    dragFree: true,
-    containScroll: "trimSnaps",
-    align: "start",
-  });
-
-  const postsParams = useMemo(
-    () => ({
-      limit: 8,
-      published: true,
-      sortBy: "latest" as const,
-      ...(selectedTopic.id !== allTag.id && {
-        tag: selectedTopic.slug,
-      }),
-    }),
-    [selectedTopic.id, selectedTopic.slug]
-  );
+  const [activeTab, setActiveTab] = useState<FeedTab>("latest");
 
   const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading: isLoadingPosts,
-  } = usePosts(postsParams);
+    data: preferredPostsData,
+    fetchNextPage: fetchNextPreferredPage,
+    hasNextPage: hasNextPreferredPage,
+    isFetchingNextPage: isFetchingNextPreferredPage,
+    isLoading: isLoadingPreferredPosts,
+  } = useMePreferredPosts(8, Boolean(me));
+
+  const preferredPosts = useMemo(() => {
+    return (
+      preferredPostsData?.pages
+        .flatMap((page) => page?.data ?? [])
+        .filter(Boolean) ?? []
+    );
+  }, [preferredPostsData]);
+
+  const {
+    data: latestPostsData,
+    fetchNextPage: fetchNextLatestPage,
+    hasNextPage: hasNextLatestPage,
+    isFetchingNextPage: isFetchingNextLatestPage,
+    isLoading: isLoadingLatestPosts,
+  } = usePosts({
+    limit: 8,
+    published: true,
+    sortBy: "latest",
+  });
+
+  const latestPosts = useMemo(() => {
+    return (
+      latestPostsData?.pages
+        .flatMap((page) => page?.data ?? [])
+        .filter(Boolean) ?? []
+    );
+  }, [latestPostsData]);
+
+  const posts = activeTab === "for-you" ? preferredPosts : latestPosts;
+
+  const isLoading =
+    activeTab === "for-you" ? isLoadingPreferredPosts : isLoadingLatestPosts;
+
+  const hasMore =
+    activeTab === "for-you" ? hasNextPreferredPage : hasNextLatestPage;
+
+  const isFetchingNextPage =
+    activeTab === "for-you"
+      ? isFetchingNextPreferredPage
+      : isFetchingNextLatestPage;
+
+  const handleLoadMore = () => {
+    if (activeTab === "for-you") {
+      if (!hasNextPreferredPage) return;
+      fetchNextPreferredPage();
+      return;
+    }
+
+    if (!hasNextLatestPage) return;
+    fetchNextLatestPage();
+  };
 
   const { data: trendingWeeklyPosts, isLoading: isLoadingWeeklyPosts } =
     useTrendingPosts("weekly", {
       limit: 5,
-      tag: selectedTopic.slug !== allTag.slug ? selectedTopic.slug : undefined,
     });
 
   const { data: trendingMonthlyPosts, isLoading: isLoadingMonthlyPosts } =
     useTrendingPosts("monthly", {
       limit: 5,
-      tag: selectedTopic.slug !== allTag.slug ? selectedTopic.slug : undefined,
     });
 
-  const posts = useMemo(() => {
-    return data?.pages.flatMap((page) => page.data) ?? [];
-  }, [data]);
+  const tabs: FeedTab[] = me ? ["latest", "for-you"] : ["latest"];
 
   return (
     <main className="min-h-screen text-[var(--midnight-text)]">
@@ -111,30 +112,30 @@ export default function Home() {
       </div>
 
       <div className="sticky top-16 z-10 mt-6 backdrop-blur-xl">
-        <div
-          ref={emblaRef}
-          className="mx-auto max-w-7xl cursor-grab overflow-hidden px-5 py-3 md:px-6"
-        >
-          <div className="flex gap-2">
-            {!isLoadingFollowedTags &&
-              followedTopics.map((topic) => {
-                const isActive = selectedTopic.slug === topic.slug;
+        <div className="mx-auto max-w-7xl px-5 md:px-6">
+          <div className="flex items-center gap-7">
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab;
 
-                return (
-                  <button
-                    key={topic.id}
-                    type="button"
-                    onClick={() => setSelectedTopic(topic)}
-                    className={`shrink-0 rounded-full border px-4 py-2 text-sm transition-all duration-300 ${
-                      isActive
-                        ? "border-[var(--midnight-border-strong)] bg-[var(--midnight-surface-soft)] text-[var(--midnight-text)]"
-                        : "border-transparent text-[var(--midnight-muted)] hover:border-[var(--midnight-border)] hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-text)]"
-                    }`}
-                  >
-                    {topic.name}
-                  </button>
-                );
-              })}
+              return (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveTab(tab)}
+                  className={`relative shrink-0 py-4 text-sm font-medium transition ${
+                    isActive
+                      ? "text-[var(--midnight-text)]"
+                      : "text-[var(--midnight-muted)] hover:text-[var(--midnight-text)]"
+                  }`}
+                >
+                  {tab === "for-you" ? "For you" : "Latest"}
+
+                  {isActive && (
+                    <span className="absolute bottom-0 left-0 right-0 h-px bg-[var(--midnight-accent)]" />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -142,84 +143,101 @@ export default function Home() {
       <div className="mx-auto grid max-w-7xl gap-16 px-5 py-10 md:px-6 lg:grid-cols-[minmax(0,720px)_280px]">
         <section>
           <PostsContainer
-            hasMore={Boolean(hasNextPage)}
-            isLoading={isLoadingPosts}
-            onLoadMore={() => {
-              if (!hasNextPage) return;
-              fetchNextPage();
-            }}
+            hasMore={Boolean(hasMore)}
+            isLoading={isLoading}
+            onLoadMore={handleLoadMore}
           >
-            {isLoadingPosts &&
+            {isLoading &&
               Array.from({ length: 5 }).map((_, index) => (
                 <PostItem.Skeleton key={`initial-skeleton-${index + 1}`} />
               ))}
 
             <div className="divide-y divide-[var(--midnight-border)]/70">
-              {posts.map((post) => {
-                const articleLink = getArticleLink(post.slug);
-                const authorName = post.author?.fullName ?? "Unknown author";
-                const authorSlug = post.author?.slug;
-                const authorLink = authorSlug ? `/${authorSlug}` : "#";
+              {!isLoading &&
+                posts.map((post) => {
+                  const articleLink = getArticleLink(post.slug);
+                  const authorName = post.author?.fullName ?? "Unknown author";
+                  const authorSlug = post.author?.slug;
+                  const authorLink = authorSlug ? `/${authorSlug}` : "#";
 
-                return (
-                  <PostItem.Container key={post.id}>
-                    <PostItem.Content>
-                      <PostItem.Header>
-                        <PostItem.Avatar
-                          src={post.author?.avatar ?? ""}
-                          alt={authorName}
-                        />
+                  return (
+                    <PostItem.Container key={post.id}>
+                      <PostItem.Content>
+                        <PostItem.Header>
+                          <PostItem.Avatar
+                            src={post.author?.avatar ?? ""}
+                            alt={authorName}
+                          />
 
-                        <PostItem.Author link={authorLink}>
-                          {authorName}
-                        </PostItem.Author>
+                          <PostItem.Author link={authorLink}>
+                            {authorName}
+                          </PostItem.Author>
 
-                        <PostItem.Dot />
+                          <PostItem.Dot />
 
-                        <PostItem.Date>
-                          {formatPostDate(post.postedDate)}
-                        </PostItem.Date>
-                      </PostItem.Header>
+                          <PostItem.Date>
+                            {formatPostDate(post.postedDate)}
+                          </PostItem.Date>
+                        </PostItem.Header>
 
-                      <PostItem.Title link={articleLink}>
-                        {post.title}
-                      </PostItem.Title>
+                        <PostItem.Title link={articleLink}>
+                          {post.title}
+                        </PostItem.Title>
 
-                      {post.subTitle && (
-                        <PostItem.SubTitle>{post.subTitle}</PostItem.SubTitle>
-                      )}
+                        {post.subTitle && (
+                          <PostItem.SubTitle>{post.subTitle}</PostItem.SubTitle>
+                        )}
 
-                      <PostItem.Footer>
-                        {post.tags.map((tag) => (
-                          <Link
-                            className="hover:underline cursor-pointer hover:brightness-200 transition-all"
-                            href={`/subjects/${tag.slug}`}
-                            key={tag.slug}
-                          >
-                            #{tag.name}
-                          </Link>
-                        ))}
-                      </PostItem.Footer>
-                    </PostItem.Content>
+                        <PostItem.Footer>
+                          {post.tags?.map((tag) => (
+                            <Link
+                              className="cursor-pointer transition-all hover:underline hover:brightness-200"
+                              href={`/subjects/${tag.slug}`}
+                              key={tag.slug}
+                            >
+                              #{tag.name}
+                            </Link>
+                          ))}
+                        </PostItem.Footer>
+                      </PostItem.Content>
 
-                    <PostItem.Thumbnail
-                      src={post.thumbnailImage ?? ""}
-                      alt={post.title}
-                      link={articleLink}
-                    />
-                  </PostItem.Container>
-                );
-              })}
+                      <PostItem.Thumbnail
+                        src={post.thumbnailImage ?? ""}
+                        alt={post.title}
+                        link={articleLink}
+                      />
+                    </PostItem.Container>
+                  );
+                })}
             </div>
 
-            {!isLoadingPosts && posts.length === 0 && (
+            {!isLoading && posts.length === 0 && activeTab === "for-you" && (
               <div className="py-20 text-center">
                 <h2 className="text-2xl font-bold tracking-[-0.03em] text-[var(--midnight-text)]">
-                  It&apos;s quiet here tonight
+                  Your feed is empty
                 </h2>
 
-                <p className="mt-2 text-sm text-[var(--midnight-muted)]">
-                  No thoughts have drifted into this corner yet.
+                <p className="mt-3 text-sm leading-6 text-[var(--midnight-muted)]">
+                  {`Follow a few topics to personalize your feed and discover stories you'll enjoy.`}
+                </p>
+
+                <Link
+                  href="/following/subjects"
+                  className="mt-6 inline-flex rounded-full border border-[var(--midnight-border)] px-5 py-2 text-sm transition hover:border-[var(--midnight-border-strong)] hover:text-[var(--midnight-text)]"
+                >
+                  Explore topics
+                </Link>
+              </div>
+            )}
+
+            {!isLoading && posts.length === 0 && activeTab === "latest" && (
+              <div className="py-20 text-center">
+                <h2 className="text-2xl font-bold tracking-[-0.03em] text-[var(--midnight-text)]">
+                  No posts yet
+                </h2>
+
+                <p className="mt-3 text-sm leading-6 text-[var(--midnight-muted)]">
+                  New thoughts will appear here when they are published.
                 </p>
               </div>
             )}

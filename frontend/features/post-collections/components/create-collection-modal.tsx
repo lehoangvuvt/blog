@@ -24,7 +24,7 @@ export default function CreateCollectionModal({
   const [description, setDescription] = useState("");
   const [thumbnailPreview, setThumbnailPreview] = useState("");
 
-  const { mutate: createCollection } = useCreatePostCollection();
+  const { mutate: createCollection, isPending } = useCreatePostCollection();
 
   if (!open) return null;
 
@@ -60,26 +60,10 @@ export default function CreateCollectionModal({
         onSubmit={handleSubmit}
         className="relative w-full max-w-[640px] overflow-hidden rounded-2xl border border-[var(--midnight-border)]/70 bg-[var(--midnight-surface)] shadow-[0_28px_90px_rgba(0,0,0,0.38)]"
       >
-        <div className="flex items-center justify-between border-b border-[var(--midnight-border)]/70 px-5 py-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full px-3 py-1.5 text-sm text-[var(--midnight-muted)] transition hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-text)]"
-          >
-            Cancel
-          </button>
-
+        <div className="flex items-center justify-center border-b border-[var(--midnight-border)]/70 px-5 py-4">
           <p className="text-sm font-medium text-[var(--midnight-muted)]">
             New collection
           </p>
-
-          <button
-            type="submit"
-            disabled={!name.trim() || !description.trim()}
-            className="rounded-full bg-[var(--midnight-accent)] px-4 py-1.5 text-sm font-medium text-[var(--midnight-on-accent)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Create
-          </button>
         </div>
 
         <div className="max-h-[78vh] overflow-y-auto px-8 py-8">
@@ -101,7 +85,7 @@ export default function CreateCollectionModal({
             required
           />
 
-          <div className="mt-7">
+          {/* <div className="mt-7">
             {thumbnailPreview ? (
               <div className="group relative overflow-hidden rounded-2xl border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)]">
                 <img
@@ -156,9 +140,9 @@ export default function CreateCollectionModal({
                 />
               </label>
             )}
-          </div>
+          </div> */}
 
-          <div className="mt-9 border-t border-[var(--midnight-border)]/70 pt-6">
+          {/* <div className="mt-9 border-t border-[var(--midnight-border)]/70 pt-6">
             <p className="text-xs tracking-[0.14em] text-[var(--midnight-soft)]">
               Preview
             </p>
@@ -176,16 +160,27 @@ export default function CreateCollectionModal({
                 0 letters
               </p>
             </article>
-          </div>
+          </div> */}
+        </div>
+
+        <div className="flex items-center justify-between border-b border-[var(--midnight-border)]/70 px-5 py-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full px-3 py-1.5 text-sm text-[var(--midnight-muted)] transition hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-text)]"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            disabled={!name.trim() || !description.trim() || isPending}
+            className="rounded-full bg-[var(--midnight-accent)] px-4 py-1.5 text-sm font-medium text-[var(--midnight-on-accent)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {isPending ? "Creating..." : "Create"}
+          </button>
         </div>
       </form>
-
-      <button
-        type="button"
-        onClick={onClose}
-        className="absolute inset-0 -z-10"
-        aria-label="Close modal"
-      />
     </div>
   );
 }

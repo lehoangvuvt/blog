@@ -804,4 +804,125 @@ export class PostsService {
       },
     });
   }
+
+  async getUserPreferredPosts(userId: string, page = 1, limit = 8) {
+    const safePage = Math.max(1, Number(page));
+    const safeLimit = Math.min(50, Number(limit));
+
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const followedTags = await this.prismaService.tagFollow.findMany({
+      where: {
+        user_id: user.id,
+      },
+    });
+
+    const tagIds = followedTags.map((ele) => ele.tag_id);
+
+    if (tagIds.length === 0) {
+      return {
+        posts: [],
+        meta: {
+          total: 0,
+          page: safePage,
+          limit: safeLimit,
+          totalPages: 0,
+          hasMore: false,
+          nextPage: null,
+        },
+      };
+    }
+
+    const [posts, totalPosts] = await this.prismaService.$transaction([
+      this.prismaService.post.findMany({
+        where: {
+          tags: {
+            some: {
+              id: {
+                in: tagIds,
+              },
+            },
+          },
+        },
+        select: {
+          id: true,
+          title: true,
+          sub_title: true,
+          thumbnail_image: true,
+          created_at: true,
+          slug: true,
+          tags: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+          author: {
+            select: {
+              slug: true,
+              full_name: true,
+              avatar: true,
+              email: true,
+            },
+          },
+        },
+        take: safeLimit,
+        skip: (safePage - 1) * safeLimit,
+        orderBy: {
+          created_at: 'desc',
+        },
+      }),
+      this.prismaService.post.count({
+        where: {
+          tags: {
+            some: {
+              id: {
+                in: tagIds,
+              },
+            },
+          },
+        },
+      }),
+    ]);
+
+    const totalPages = Math.ceil(totalPosts / safeLimit);
+    const hasMore = totalPages > safePage;
+
+    return {
+      data: posts.map((post) => ({
+        id: post.id,
+        title: post.title,
+        subTitle: post.sub_title,
+        slug: post.slug,
+        thumbnailImage: post.thumbnail_image
+          ? String(post.thumbnail_image)
+          : null,
+        postedDate: post.created_at,
+        author: {
+          email: post.author?.email,
+          fullName: post.author?.full_name,
+          avatar: post.author?.avatar,
+          slug: post.author?.slug,
+        },
+        tags: post.tags,
+      })),
+      meta: {
+        total: totalPosts,
+        page: safePage,
+        limit: safeLimit,
+        totalPages,
+        hasMore,
+        nextPage: hasMore ? safePage + 1 : null,
+      },
+    };
+  }
 }

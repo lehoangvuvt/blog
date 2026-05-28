@@ -34,5 +34,9 @@ export default function useUnfollowTag() {
     onError: (_error, _postId, context) => {
       queryClient.setQueryData(["me"], context?.previousMe);
     },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["me-preferred-posts"] });
+    },
   });
 }

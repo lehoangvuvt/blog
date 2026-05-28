@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { X } from "lucide-react";
-import { updatePassword } from "@/features/auth/api/update-password";
 import axios from "axios";
+import useUpdatePassword from "@/features/auth/hooks/use-update-password";
 
 type Props = {
   open: boolean;
@@ -21,6 +21,7 @@ export default function UpdatePasswordModal({
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const { mutate: updatePassword, isPending } = useUpdatePassword();
 
   if (!open) return null;
 
@@ -33,20 +34,29 @@ export default function UpdatePasswordModal({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    try {
-      await updatePassword(currentPassword, newPassword);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-      onSuccess();
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        onError(err.response?.data.message);
-        return;
+    updatePassword(
+      {
+        currentPassword,
+        newPassword,
+      },
+      {
+        onSuccess: () => {
+          setCurrentPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+          onSuccess();
+        },
+        onError: (err) => {
+          if (axios.isAxiosError(err)) {
+            onError(err.response?.data.message);
+          } else {
+            onError(
+              err instanceof Error ? err.message : "Failed to update password"
+            );
+          }
+        },
       }
-
-      onError(err instanceof Error ? err.message : "Failed to update password");
-    }
+    );
   };
 
   return (
@@ -132,10 +142,10 @@ export default function UpdatePasswordModal({
 
             <button
               type="submit"
-              disabled={isDisabled}
+              disabled={isDisabled || isPending}
               className="rounded-full bg-[var(--midnight-accent)] px-5 py-2 text-sm font-medium text-[var(--midnight-on-accent)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Update password
+              {isPending ? "Updating..." : "Update password"}
             </button>
           </div>
         </form>

@@ -21,6 +21,7 @@ import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from 'src/auth/guards/optional-jwt-guard';
 import { CreatePostHighlightDto } from './dtos/create-post-highlight.dto';
+import getUserPreferredPostsDto from './dtos/get-user-preferred-posts.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -32,6 +33,22 @@ export class PostsController {
   @Get()
   async findMany(@Query() query: FindManyPostsDto) {
     return await this.postsService.findMany(query);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/preferred')
+  async getUserPreferredPosts(
+    @CurrentUser()
+    user: {
+      sub: string;
+    },
+    @Query() query: getUserPreferredPostsDto,
+  ) {
+    return await this.postsService.getUserPreferredPosts(
+      user.sub,
+      query.page,
+      query.limit,
+    );
   }
 
   @Get('/:slug')
