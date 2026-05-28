@@ -1,4 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
+
+"use client";
+
 import { useMe } from "@/features/auth/hooks/use-me";
 import useCreatePostCollection from "@/features/post-collections/hooks/use-create-post-collection";
 import { useQueryClient } from "@tanstack/react-query";
@@ -8,9 +11,11 @@ import { useState } from "react";
 export default function CreateCollectionModal({
   open,
   onClose,
+  onCreateSuccess,
 }: {
   open: boolean;
   onClose: () => void;
+  onCreateSuccess?: (newCollectionId: string) => void;
 }) {
   const { data: myInfo } = useMe();
   const queryClient = useQueryClient();

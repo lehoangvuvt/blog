@@ -20,7 +20,7 @@ import useFollowAUser from "@/features/users/hooks/use-follow-a-user";
 import useUnfollowAUser from "@/features/users/hooks/use-unfollow-a-user";
 
 import EditProfileModal from "./components/edit-profile-modal";
-import CreateCollectionModal from "./components/create-collection-modal";
+import CreateCollectionModal from "@/features/post-collections/components/create-collection-modal";
 import ArticleCollectionsSection from "./components/article-collections-section";
 import LikedPosts from "./components/liked-posts";
 import RepostedPosts from "./components/reposted-posts";

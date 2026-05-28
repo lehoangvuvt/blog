@@ -110,7 +110,7 @@ export default function Home() {
         </section>
       </div>
 
-      <div className="sticky top-16 z-10 mt-6 border-y border-[var(--midnight-border)]/70 bg-[var(--midnight-bg)]/90 backdrop-blur-xl">
+      <div className="sticky top-16 z-10 mt-6 backdrop-blur-xl">
         <div
           ref={emblaRef}
           className="mx-auto max-w-7xl cursor-grab overflow-hidden px-5 py-3 md:px-6"

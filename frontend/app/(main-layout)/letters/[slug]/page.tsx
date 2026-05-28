@@ -6,9 +6,7 @@ import Image from "next/image";
 import { MoonStar } from "lucide-react";
 
 import { ArticleContent } from "@/app/(main-layout)/letters/[slug]/components/article-content";
-import HeadingNavigation, {
-  type Heading,
-} from "@/app/(main-layout)/letters/[slug]/components/headings";
+import { type Heading } from "@/app/(main-layout)/letters/[slug]/components/headings";
 
 import type { PostDetails } from "@/features/posts/types";
 import { PostsBySameAuthor } from "./components/posts-by-same-author";

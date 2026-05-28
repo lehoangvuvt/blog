@@ -9,6 +9,8 @@ import { useMe } from "@/features/auth/hooks/use-me";
 import usePostCollections from "@/features/post-collections/hooks/use-post-collections";
 import { apiClient } from "@/shared/api/client";
 import { formatPostDate } from "@/shared/utils";
+import CreateCollectionModal from "@/features/post-collections/components/create-collection-modal";
+import Link from "next/link";
 
 export default function AddToCollectionModal({
   onClose,
@@ -19,6 +21,9 @@ export default function AddToCollectionModal({
 }) {
   const queryClient = useQueryClient();
   const { data: myInfo } = useMe();
+
+  const [isOpenCreateCollectionModal, setOpenCreateCollectionModal] =
+    useState(false);
 
   const [loadingCollectionId, setLoadingCollectionId] = useState<string | null>(
     null
@@ -109,8 +114,8 @@ export default function AddToCollectionModal({
               </p>
 
               <p className="mt-1 max-w-sm text-sm leading-6 text-[var(--midnight-muted)]">
-                Start a collection for letters that belong in the same late-night
-                mood.
+                Start a collection for letters that belong in the same
+                late-night mood.
               </p>
             </div>
           )}
@@ -131,6 +136,7 @@ export default function AddToCollectionModal({
                     : [];
 
                 const isMutating = loadingCollectionId === collection.id;
+                const collectionURU = `/collections/${collection.slug}`;
 
                 return (
                   <article
@@ -172,9 +178,12 @@ export default function AddToCollectionModal({
                               Letter collection
                             </p>
 
-                            <h3 className="mt-1 line-clamp-1 text-2xl font-bold tracking-[-0.045em] text-[var(--midnight-text)]">
+                            <Link
+                              href={collectionURU}
+                              className="mt-1 line-clamp-1 text-2xl font-bold tracking-[-0.045em] text-[var(--midnight-text)] hover:underline cursor-pointer"
+                            >
                               {collection.name}
-                            </h3>
+                            </Link>
                           </div>
 
                           <button
@@ -243,17 +252,21 @@ export default function AddToCollectionModal({
                     </div>
 
                     {collection.posts.length > 0 && (
-                      <div className="mt-5 border-t border-[var(--midnight-border)]/70 pt-3">
-                        {collection.posts.slice(0, 3).map((post) => (
+                      <div className="mt-5 border-t border-[var(--midnight-border)]/70 pt-3 h-30 overflow-auto">
+                        {collection.posts.map((post, i) => (
                           <div
                             key={post.id}
                             className="flex items-center justify-between gap-4 py-2 text-sm"
                           >
-                            <span className="line-clamp-1 font-medium text-[var(--midnight-text)]">
-                              {post.title}
-                            </span>
+                            <Link
+                              href={`/letters/${post.slug}`}
+                              onClick={() => onClose()}
+                              className="line-clamp-1 font-medium text-[var(--midnight-text)] hover:underline"
+                            >
+                              {i + 1}. &nbsp;{post.title}
+                            </Link>
 
-                            <span className="shrink-0 text-xs text-[var(--midnight-soft)]">
+                            <span className="shrink-0 text-xs text-[var(--midnight-soft)] mr-5">
                               {formatPostDate(post.postedDate)}
                             </span>
                           </div>
@@ -270,13 +283,11 @@ export default function AddToCollectionModal({
         <div className="border-t border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)]/70 p-4">
           <button
             type="button"
-            onClick={() => {
-              console.log("Create new collection from article:", postId);
-            }}
+            onClick={() => setOpenCreateCollectionModal(true)}
             className="flex w-full items-center justify-center gap-2 rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-surface)] px-4 py-3 text-sm font-medium text-[var(--midnight-muted)] transition hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-accent-hover)]"
           >
             <FolderPlus className="h-4 w-4" />
-            Start a new collection
+            Create a new collection
           </button>
         </div>
       </div>
@@ -286,6 +297,11 @@ export default function AddToCollectionModal({
         onClick={onClose}
         className="absolute inset-0 -z-10"
         aria-label="Close collection modal"
+      />
+
+      <CreateCollectionModal
+        onClose={() => setOpenCreateCollectionModal(false)}
+        open={isOpenCreateCollectionModal}
       />
     </div>
   );
