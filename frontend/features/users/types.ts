@@ -35,6 +35,10 @@ export type PublicUserInfo = {
   avatar: string;
   introduction: string;
   createdAt: string;
+  statistics: {
+    postsCount: number;
+    followersCount: number;
+  };
 };
 
 export type UpdateProfilePayload = {

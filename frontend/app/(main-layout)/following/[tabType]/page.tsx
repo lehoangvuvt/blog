@@ -27,6 +27,8 @@ import ForbiddenPage from "@/app/forbbiden";
 import Loading from "@/shared/components/loading";
 import { useNotification } from "@/hooks/use-notification";
 import { apiClient } from "@/shared/api/client";
+import { User } from "@/features/auth/types";
+import { PublicUserInfo } from "@/features/users/types";
 
 type Tab = "writers" | "subjects";
 
@@ -78,8 +80,8 @@ async function getSuggestedAuthors({ pageParam = 1 }: { pageParam?: number }) {
   return res.data as SuggestedAuthorsResponse;
 }
 
-async function followWriter(writerId: string) {
-  await apiClient.post(`/users/${writerId}/follow`);
+async function followWriter(writer: Writer) {
+  await apiClient.post(`/users/${writer.id}/follow`);
 }
 
 async function unfollowWriter(writerId: string) {
@@ -110,25 +112,17 @@ export default function FollowingPage() {
   );
 
   const followedWriters = useMemo<Writer[]>(() => {
-    const followings = (me?.followings ?? []) as MeFollowingWriter[];
+    const followings = (me?.followings ?? []) as PublicUserInfo[];
 
     return followings.map((writer) => ({
       id: writer.id,
       slug: writer.slug,
       avatar: writer.avatar,
-      fullName: writer.fullName ?? writer.full_name ?? null,
-      createdAt: writer.created_at,
+      fullName: writer.fullName,
+      createdAt: writer.createdAt,
       statistics: {
-        postsCount:
-          writer.statistics?.postsCount ??
-          writer.postsCount ??
-          writer._count?.posts ??
-          0,
-        followersCount:
-          writer.statistics?.followersCount ??
-          writer.followersCount ??
-          writer._count?.userFollowers ??
-          0,
+        postsCount: writer.statistics.postsCount,
+        followersCount: writer.statistics.followersCount,
       },
     }));
   }, [me]);
@@ -160,9 +154,39 @@ export default function FollowingPage() {
   const { mutate: followWriterMutate, isPending: isFollowingWriter } =
     useMutation({
       mutationFn: followWriter,
+      onMutate: async (writer: Writer) => {
+        await queryClient.cancelQueries({ queryKey: ["me"] });
+
+        const prevMe = queryClient.getQueryData<User>(["me"]);
+
+        queryClient.setQueryData<User>(["me"], (old) => {
+          if (!old) return old;
+
+          const _targetUser: PublicUserInfo = {
+            avatar: writer.avatar || "",
+            createdAt: writer.createdAt || "",
+            fullName: writer.fullName || "",
+            slug: writer.slug || "",
+            id: writer.id,
+            email: "",
+            introduction: "",
+            statistics: {
+              postsCount: writer.statistics?.postsCount || 0,
+              followersCount: writer.statistics?.followersCount || 0,
+            },
+          };
+
+          return {
+            ...old,
+            followings: [...old.followings, _targetUser],
+          };
+        });
+
+        return { prevMe };
+      },
+
       onSuccess: async () => {
         pushNotification("Writer followed successfully", "success");
-        await queryClient.invalidateQueries({ queryKey: ["me"] });
         await queryClient.invalidateQueries({
           queryKey: ["suggested-authors"],
         });
@@ -178,10 +202,27 @@ export default function FollowingPage() {
   const { mutate: unfollowWriterMutate, isPending: isUnfollowingWriter } =
     useMutation({
       mutationFn: unfollowWriter,
+
+      onMutate: async (writerId: string) => {
+        await queryClient.cancelQueries({ queryKey: ["me"] });
+
+        const prevMe = queryClient.getQueryData<User>(["me"]);
+
+        queryClient.setQueryData<User>(["me"], (old) => {
+          if (!old) return old;
+
+          return {
+            ...old,
+            followings: old.followings.filter((old) => old.id !== writerId),
+          };
+        });
+
+        return { prevMe };
+      },
+
       onSuccess: async () => {
         pushNotification("Writer unfollowed successfully", "success");
         setOpenWriterMenuId(null);
-        await queryClient.invalidateQueries({ queryKey: ["me"] });
         await queryClient.invalidateQueries({
           queryKey: ["suggested-authors"],
         });
@@ -189,6 +230,7 @@ export default function FollowingPage() {
           queryKey: ["me-preferred-posts"],
         });
       },
+
       onError: () => {
         pushNotification("Failed to unfollow writer", "error");
       },
@@ -326,7 +368,7 @@ export default function FollowingPage() {
               mode="following"
               openWriterMenuId={openWriterMenuId}
               setOpenWriterMenuId={setOpenWriterMenuId}
-              onFollow={(writer) => followWriterMutate(writer.id)}
+              onFollow={(writer) => followWriterMutate(writer)}
               onUnfollow={(writer) => unfollowWriterMutate(writer.id)}
               isPending={isFollowingWriter || isUnfollowingWriter}
             />
@@ -362,7 +404,7 @@ export default function FollowingPage() {
                   mode="suggested"
                   openWriterMenuId={openWriterMenuId}
                   setOpenWriterMenuId={setOpenWriterMenuId}
-                  onFollow={(writer) => followWriterMutate(writer.id)}
+                  onFollow={(writer) => followWriterMutate(writer)}
                   onUnfollow={(writer) => unfollowWriterMutate(writer.id)}
                   isPending={isFollowingWriter || isUnfollowingWriter}
                 />

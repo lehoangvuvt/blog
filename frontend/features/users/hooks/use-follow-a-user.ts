@@ -28,6 +28,10 @@ export default function useFollowAUser() {
           id: targetUser.id,
           email: "",
           introduction: targetUser.introduction || "",
+          statistics: {
+            followersCount: targetUser.statistics.followersCount,
+            postsCount: targetUser.statistics.postsCount,
+          },
         };
 
         return {
