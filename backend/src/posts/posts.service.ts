@@ -824,10 +824,16 @@ export class PostsService {
         user_id: user.id,
       },
     });
-
     const tagIds = followedTags.map((ele) => ele.tag_id);
 
-    if (tagIds.length === 0) {
+    const followedUsers = await this.prismaService.userFollow.findMany({
+      where: {
+        follower_id: userId,
+      },
+    });
+    const userIds = followedUsers.map((ele) => ele.following_id);
+
+    if (tagIds.length === 0 && userIds.length === 0) {
       return {
         posts: [],
         meta: {
@@ -844,13 +850,22 @@ export class PostsService {
     const [posts, totalPosts] = await this.prismaService.$transaction([
       this.prismaService.post.findMany({
         where: {
-          tags: {
-            some: {
-              id: {
-                in: tagIds,
+          OR: [
+            {
+              tags: {
+                some: {
+                  id: {
+                    in: tagIds,
+                  },
+                },
               },
             },
-          },
+            {
+              authorId: {
+                in: userIds,
+              },
+            },
+          ],
         },
         select: {
           id: true,

@@ -40,7 +40,7 @@ import {
 } from "@lexkit/editor";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
-import { LexicalEditor } from "lexical";
+import { $getSelection, $isRangeSelection, LexicalEditor } from "lexical";
 import {
   Bold,
   Italic,
@@ -129,7 +129,7 @@ export const extensions = [
   floatingToolbarExtension,
   contextMenuExtension,
   commandPaletteExtension,
-  new DraggableBlockExtension().configure({}),
+  // new DraggableBlockExtension().configure({}),
 ] as const;
 
 // Create typed editor system
@@ -252,8 +252,9 @@ function FloatingToolbarRenderer() {
           <button
             type="button"
             onClick={() => commands.setImageAlignment("left")}
-            className={`lexkit-toolbar-button ${activeStates.isImageAlignedLeft ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.isImageAlignedLeft ? "active" : ""
+            }`}
             title="Align Left"
           >
             <AlignLeft size={14} />
@@ -261,8 +262,9 @@ function FloatingToolbarRenderer() {
           <button
             type="button"
             onClick={() => commands.setImageAlignment("center")}
-            className={`lexkit-toolbar-button ${activeStates.isImageAlignedCenter ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.isImageAlignedCenter ? "active" : ""
+            }`}
             title="Align Center"
           >
             <AlignCenter size={14} />
@@ -270,8 +272,9 @@ function FloatingToolbarRenderer() {
           <button
             type="button"
             onClick={() => commands.setImageAlignment("right")}
-            className={`lexkit-toolbar-button ${activeStates.isImageAlignedRight ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.isImageAlignedRight ? "active" : ""
+            }`}
             title="Align Right"
           >
             <AlignRight size={14} />
@@ -293,8 +296,9 @@ function FloatingToolbarRenderer() {
           <button
             type="button"
             onClick={() => commands.toggleBold()}
-            className={`lexkit-toolbar-button ${activeStates.bold ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.bold ? "active" : ""
+            }`}
             title="Bold"
           >
             <Bold size={14} />
@@ -302,8 +306,9 @@ function FloatingToolbarRenderer() {
           <button
             type="button"
             onClick={() => commands.toggleItalic()}
-            className={`lexkit-toolbar-button ${activeStates.italic ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.italic ? "active" : ""
+            }`}
             title="Italic"
           >
             <Italic size={14} />
@@ -311,8 +316,9 @@ function FloatingToolbarRenderer() {
           <button
             type="button"
             onClick={() => commands.toggleUnderline()}
-            className={`lexkit-toolbar-button ${activeStates.underline ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.underline ? "active" : ""
+            }`}
             title="Underline"
           >
             <Underline size={14} />
@@ -320,8 +326,9 @@ function FloatingToolbarRenderer() {
           <button
             type="button"
             onClick={() => commands.toggleStrikethrough()}
-            className={`lexkit-toolbar-button ${activeStates.strikethrough ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.strikethrough ? "active" : ""
+            }`}
             title="Strikethrough"
           >
             <Strikethrough size={14} />
@@ -330,8 +337,9 @@ function FloatingToolbarRenderer() {
           <button
             type="button"
             onClick={() => commands.formatText("code")}
-            className={`lexkit-toolbar-button ${activeStates.code ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.code ? "active" : ""
+            }`}
             title="Inline Code"
           >
             <Code size={14} />
@@ -343,8 +351,9 @@ function FloatingToolbarRenderer() {
                 ? commands.removeLink()
                 : commands.insertLink()
             }
-            className={`lexkit-toolbar-button ${activeStates.isLink ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.isLink ? "active" : ""
+            }`}
             title={activeStates.isLink ? "Remove Link" : "Insert Link"}
           >
             {activeStates.isLink ? <Unlink size={14} /> : <Link size={14} />}
@@ -355,16 +364,17 @@ function FloatingToolbarRenderer() {
               <button
                 type="button"
                 onClick={() => commands.toggleParagraph()}
-                className={`lexkit-toolbar-button ${!activeStates.isH1 &&
-                    !activeStates.isH2 &&
-                    !activeStates.isH3 &&
-                    !activeStates.isH4 &&
-                    !activeStates.isH5 &&
-                    !activeStates.isH6 &&
-                    !activeStates.isQuote
+                className={`lexkit-toolbar-button ${
+                  !activeStates.isH1 &&
+                  !activeStates.isH2 &&
+                  !activeStates.isH3 &&
+                  !activeStates.isH4 &&
+                  !activeStates.isH5 &&
+                  !activeStates.isH6 &&
+                  !activeStates.isQuote
                     ? "active"
                     : ""
-                  }`}
+                }`}
                 title="Paragraph"
               >
                 P
@@ -372,8 +382,9 @@ function FloatingToolbarRenderer() {
               <button
                 type="button"
                 onClick={() => commands.toggleHeading("h1")}
-                className={`lexkit-toolbar-button ${activeStates.isH1 ? "active" : ""
-                  }`}
+                className={`lexkit-toolbar-button ${
+                  activeStates.isH1 ? "active" : ""
+                }`}
                 title="Heading 1"
               >
                 H1
@@ -381,8 +392,9 @@ function FloatingToolbarRenderer() {
               <button
                 type="button"
                 onClick={() => commands.toggleHeading("h2")}
-                className={`lexkit-toolbar-button ${activeStates.isH2 ? "active" : ""
-                  }`}
+                className={`lexkit-toolbar-button ${
+                  activeStates.isH2 ? "active" : ""
+                }`}
                 title="Heading 2"
               >
                 H2
@@ -390,8 +402,9 @@ function FloatingToolbarRenderer() {
               <button
                 type="button"
                 onClick={() => commands.toggleHeading("h3")}
-                className={`lexkit-toolbar-button ${activeStates.isH3 ? "active" : ""
-                  }`}
+                className={`lexkit-toolbar-button ${
+                  activeStates.isH3 ? "active" : ""
+                }`}
                 title="Heading 3"
               >
                 H3
@@ -399,8 +412,9 @@ function FloatingToolbarRenderer() {
               <button
                 type="button"
                 onClick={() => commands.toggleQuote()}
-                className={`lexkit-toolbar-button ${activeStates.isQuote ? "active" : ""
-                  }`}
+                className={`lexkit-toolbar-button ${
+                  activeStates.isQuote ? "active" : ""
+                }`}
                 title="Quote"
               >
                 <Quote size={14} />
@@ -409,8 +423,9 @@ function FloatingToolbarRenderer() {
                 <button
                   type="button"
                   onClick={() => commands.toggleCodeBlock()}
-                  className={`lexkit-toolbar-button ${activeStates.isInCodeBlock ? "active" : ""
-                    }`}
+                  className={`lexkit-toolbar-button ${
+                    activeStates.isInCodeBlock ? "active" : ""
+                  }`}
                   title="Code Block"
                 >
                   <Terminal size={14} />
@@ -424,8 +439,9 @@ function FloatingToolbarRenderer() {
               <button
                 type="button"
                 onClick={() => commands.toggleUnorderedList()}
-                className={`lexkit-toolbar-button ${activeStates.unorderedList ? "active" : ""
-                  }`}
+                className={`lexkit-toolbar-button ${
+                  activeStates.unorderedList ? "active" : ""
+                }`}
                 title="Bullet List"
               >
                 <List size={14} />
@@ -433,8 +449,9 @@ function FloatingToolbarRenderer() {
               <button
                 type="button"
                 onClick={() => commands.toggleOrderedList()}
-                className={`lexkit-toolbar-button ${activeStates.orderedList ? "active" : ""
-                  }`}
+                className={`lexkit-toolbar-button ${
+                  activeStates.orderedList ? "active" : ""
+                }`}
                 title="Numbered List"
               >
                 <ListOrdered size={14} />
@@ -489,18 +506,18 @@ function Toolbar({
   const currentBlockFormat = activeStates.isH1
     ? "h1"
     : activeStates.isH2
-      ? "h2"
-      : activeStates.isH3
-        ? "h3"
-        : activeStates.isH4
-          ? "h4"
-          : activeStates.isH5
-            ? "h5"
-            : activeStates.isH6
-              ? "h6"
-              : activeStates.isQuote
-                ? "quote"
-                : "p";
+    ? "h2"
+    : activeStates.isH3
+    ? "h3"
+    : activeStates.isH4
+    ? "h4"
+    : activeStates.isH5
+    ? "h5"
+    : activeStates.isH6
+    ? "h6"
+    : activeStates.isQuote
+    ? "quote"
+    : "p";
 
   const handleBlockFormatChange = (value: string) => {
     if (value === "p") commands.toggleParagraph();
@@ -517,8 +534,9 @@ function Toolbar({
           <button
             type="button"
             onClick={() => commands.toggleBold()}
-            className={`lexkit-toolbar-button ${activeStates.bold ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.bold ? "active" : ""
+            }`}
             title="Bold (Ctrl+B)"
           >
             <Bold size={16} />
@@ -526,8 +544,9 @@ function Toolbar({
           <button
             type="button"
             onClick={() => commands.toggleItalic()}
-            className={`lexkit-toolbar-button ${activeStates.italic ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.italic ? "active" : ""
+            }`}
             title="Italic (Ctrl+I)"
           >
             <Italic size={16} />
@@ -535,8 +554,9 @@ function Toolbar({
           <button
             type="button"
             onClick={() => commands.toggleUnderline()}
-            className={`lexkit-toolbar-button ${activeStates.underline ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.underline ? "active" : ""
+            }`}
             title="Underline (Ctrl+U)"
           >
             <Underline size={16} />
@@ -544,8 +564,9 @@ function Toolbar({
           <button
             type="button"
             onClick={() => commands.toggleStrikethrough()}
-            className={`lexkit-toolbar-button ${activeStates.strikethrough ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.strikethrough ? "active" : ""
+            }`}
             title="Strikethrough"
           >
             <Strikethrough size={16} />
@@ -553,8 +574,9 @@ function Toolbar({
           <button
             type="button"
             onClick={() => commands.formatText("code")}
-            className={`lexkit-toolbar-button ${activeStates.code ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.code ? "active" : ""
+            }`}
             title="Inline Code"
           >
             <Code size={16} />
@@ -566,8 +588,9 @@ function Toolbar({
                 ? commands.removeLink()
                 : commands.insertLink()
             }
-            className={`lexkit-toolbar-button ${activeStates.isLink ? "active" : ""
-              }`}
+            className={`lexkit-toolbar-button ${
+              activeStates.isLink ? "active" : ""
+            }`}
             title={activeStates.isLink ? "Remove Link" : "Insert Link"}
           >
             {activeStates.isLink ? <Unlink size={16} /> : <Link size={16} />}
@@ -587,8 +610,9 @@ function Toolbar({
               <button
                 type="button"
                 onClick={() => commands.toggleCodeBlock()}
-                className={`lexkit-toolbar-button ${activeStates.isInCodeBlock ? "active" : ""
-                  }`}
+                className={`lexkit-toolbar-button ${
+                  activeStates.isInCodeBlock ? "active" : ""
+                }`}
                 title="Code Block"
               >
                 <Terminal size={16} />
@@ -603,8 +627,9 @@ function Toolbar({
             <button
               type="button"
               onClick={() => commands.toggleUnorderedList()}
-              className={`lexkit-toolbar-button ${activeStates.unorderedList ? "active" : ""
-                }`}
+              className={`lexkit-toolbar-button ${
+                activeStates.unorderedList ? "active" : ""
+              }`}
               title="Bullet List"
             >
               <List size={16} />
@@ -612,8 +637,9 @@ function Toolbar({
             <button
               type="button"
               onClick={() => commands.toggleOrderedList()}
-              className={`lexkit-toolbar-button ${activeStates.orderedList ? "active" : ""
-                }`}
+              className={`lexkit-toolbar-button ${
+                activeStates.orderedList ? "active" : ""
+              }`}
               title="Numbered List"
             >
               <ListOrdered size={16} />
@@ -675,8 +701,9 @@ function Toolbar({
             <Dropdown
               trigger={
                 <div
-                  className={`lexkit-toolbar-button ${activeStates.imageSelected ? "active" : ""
-                    }`}
+                  className={`lexkit-toolbar-button ${
+                    activeStates.imageSelected ? "active" : ""
+                  }`}
                   title="Insert Image"
                 >
                   <ImageIcon size={16} />
@@ -774,8 +801,9 @@ function Toolbar({
             <button
               type="button"
               onClick={() => commands.insertHTMLEmbed()}
-              className={`lexkit-toolbar-button ${activeStates.isHTMLEmbedSelected ? "active" : ""
-                }`}
+              className={`lexkit-toolbar-button ${
+                activeStates.isHTMLEmbedSelected ? "active" : ""
+              }`}
               title="Insert HTML Embed"
             >
               <FileCode size={16} />
@@ -987,8 +1015,23 @@ function EditorContent({
 }) {
   const { commands, hasExtension, activeStates, lexical: editor } = useEditor();
 
+  const [plusPosition, setPlusPosition] = useState({
+    top: 4,
+    left: 0,
+  });
+  [];
+
   const [mode] = useState<EditorMode>("visual");
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+
+  const [showInsertMenu, setShowInsertMenu] = useState(false);
+  const [insertMenuPosition, setInsertMenuPosition] = useState({
+    top: 44,
+    left: 0,
+  });
+
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
+  const editorBodyRef = useRef<HTMLDivElement | null>(null);
 
   const commandsRef = useRef<EditorCommands>(commands);
   const readyRef = useRef(false);
@@ -996,6 +1039,62 @@ function EditorContent({
   useEffect(() => {
     commandsRef.current = commands;
   }, [commands]);
+
+  const removeSlashBeforeCommand = () => {
+    if (!editor) return;
+
+    editor.update(() => {
+      const selection = $getSelection();
+
+      if (!$isRangeSelection(selection) || !selection.isCollapsed()) return;
+
+      const offset = selection.anchor.offset;
+      if (offset <= 0) return;
+
+      selection.anchor.set(
+        selection.anchor.key,
+        offset - 1,
+        selection.anchor.type
+      );
+
+      selection.removeText();
+    });
+  };
+
+  const closeInsertMenu = () => {
+    setShowInsertMenu(false);
+  };
+
+  const runInsertCommand = (callback: () => void) => {
+    removeSlashBeforeCommand();
+
+    window.setTimeout(() => {
+      callback();
+      closeInsertMenu();
+    }, 0);
+  };
+
+  const openInsertMenuAtCaret = () => {
+    const editorBody = editorBodyRef.current;
+    const selection = window.getSelection();
+
+    if (!editorBody || !selection || selection.rangeCount === 0) {
+      setInsertMenuPosition({ top: 44, left: 0 });
+      setShowInsertMenu(true);
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    const editorRect = editorBody.getBoundingClientRect();
+
+    setInsertMenuPosition({
+      top: Math.max(rect.bottom - editorRect.top + 8, 44),
+      left: Math.max(rect.left - editorRect.left, 0),
+    });
+
+    setShowInsertMenu(true);
+  };
 
   const methods = useMemo<DefaultTemplateRef>(
     () => ({
@@ -1031,13 +1130,39 @@ function EditorContent({
     [editor]
   );
 
-  // Setup commands, shortcuts, command palette
+  useEffect(() => {
+    if (!editor) return;
+
+    const updatePlusPosition = () => {
+      const editorBody = editorBodyRef.current;
+      const selection = window.getSelection();
+
+      if (!editorBody || !selection || selection.rangeCount === 0) {
+        return;
+      }
+
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      const editorRect = editorBody.getBoundingClientRect();
+
+      setPlusPosition({
+        top: rect.top - editorRect.top - 4,
+        left: 0,
+      });
+    };
+
+    document.addEventListener("selectionchange", updatePlusPosition);
+
+    return () => {
+      document.removeEventListener("selectionchange", updatePlusPosition);
+    };
+  }, [editor]);
+
   useEffect(() => {
     if (!editor || !commands) return;
 
     const paletteCommands = commandsToCommandPaletteItems(commands);
 
-    // biome-ignore lint/complexity/noForEach: <explanation>
     paletteCommands.forEach((cmd) => {
       commands.registerCommand(cmd);
     });
@@ -1053,7 +1178,20 @@ function EditorContent({
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
+        closeInsertMenu();
         setCommandPaletteOpen(true);
+        return;
+      }
+
+      if (e.key === "Escape") {
+        closeInsertMenu();
+        return;
+      }
+
+      if (e.key === "/") {
+        window.setTimeout(() => {
+          openInsertMenuAtCaret();
+        }, 0);
       }
     };
 
@@ -1071,7 +1209,6 @@ function EditorContent({
     };
   }, [editor, commands, onReady, methods]);
 
-  // Listen to latest editor JSON + HTML
   useEffect(() => {
     if (!editor) return;
 
@@ -1091,30 +1228,140 @@ function EditorContent({
 
   return (
     <>
-      <div className="lexkit-editor-header">
-        {mode === "visual" && (
-          <Toolbar
-            commands={commands}
-            hasExtension={hasExtension}
-            activeStates={activeStates}
-            isDark={isDark}
-            toggleTheme={toggleTheme}
-            onCommandPaletteOpen={() => setCommandPaletteOpen(true)}
-          />
-        )}
-      </div>
+      <div className="medium-editor-shell">
+        <div ref={editorBodyRef} className="medium-editor-body">
+          <button
+            type="button"
+            onClick={() => {
+              if (showInsertMenu) {
+                closeInsertMenu();
+                return;
+              }
 
-      <div className="lexkit-editor">
-        <div
-          className="flex flex-col flex-1"
-          style={{ display: mode === "visual" ? "flex" : "none" }}
-        >
+              setInsertMenuPosition({ top: 44, left: 0 });
+              setShowInsertMenu(true);
+            }}
+            className="medium-plus-button"
+            style={{
+              top: plusPosition.top,
+            }}
+            title="Insert"
+          >
+            +
+          </button>
+
+          {showInsertMenu && (
+            <div
+              className="medium-insert-menu"
+              style={{
+                top: insertMenuPosition.top,
+                left: insertMenuPosition.left,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  runInsertCommand(() => imageInputRef.current?.click())
+                }
+              >
+                Image
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  runInsertCommand(() => commands.toggleHeading("h1"))
+                }
+              >
+                Heading 1
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  runInsertCommand(() => commands.toggleHeading("h2"))
+                }
+              >
+                Heading 2
+              </button>
+
+              <button
+                type="button"
+                onClick={() => runInsertCommand(() => commands.toggleQuote())}
+              >
+                Quote
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  runInsertCommand(() => commands.toggleUnorderedList())
+                }
+              >
+                Bullet list
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  runInsertCommand(() => commands.toggleOrderedList())
+                }
+              >
+                Numbered list
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  runInsertCommand(() => commands.insertHorizontalRule())
+                }
+              >
+                Divider
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  runInsertCommand(() => commands.toggleCodeBlock())
+                }
+              >
+                Code block
+              </button>
+            </div>
+          )}
+
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+
+              const { url, publicUrl } = await getUploadPresignedUrl(
+                file.name,
+                file.type
+              );
+
+              await uploadFile(file, url);
+
+              commands.insertImage({
+                src: publicUrl,
+                alt: file.name,
+                file,
+              });
+
+              e.target.value = "";
+            }}
+          />
+
           <RichTextPlugin
             contentEditable={
-              <ContentEditable className="lexkit-content-editable" />
+              <ContentEditable className="medium-content-editable" />
             }
             placeholder={
-              <div className="lexkit-placeholder">Start typing...</div>
+              <div className="medium-placeholder">Tell your story...</div>
             }
             ErrorBoundary={ErrorBoundary}
           />

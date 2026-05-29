@@ -1,27 +1,93 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, BellOff, Check, ChevronDown, Mail, Slash } from "lucide-react";
+import {
+  Bell,
+  BellOff,
+  Check,
+  ChevronDown,
+  Slash,
+  UserRound,
+} from "lucide-react";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 
-import PostsContainer from "@/features/posts/components/posts-container";
-import { PostItem } from "@/features/posts/components/post-item";
-import { usePosts } from "@/features/posts/hooks/use-posts";
 import { useMe } from "@/features/auth/hooks/use-me";
 import { useTags } from "@/features/tags/hooks/use-tags";
-import { formatTimeAgo } from "@/shared/utils";
 import useFollowTag from "@/features/tags/hooks/use-follow-tag";
 import useUnfollowTag from "@/features/tags/hooks/use-unfollow-tag";
-import type { Tag } from "@/features/tags/types";
 import useToggleTagFollowEmailNotify from "@/features/tags/hooks/use-toggle-tag-follow-email-notify";
-import Link from "next/link";
+import type { Tag } from "@/features/tags/types";
 import ForbiddenPage from "@/app/forbbiden";
 import Loading from "@/shared/components/loading";
 import { useNotification } from "@/hooks/use-notification";
+import { apiClient } from "@/shared/api/client";
 
 type Tab = "writers" | "subjects";
 
+type Writer = {
+  id: string;
+  slug: string;
+  avatar: string | null;
+  fullName: string | null;
+  createdAt?: string;
+  statistics?: {
+    postsCount: number;
+    followersCount: number;
+  };
+};
+
+type MeFollowingWriter = {
+  id: string;
+  slug: string;
+  avatar: string | null;
+  fullName?: string | null;
+  full_name?: string | null;
+  created_at?: string;
+  postsCount?: number;
+  followersCount?: number;
+  statistics?: {
+    postsCount?: number;
+    followersCount?: number;
+  };
+  _count?: {
+    posts?: number;
+    userFollowers?: number;
+  };
+};
+
+type SuggestedAuthorsResponse = {
+  data: Writer[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasMore: boolean;
+    nextPage: number | null;
+  };
+};
+
+async function getSuggestedAuthors({ pageParam = 1 }: { pageParam?: number }) {
+  const res = await apiClient.get(`/users/suggested?page=${pageParam}&limit=8`);
+  return res.data as SuggestedAuthorsResponse;
+}
+
+async function followWriter(writerId: string) {
+  await apiClient.post(`/users/${writerId}/follow`);
+}
+
+async function unfollowWriter(writerId: string) {
+  await apiClient.delete(`/users/${writerId}/follow`);
+}
+
 export default function FollowingPage() {
+  const queryClient = useQueryClient();
   const { pushNotification } = useNotification();
   const router = useRouter();
   const params = useParams();
@@ -31,6 +97,7 @@ export default function FollowingPage() {
   );
 
   const [openTopicMenuId, setOpenTopicMenuId] = useState<string | null>(null);
+  const [openWriterMenuId, setOpenWriterMenuId] = useState<string | null>(null);
 
   const { data: me, isLoading: isLoadingMe } = useMe();
 
@@ -38,25 +105,88 @@ export default function FollowingPage() {
     me?.followedTags?.filter((t) => t.isEmailNotify).map((t) => t.id) ?? [];
 
   const followedTagIds = useMemo(
-    () => (me?.followedTags ? me.followedTags.map((tag) => tag.id) : []),
+    () => me?.followedTags?.map((tag) => tag.id) ?? [],
     [me]
   );
+
+  const followedWriters = useMemo<Writer[]>(() => {
+    const followings = (me?.followings ?? []) as MeFollowingWriter[];
+
+    return followings.map((writer) => ({
+      id: writer.id,
+      slug: writer.slug,
+      avatar: writer.avatar,
+      fullName: writer.fullName ?? writer.full_name ?? null,
+      createdAt: writer.created_at,
+      statistics: {
+        postsCount:
+          writer.statistics?.postsCount ??
+          writer.postsCount ??
+          writer._count?.posts ??
+          0,
+        followersCount:
+          writer.statistics?.followersCount ??
+          writer.followersCount ??
+          writer._count?.userFollowers ??
+          0,
+      },
+    }));
+  }, [me]);
 
   const followingIds = useMemo(
-    () => me?.followings?.map((user) => user.id) ?? [],
-    [me]
+    () => followedWriters.map((writer) => writer.id),
+    [followedWriters]
   );
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    usePosts(
-      {
-        limit: 10,
-        published: true,
-        sortBy: "latest",
-        authorIds: followingIds,
+  const {
+    data: suggestedAuthorsData,
+    fetchNextPage: fetchNextSuggestedAuthorsPage,
+    hasNextPage: hasNextSuggestedAuthorsPage,
+    isFetchingNextPage: isFetchingNextSuggestedAuthorsPage,
+    isLoading: isLoadingSuggestedAuthors,
+  } = useInfiniteQuery({
+    queryKey: ["suggested-authors"],
+    queryFn: getSuggestedAuthors,
+    initialPageParam: 1,
+    enabled: activeTab === "writers",
+    getNextPageParam: (lastPage) => lastPage.meta.nextPage,
+  });
+
+  const suggestedAuthors =
+    suggestedAuthorsData?.pages
+      .flatMap((page) => page.data)
+      .filter((author) => !followingIds.includes(author.id)) ?? [];
+
+  const { mutate: followWriterMutate, isPending: isFollowingWriter } =
+    useMutation({
+      mutationFn: followWriter,
+      onSuccess: async () => {
+        pushNotification("Writer followed successfully", "success");
+        await queryClient.invalidateQueries({ queryKey: ["me"] });
+        await queryClient.invalidateQueries({
+          queryKey: ["suggested-authors"],
+        });
       },
-      activeTab === "writers" && followingIds.length > 0
-    );
+      onError: () => {
+        pushNotification("Failed to follow writer", "error");
+      },
+    });
+
+  const { mutate: unfollowWriterMutate, isPending: isUnfollowingWriter } =
+    useMutation({
+      mutationFn: unfollowWriter,
+      onSuccess: async () => {
+        pushNotification("Writer unfollowed successfully", "success");
+        setOpenWriterMenuId(null);
+        await queryClient.invalidateQueries({ queryKey: ["me"] });
+        await queryClient.invalidateQueries({
+          queryKey: ["suggested-authors"],
+        });
+      },
+      onError: () => {
+        pushNotification("Failed to unfollow writer", "error");
+      },
+    });
 
   const shouldFetchFollowedTags =
     activeTab === "subjects" && followedTagIds.length > 0;
@@ -83,17 +213,15 @@ export default function FollowingPage() {
       activeTab === "subjects"
     );
 
-  const posts = data?.pages.flatMap((page) => page.data) ?? [];
-
   const recommendedTopics =
     recommendedTagsData?.pages
       .flatMap((page) => page.data)
       .filter((tag) => !followedTagIds.includes(tag.id)) ?? [];
 
-  const showInitialSkeleton =
-    activeTab === "writers" && (isLoadingMe || isLoading) && posts.length === 0;
-
-  const hasNoFollowings = !isLoadingMe && followingIds.length === 0;
+  const showWritersSkeleton =
+    activeTab === "writers" &&
+    isLoadingSuggestedAuthors &&
+    suggestedAuthors.length === 0;
 
   const showTopicsSkeleton =
     activeTab === "subjects" &&
@@ -140,13 +268,9 @@ export default function FollowingPage() {
     });
   };
 
-  if (isLoadingMe) {
-    return <Loading />;
-  }
+  if (isLoadingMe) return <Loading />;
 
-  if (!me && !isLoadingMe) {
-    return <ForbiddenPage />;
-  }
+  if (!me && !isLoadingMe) return <ForbiddenPage />;
 
   return (
     <main className="min-h-screen text-[var(--midnight-text)]">
@@ -189,84 +313,75 @@ export default function FollowingPage() {
       </section>
 
       {activeTab === "writers" && (
-        <section className="mx-auto w-full max-w-3xl px-5 md:px-6">
-          <PostsContainer
-            hasMore={!hasNoFollowings && Boolean(hasNextPage)}
-            isLoading={isFetchingNextPage}
-            onLoadMore={() => fetchNextPage()}
-          >
-            {showInitialSkeleton &&
-              Array.from({ length: 5 }).map((_, index) => (
-                <PostItem.Skeleton key={`skeleton-loading-${index + 1}`} />
-              ))}
+        <section className="mx-auto w-full max-w-3xl px-5 py-8 md:px-6">
+          {followedWriters.length > 0 ? (
+            <WriterList
+              writers={followedWriters}
+              mode="following"
+              openWriterMenuId={openWriterMenuId}
+              setOpenWriterMenuId={setOpenWriterMenuId}
+              onFollow={(writer) => followWriterMutate(writer.id)}
+              onUnfollow={(writer) => unfollowWriterMutate(writer.id)}
+              isPending={isFollowingWriter || isUnfollowingWriter}
+            />
+          ) : (
+            <div className="pt-4 pb-10">
+              <p className="text-2xl font-bold tracking-[-0.04em] text-[var(--midnight-text)]">
+                No writers followed yet.
+              </p>
 
-            {!showInitialSkeleton &&
-              !hasNoFollowings &&
-              posts.map((post) => {
-                const authorName =
-                  post.author?.fullName ||
-                  post.author?.email ||
-                  "Unknown writer";
+              <p className="mt-3 max-w-md text-[15px] leading-7 text-[var(--midnight-muted)]">
+                Follow a few voices and their newest letters will appear here.
+              </p>
+            </div>
+          )}
 
-                const authorSlug = post.author?.slug;
-                const postLink = `/letters/${post.slug}`;
+          <div className="mt-12 border-t border-[var(--midnight-border)]/70 pt-9">
+            <div className="mb-6">
+              <p className="text-xs tracking-[0.14em] text-[var(--midnight-soft)]">
+                Suggested
+              </p>
 
-                return (
-                  <PostItem.Container key={post.id}>
-                    <PostItem.Content>
-                      <PostItem.Header>
-                        <PostItem.Avatar
-                          src={post.author?.avatar}
-                          alt={authorName}
-                        />
+              <h2 className="mt-2 text-3xl font-bold tracking-[-0.05em] text-[var(--midnight-text)]">
+                Writers to follow
+              </h2>
+            </div>
 
-                        {authorSlug ? (
-                          <PostItem.Author link={`/${authorSlug}`}>
-                            {authorName}
-                          </PostItem.Author>
-                        ) : (
-                          <span>{authorName}</span>
-                        )}
+            {showWritersSkeleton ? (
+              <WriterSkeleton />
+            ) : suggestedAuthors.length > 0 ? (
+              <>
+                <WriterList
+                  writers={suggestedAuthors}
+                  mode="suggested"
+                  openWriterMenuId={openWriterMenuId}
+                  setOpenWriterMenuId={setOpenWriterMenuId}
+                  onFollow={(writer) => followWriterMutate(writer.id)}
+                  onUnfollow={(writer) => unfollowWriterMutate(writer.id)}
+                  isPending={isFollowingWriter || isUnfollowingWriter}
+                />
 
-                        <PostItem.Dot />
-
-                        <PostItem.Date>
-                          {formatTimeAgo(post.postedDate)}
-                        </PostItem.Date>
-                      </PostItem.Header>
-
-                      <PostItem.Title link={postLink}>
-                        {post.title}
-                      </PostItem.Title>
-
-                      {post.subTitle && (
-                        <PostItem.SubTitle>{post.subTitle}</PostItem.SubTitle>
-                      )}
-
-                      <PostItem.Footer />
-                    </PostItem.Content>
-
-                    <PostItem.Thumbnail
-                      src={post.thumbnailImage ?? undefined}
-                      alt={post.title}
-                      link={postLink}
-                    />
-                  </PostItem.Container>
-                );
-              })}
-
-            {!showInitialSkeleton && hasNoFollowings && (
-              <div className="pt-12 pb-16">
-                <h2 className="text-2xl font-bold tracking-[-0.04em] text-[var(--midnight-text)]">
-                  No writers followed yet.
-                </h2>
-
-                <p className="mt-3 max-w-md text-[15px] leading-7 text-[var(--midnight-muted)]">
-                  Follow a few voices and their newest letters will appear here.
-                </p>
-              </div>
+                {hasNextSuggestedAuthorsPage && (
+                  <div className="mt-8 flex justify-center">
+                    <button
+                      type="button"
+                      disabled={isFetchingNextSuggestedAuthorsPage}
+                      onClick={() => fetchNextSuggestedAuthorsPage()}
+                      className="rounded-full border border-[var(--midnight-border)]/70 px-5 py-2 text-sm text-[var(--midnight-muted)] transition hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-accent-hover)] disabled:opacity-50"
+                    >
+                      {isFetchingNextSuggestedAuthorsPage
+                        ? "Loading..."
+                        : "Load more writers"}
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-[var(--midnight-muted)]">
+                No suggested writers right now.
+              </p>
             )}
-          </PostsContainer>
+          </div>
         </section>
       )}
 
@@ -343,6 +458,164 @@ export default function FollowingPage() {
         </section>
       )}
     </main>
+  );
+}
+
+function WriterList({
+  writers,
+  mode,
+  openWriterMenuId,
+  setOpenWriterMenuId,
+  onFollow,
+  onUnfollow,
+  isPending,
+}: {
+  writers: Writer[];
+  mode: "following" | "suggested";
+  openWriterMenuId: string | null;
+  setOpenWriterMenuId: (id: string | null) => void;
+  onFollow: (writer: Writer) => void;
+  onUnfollow: (writer: Writer) => void;
+  isPending: boolean;
+}) {
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const { data: me } = useMe();
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (!menuRef.current) return;
+
+      if (!menuRef.current.contains(event.target as Node)) {
+        setOpenWriterMenuId(null);
+      }
+    }
+
+    if (openWriterMenuId) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [openWriterMenuId, setOpenWriterMenuId]);
+
+  return (
+    <div className="divide-y divide-[var(--midnight-border)]/70">
+      {writers
+        .filter((ele) => ele.id !== me?.id)
+        .map((writer) => {
+          const name = writer.fullName || "Unknown writer";
+          const isFollowing = mode === "following";
+          const isMenuOpen = openWriterMenuId === writer.id;
+
+          return (
+            <div
+              key={writer.id}
+              className="flex items-center justify-between gap-5 py-5"
+            >
+              <Link
+                href={`/${writer.slug}`}
+                className="flex min-w-0 items-center gap-4"
+              >
+                {writer.avatar ? (
+                  <img
+                    src={writer.avatar}
+                    alt={name}
+                    className="h-12 w-12 shrink-0 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] text-[var(--midnight-muted)]">
+                    <UserRound className="h-5 w-5" />
+                  </div>
+                )}
+
+                <div className="min-w-0">
+                  <p className="truncate text-xl font-bold tracking-[-0.035em] text-[var(--midnight-text)]">
+                    {name}
+                  </p>
+
+                  <p className="mt-1 text-sm text-[var(--midnight-muted)]">
+                    {(writer.statistics?.postsCount ?? 0).toLocaleString()}{" "}
+                    letters ·{" "}
+                    {(writer.statistics?.followersCount ?? 0).toLocaleString()}{" "}
+                    followers
+                  </p>
+                </div>
+              </Link>
+
+              <div
+                ref={isMenuOpen ? menuRef : null}
+                className="relative shrink-0"
+              >
+                {isFollowing ? (
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() =>
+                      setOpenWriterMenuId(isMenuOpen ? null : writer.id)
+                    }
+                    className="inline-flex items-center gap-2 rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] px-4 py-2 text-sm font-medium text-[var(--midnight-text)] transition hover:border-[var(--midnight-accent)]/60 disabled:opacity-50"
+                  >
+                    Following
+                    <ChevronDown
+                      className={`h-4 w-4 transition ${
+                        isMenuOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => onFollow(writer)}
+                    className="rounded-full border border-[var(--midnight-border)]/70 px-4 py-2 text-sm font-medium text-[var(--midnight-muted)] transition hover:border-[var(--midnight-accent)]/70 hover:text-[var(--midnight-accent-hover)] disabled:opacity-50"
+                  >
+                    Follow
+                  </button>
+                )}
+
+                {isMenuOpen && (
+                  <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-2xl border border-[var(--midnight-border)]/70 bg-[var(--midnight-surface)] shadow-[0_18px_60px_rgba(0,0,0,0.35)]">
+                    <button
+                      type="button"
+                      disabled={isPending}
+                      onClick={() => onUnfollow(writer)}
+                      className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-red-300 transition hover:bg-red-400/10 disabled:opacity-50"
+                    >
+                      <Slash className="h-4 w-4" />
+                      Unfollow
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+    </div>
+  );
+}
+
+function WriterSkeleton() {
+  return (
+    <div className="space-y-5">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <div
+          key={`writer-skeleton-${index + 1}`}
+          className="flex items-center justify-between border-b border-[var(--midnight-border)]/70 py-5"
+        >
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 animate-pulse rounded-full bg-[var(--midnight-code-bg)]" />
+
+            <div className="space-y-2">
+              <div className="h-5 w-40 animate-pulse rounded bg-[var(--midnight-code-bg)]" />
+              <div className="h-4 w-32 animate-pulse rounded bg-[var(--midnight-code-bg)]" />
+            </div>
+          </div>
+
+          <div className="h-10 w-20 animate-pulse rounded-full bg-[var(--midnight-code-bg)]" />
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -426,8 +699,8 @@ function TopicList({
               </Link>
 
               <p className="mt-1 text-sm text-[var(--midnight-muted)]">
-                {topic.postsCount.toLocaleString()} &nbsp;letters ·{" "}
-                {topic.authorsCount.toLocaleString()} &nbsp;&nbsp;writers
+                {topic.postsCount.toLocaleString()} letters ·{" "}
+                {topic.authorsCount.toLocaleString()} writers
               </p>
             </div>
 

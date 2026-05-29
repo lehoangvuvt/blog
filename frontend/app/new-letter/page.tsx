@@ -2,7 +2,16 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, ImagePlus, Loader2, Search, Send, X } from "lucide-react";
+import {
+  Check,
+  CheckCircle2,
+  Circle,
+  ImagePlus,
+  Loader2,
+  Send,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { DefaultTemplate } from "@/features/editor/components/default-template";
@@ -22,7 +31,7 @@ export default function NewLetterPage() {
 
   const titleRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const [tags, setTags] = useState<string[]>(["Journal", "Ideas"]);
+  const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [debouncedTagSearch, setDebouncedTagSearch] = useState("");
   const [isTagInputFocused, setIsTagInputFocused] = useState(false);
@@ -44,10 +53,83 @@ export default function NewLetterPage() {
     slug?: string;
   } | null>(null);
 
+  const [focusedSection, setFocusedSection] = useState<
+    "title" | "subtitle" | "topics" | "cover" | "content" | null
+  >(null);
+
   const TITLE_LIMIT = 100;
   const SUBTITLE_LIMIT = 200;
 
-  const canPublish = title.trim().length > 0 && htmlContent.trim().length > 0;
+  const writingTip = useMemo(() => {
+    switch (focusedSection) {
+      case "title":
+        return {
+          label: "Title",
+          title: "Shape your headline",
+          description:
+            "Write a clear title that gives readers a reason to begin.",
+        };
+      case "subtitle":
+        return {
+          label: "Subtitle",
+          title: "Set the mood",
+          description:
+            "Use the subtitle to gently preview what this letter is about.",
+        };
+      case "topics":
+        return {
+          label: "Topics",
+          title: "Help readers find this",
+          description:
+            "Add subjects so your letter can reach readers who care about them.",
+        };
+      case "cover":
+        return {
+          label: "Cover",
+          title: "Give it a visual feeling",
+          description:
+            "A cover image is optional, but it helps your letter feel complete.",
+        };
+      case "content":
+        return {
+          label: "Editor",
+          title: "Write the letter",
+          description: "Type / to insert blocks. Highlight text to format it.",
+        };
+      default:
+        return {
+          label: "Guide",
+          title: "Start your letter",
+          description:
+            "Begin with a title, write your story, add topics, then publish.",
+        };
+    }
+  }, [focusedSection]);
+
+  const hasRealContent = (html: string) => {
+    if (!html.trim()) return false;
+
+    const plainText = html
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, "")
+      .trim();
+
+    return plainText.length > 0;
+  };
+
+  const hasContent = hasRealContent(htmlContent);
+
+  const canPublish = title.trim().length > 0 && hasContent && tags.length > 0;
+
+  const tutorialSteps = useMemo(
+    () => [
+      { label: "Title", done: title.trim().length > 0 },
+      { label: "Subtitle", done: subtitle.trim().length > 0 },
+      { label: "Topics", done: tags.length > 0 },
+      { label: "Content", done: hasContent },
+    ],
+    [title, subtitle, tags.length, hasContent]
+  );
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -57,8 +139,7 @@ export default function NewLetterPage() {
     return () => window.clearTimeout(timeout);
   }, [tagInput]);
 
-  const shouldSearchTags =
-    isTagInputFocused && debouncedTagSearch.length >= 2;
+  const shouldSearchTags = isTagInputFocused && debouncedTagSearch.length >= 2;
 
   const {
     data: searchedTagsData,
@@ -66,13 +147,7 @@ export default function NewLetterPage() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useTags(
-    {
-      search: debouncedTagSearch,
-      limit: 8,
-    },
-    shouldSearchTags
-  );
+  } = useTags({ search: debouncedTagSearch, limit: 8 }, shouldSearchTags);
 
   const suggestedTags = useMemo(() => {
     const selected = new Set(tags.map((tag) => tag.toLowerCase()));
@@ -92,9 +167,7 @@ export default function NewLetterPage() {
       (tag) => tag.toLowerCase() === nextTag.toLowerCase()
     );
 
-    if (!exists) {
-      setTags((prev) => [...prev, nextTag]);
-    }
+    if (!exists) setTags((prev) => [...prev, nextTag]);
 
     setTagInput("");
     setDebouncedTagSearch("");
@@ -162,233 +235,20 @@ export default function NewLetterPage() {
 
   return (
     <div className="min-h-screen bg-[var(--midnight-bg)] text-[var(--midnight-text)]">
-      <main className="mx-auto max-w-5xl px-5 pb-40 pt-12">
-        <section className="mx-auto w-full max-w-3xl">
-          <p className="mb-8 text-xs tracking-[0.14em] text-[var(--midnight-soft)]">
-            The Midnight Letters / Writing desk
-          </p>
-
-          <textarea
-            ref={titleRef}
-            value={title}
-            onChange={handleTitleChange}
-            placeholder="Title"
-            rows={1}
-            className="w-full resize-none overflow-hidden bg-transparent text-5xl font-bold leading-[1.05] tracking-[-0.06em] text-[var(--midnight-text)] outline-none placeholder:text-[var(--midnight-soft)] md:text-6xl"
-          />
-
-          <div className="mt-2 text-xs text-[var(--midnight-soft)]">
-            {title.length}/{TITLE_LIMIT}
-          </div>
-
-          <textarea
-            value={subtitle}
-            onChange={(e) =>
-              setSubtitle(e.target.value.slice(0, SUBTITLE_LIMIT))
-            }
-            placeholder="Subtitle"
-            rows={2}
-            className="mt-8 w-full resize-none bg-transparent text-xl leading-8 text-[var(--midnight-muted)] outline-none placeholder:text-[var(--midnight-soft)]"
-          />
-
-          <div className="mt-2 text-xs text-[var(--midnight-soft)]">
-            {subtitle.length}/{SUBTITLE_LIMIT}
-          </div>
-        </section>
-
-        <section className="mx-auto mt-10 w-full max-w-3xl border-y border-[var(--midnight-border)]/70 py-6">
-          <p className="mb-3 text-xs tracking-[0.14em] text-[var(--midnight-soft)]">
-            Subjects
-          </p>
-
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => removeTag(tag)}
-                className="rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] px-3 py-1 text-sm text-[var(--midnight-muted)] transition hover:border-red-400/40 hover:text-red-300"
-              >
-                {tag} ×
-              </button>
-            ))}
-
-            <div className="relative">
-              <input
-                value={tagInput}
-                onFocus={() => setIsTagInputFocused(true)}
-                onBlur={() => {
-                  window.setTimeout(() => setIsTagInputFocused(false), 150);
-                }}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-
-                    if (suggestedTags[0]) {
-                      addTag(suggestedTags[0].name);
-                      return;
-                    }
-
-                    addTag();
-                  }
-
-                  if (e.key === "Escape") {
-                    setIsTagInputFocused(false);
-                  }
-                }}
-                placeholder="Add subject..."
-                className="min-w-44 rounded-full border border-[var(--midnight-border)]/70 bg-transparent px-3 py-1 text-sm text-[var(--midnight-text)] outline-none placeholder:text-[var(--midnight-soft)] focus:border-[var(--midnight-accent)]/70"
-              />
-
-              {isTagInputFocused && tagInput.trim().length > 0 && (
-                <div className="absolute left-0 top-[calc(100%+0.5rem)] z-50 w-72 overflow-hidden rounded-2xl border border-[var(--midnight-border)]/70 bg-[var(--midnight-surface)] shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur-xl">
-                  <div className="flex items-center gap-2 border-b border-[var(--midnight-border)]/70 px-4 py-3 text-xs text-[var(--midnight-soft)]">
-                    <Search className="h-3.5 w-3.5" />
-                    Suggested subjects
-                  </div>
-
-                  <div className="max-h-72 overflow-y-auto p-2">
-                    {tagInput.trim().length < 2 && (
-                      <div className="px-3 py-3 text-sm text-[var(--midnight-muted)]">
-                        Type at least 2 characters...
-                      </div>
-                    )}
-
-                    {tagInput.trim().length >= 2 &&
-                      isFetchingTags &&
-                      suggestedTags.length === 0 && (
-                        <div className="flex items-center gap-2 px-3 py-3 text-sm text-[var(--midnight-muted)]">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Searching...
-                        </div>
-                      )}
-
-                    {tagInput.trim().length >= 2 &&
-                      !isFetchingTags &&
-                      suggestedTags.length === 0 && (
-                        <button
-                          type="button"
-                          onMouseDown={(e) => e.preventDefault()}
-                          onClick={() => addTag()}
-                          className="w-full rounded-xl px-3 py-3 text-left text-sm text-[var(--midnight-muted)] transition hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-text)]"
-                        >
-                          Create “{tagInput.trim()}”
-                        </button>
-                      )}
-
-                    {tagInput.trim().length >= 2 &&
-                      suggestedTags.map((tag) => (
-                        <button
-                          key={tag.id}
-                          type="button"
-                          onMouseDown={(e) => e.preventDefault()}
-                          onClick={() => addTag(tag.name)}
-                          className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-[var(--midnight-code-bg)]"
-                        >
-                          <div>
-                            <p className="text-sm font-medium text-[var(--midnight-text)]">
-                              {tag.name}
-                            </p>
-                            <p className="mt-0.5 text-xs text-[var(--midnight-soft)]">
-                              {tag.postsCount} posts · {tag.authorsCount}{" "}
-                              authors
-                            </p>
-                          </div>
-
-                          <span className="shrink-0 text-xs text-[var(--midnight-soft)]">
-                            Add
-                          </span>
-                        </button>
-                      ))}
-
-                    {tagInput.trim().length >= 2 && hasNextPage && (
-                      <button
-                        type="button"
-                        disabled={isFetchingNextPage}
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={() => fetchNextPage()}
-                        className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs text-[var(--midnight-muted)] transition hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-text)] disabled:opacity-50"
-                      >
-                        {isFetchingNextPage && (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        )}
-                        Load more
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        <section className="mx-auto mt-10 w-full max-w-3xl">
-          <p className="mb-3 text-xs tracking-[0.14em] text-[var(--midnight-soft)]">
-            Cover image
-          </p>
-
-          <label className="group relative flex aspect-[16/9] cursor-pointer items-center justify-center overflow-hidden rounded-2xl border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] transition hover:border-[var(--midnight-accent)]/60">
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleThumbnailChange}
-            />
-
-            {thumbnailPreview ? (
-              <>
-                <img
-                  src={thumbnailPreview}
-                  alt="Cover preview"
-                  className="h-full w-full object-cover opacity-90 saturate-[0.85] transition group-hover:opacity-100"
-                />
-
-                <div className="absolute bottom-4 right-4 rounded-full bg-[var(--midnight-surface)] px-4 py-2 text-xs font-medium text-[var(--midnight-text)] shadow-xl">
-                  Change cover
-                </div>
-              </>
-            ) : (
-              <div className="flex flex-col items-center text-center">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-[var(--midnight-border)]/70 text-[var(--midnight-muted)]">
-                  <ImagePlus className="h-5 w-5" />
-                </div>
-
-                <p className="text-sm font-medium text-[var(--midnight-text)]">
-                  Add a cover image
-                </p>
-
-                <p className="mt-1 text-sm text-[var(--midnight-muted)]">
-                  Optional, but useful for sharing.
-                </p>
-              </div>
-            )}
-          </label>
-        </section>
-
-        <section className="mx-auto mt-14 w-full max-w-3xl">
-          <DefaultTemplate
-            onContentChange={(json, html) => {
-              setJsonContent(json);
-              setHtmlContent(html);
-            }}
-            theme="dark"
-          />
-        </section>
-      </main>
-
-      <div className="fixed bottom-5 left-1/2 z-50 w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 rounded-2xl border border-[var(--midnight-border)]/70 bg-[var(--midnight-surface)]/90 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur-2xl">
-        <div className="flex items-center justify-between gap-4 px-5 py-3">
-          <p className="text-sm text-[var(--midnight-muted)]">Draft</p>
+      <header className="sticky top-0 z-50 border-b border-[var(--midnight-border)]/60 bg-[var(--midnight-bg)]/90 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 md:px-6">
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            className="text-sm font-medium text-[var(--midnight-muted)] transition hover:text-[var(--midnight-text)]"
+          >
+            The Midnight Letters
+          </button>
 
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => router.push("/")}
-              className="rounded-full px-4 py-2 text-sm text-[var(--midnight-muted)] transition hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-text)]"
-            >
-              Cancel
-            </button>
+            <span className="hidden text-sm text-[var(--midnight-soft)] sm:inline">
+              Draft
+            </span>
 
             <button
               type="button"
@@ -405,6 +265,213 @@ export default function NewLetterPage() {
             </button>
           </div>
         </div>
+      </header>
+
+      <div className="relative mx-auto w-full max-w-[1060px] px-5 md:px-6">
+        <aside className="absolute left-[calc(50%+420px)] top-12 hidden w-64 xl:block">
+          <div className="sticky top-24 border-l-1 border-[var(--midnight-border)]/70 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.26)] backdrop-blur-xl">
+            <h2 className="mt-2 font-serif text-lg tracking-[-0.03em] text-[var(--midnight-text)]">
+              {writingTip.title}
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-[var(--midnight-muted)]">
+              {writingTip.description}
+            </p>
+
+            <div className="mt-4 space-y-2 border-t border-[var(--midnight-border)]/60 pt-4">
+              {tutorialSteps.map((step) => {
+                const Icon = step.done ? CheckCircle2 : Circle;
+
+                return (
+                  <div
+                    key={step.label}
+                    className="flex items-center gap-2 text-xs text-[var(--midnight-muted)]"
+                  >
+                    <Icon
+                      className={`h-4 w-4 ${
+                        step.done
+                          ? "text-emerald-300"
+                          : "text-[var(--midnight-soft)]"
+                      }`}
+                    />
+                    {step.label}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </aside>
+
+        <main className="mx-auto w-full max-w-[740px] pb-32 pt-12 md:pt-16">
+          <textarea
+            ref={titleRef}
+            value={title}
+            onFocus={() => setFocusedSection("title")}
+            onChange={handleTitleChange}
+            placeholder="Title"
+            rows={2}
+            className="w-full resize-none overflow-hidden bg-transparent font-serif text-5xl leading-tight tracking-[-0.04em] text-[var(--midnight-text)] outline-none placeholder:text-[var(--midnight-soft)] md:text-6xl"
+          />
+
+          <div
+            className={`mt-2 flex justify-end text-xs ${
+              title.length >= TITLE_LIMIT
+                ? "text-red-300"
+                : "text-[var(--midnight-soft)]"
+            }`}
+          >
+            {title.length}/{TITLE_LIMIT}
+          </div>
+
+          <textarea
+            value={subtitle}
+            onFocus={() => setFocusedSection("subtitle")}
+            onChange={(e) =>
+              setSubtitle(e.target.value.slice(0, SUBTITLE_LIMIT))
+            }
+            placeholder="Tell your story..."
+            rows={2}
+            className="mt-5 w-full resize-none bg-transparent font-serif text-xl leading-8 text-[var(--midnight-muted)] outline-none placeholder:text-[var(--midnight-soft)] md:text-2xl"
+          />
+
+          <div
+            className={`mt-2 flex justify-end text-xs ${
+              subtitle.length >= SUBTITLE_LIMIT
+                ? "text-red-300"
+                : "text-[var(--midnight-soft)]"
+            }`}
+          >
+            {subtitle.length}/{SUBTITLE_LIMIT}
+          </div>
+
+          <div
+            onFocusCapture={() => setFocusedSection("topics")}
+            onMouseEnter={() => setFocusedSection("topics")}
+            className="mt-8 flex flex-wrap items-center gap-2 border-y border-[var(--midnight-border)]/60 py-4"
+          >
+            {tags.map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => removeTag(tag)}
+                className="rounded-full border border-[var(--midnight-border)] px-3 py-1 text-sm text-[var(--midnight-muted)] transition hover:border-red-400/40 hover:text-red-300"
+              >
+                {tag} ×
+              </button>
+            ))}
+
+            <div className="relative">
+              <input
+                value={tagInput}
+                onFocus={() => {
+                  setFocusedSection("topics");
+                  setIsTagInputFocused(true);
+                }}
+                onBlur={() => {
+                  window.setTimeout(() => setIsTagInputFocused(false), 150);
+                }}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addTag();
+                  }
+                }}
+                placeholder="Add a topic"
+                className="min-w-36 bg-transparent px-1 py-1 text-sm text-[var(--midnight-text)] outline-none placeholder:text-[var(--midnight-soft)]"
+              />
+
+              {isTagInputFocused && shouldSearchTags && (
+                <div className="absolute left-0 top-full z-30 mt-3 w-72 overflow-hidden rounded-2xl border border-[var(--midnight-border)]/70 bg-[var(--midnight-surface)] shadow-[0_18px_60px_rgba(0,0,0,0.32)]">
+                  <div className="border-b border-[var(--midnight-border)]/60 px-4 py-3 text-xs uppercase tracking-[0.16em] text-[var(--midnight-soft)]">
+                    Suggested topics
+                  </div>
+
+                  <div className="max-h-72 overflow-y-auto p-2">
+                    {isFetchingTags && suggestedTags.length === 0 ? (
+                      <div className="flex items-center gap-2 px-3 py-3 text-sm text-[var(--midnight-muted)]">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Searching...
+                      </div>
+                    ) : suggestedTags.length > 0 ? (
+                      suggestedTags.map((tag) => (
+                        <button
+                          key={tag.id}
+                          type="button"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => addTag(tag.name)}
+                          className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm text-[var(--midnight-muted)] transition hover:bg-[var(--midnight-code-bg)] hover:text-[var(--midnight-text)]"
+                        >
+                          <span>{tag.name}</span>
+                          <span className="text-xs text-[var(--midnight-soft)]">
+                            Add
+                          </span>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-3 py-3 text-sm text-[var(--midnight-muted)]">
+                        No matching topics.
+                      </div>
+                    )}
+
+                    {hasNextPage && (
+                      <button
+                        type="button"
+                        disabled={isFetchingNextPage}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => fetchNextPage()}
+                        className="mt-1 w-full rounded-xl px-3 py-2 text-sm text-[var(--midnight-accent)] transition hover:bg-[var(--midnight-code-bg)] disabled:opacity-50"
+                      >
+                        {isFetchingNextPage ? "Loading..." : "Load more"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <label
+            onMouseEnter={() => setFocusedSection("cover")}
+            className="group mt-8 flex cursor-pointer items-center gap-3 text-sm text-[var(--midnight-muted)] transition hover:text-[var(--midnight-text)]"
+          >
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleThumbnailChange}
+            />
+
+            <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--midnight-border)] transition group-hover:border-[var(--midnight-accent)]/50 group-hover:text-[var(--midnight-accent)]">
+              <ImagePlus className="h-4 w-4" />
+            </span>
+
+            {thumbnailPreview ? "Change cover image" : "Add cover image"}
+          </label>
+
+          {thumbnailPreview && (
+            <div className="mt-6 overflow-hidden rounded-sm">
+              <img
+                src={thumbnailPreview}
+                alt="Cover preview"
+                className="aspect-[16/9] w-full object-cover"
+              />
+            </div>
+          )}
+
+          <section
+            className="mt-10"
+            onFocusCapture={() => setFocusedSection("content")}
+            onMouseEnter={() => setFocusedSection("content")}
+          >
+            <DefaultTemplate
+              onContentChange={(json, html) => {
+                setJsonContent(json);
+                setHtmlContent(html);
+              }}
+              theme="dark"
+            />
+          </section>
+        </main>
       </div>
 
       {showPublishModal && (
@@ -420,16 +487,16 @@ export default function NewLetterPage() {
                   {publishStatus === "success"
                     ? "Published"
                     : publishStatus === "publishing"
-                      ? "Publishing"
-                      : "Ready to publish?"}
+                    ? "Publishing"
+                    : "Ready to publish?"}
                 </h2>
 
                 <p className="mt-2 text-sm leading-6 text-[var(--midnight-muted)]">
                   {publishStatus === "success"
                     ? "Your article is now publicly available."
                     : publishStatus === "publishing"
-                      ? "Sending your article to the archive."
-                      : "Review the subjects before publishing."}
+                    ? "Sending your article to the archive."
+                    : "Review your topics before publishing."}
                 </p>
               </div>
 
@@ -444,13 +511,7 @@ export default function NewLetterPage() {
             </div>
 
             <div className="px-6 py-5">
-              {publishStatus === "publishing" && (
-                <div className="h-2 overflow-hidden rounded-full bg-[var(--midnight-code-bg)]">
-                  <div className="h-full w-1/2 animate-pulse rounded-full bg-[var(--midnight-accent)]" />
-                </div>
-              )}
-
-              {publishStatus === "success" && (
+              {publishStatus === "success" ? (
                 <div className="text-center">
                   <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--midnight-accent)] text-[var(--midnight-on-accent)]">
                     <Check className="h-6 w-6" />
@@ -465,22 +526,26 @@ export default function NewLetterPage() {
                     Read article
                   </a>
                 </div>
-              )}
-
-              {publishStatus !== "success" && (
+              ) : (
                 <>
                   <div className="flex flex-wrap gap-2">
-                    {tags.map((tag) => (
-                      <button
-                        key={tag}
-                        type="button"
-                        disabled={publishStatus === "publishing"}
-                        onClick={() => removeTag(tag)}
-                        className="rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] px-3 py-1 text-xs text-[var(--midnight-muted)] disabled:opacity-40"
-                      >
-                        {tag} ×
-                      </button>
-                    ))}
+                    {tags.length > 0 ? (
+                      tags.map((tag) => (
+                        <button
+                          key={tag}
+                          type="button"
+                          disabled={publishStatus === "publishing"}
+                          onClick={() => removeTag(tag)}
+                          className="rounded-full border border-[var(--midnight-border)]/70 bg-[var(--midnight-code-bg)] px-3 py-1 text-xs text-[var(--midnight-muted)] disabled:opacity-40"
+                        >
+                          {tag} ×
+                        </button>
+                      ))
+                    ) : (
+                      <p className="text-sm text-[var(--midnight-muted)]">
+                        No topics added.
+                      </p>
+                    )}
                   </div>
 
                   {publishStatus === "error" && (

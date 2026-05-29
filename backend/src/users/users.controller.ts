@@ -16,6 +16,7 @@ import { FindManyPostsDto } from 'src/posts/dtos/find-many-posts.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import UpdateUserProfileDto from './dtos/update-user-profile';
+import GetSuggestedAuthorsDto from './dtos/get-suggested-authors.dto';
 
 @Controller('users')
 export class UsersController {
@@ -25,6 +26,11 @@ export class UsersController {
   async findMany() {
     const users = await this.usersService.findMany();
     return { users };
+  }
+
+  @Get('/suggested')
+  async getSuggestedAuthors(@Query() query: GetSuggestedAuthorsDto) {
+    return await this.usersService.getSuggestedAuthors(query.page, query.limit);
   }
 
   @Get('/:slug')

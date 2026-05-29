@@ -517,4 +517,120 @@ export class UsersService {
       };
     });
   }
+
+  async getSuggestedAuthors(page = 1, limit = 8) {
+    const safeLimit = Math.min(50, Math.max(1, Number(limit) || 8));
+    const safePage = Math.max(1, Number(page) || 1);
+    const skip = (safePage - 1) * safeLimit;
+
+    const [topAuthors, allAuthorGroups] = await this.prisma.post
+      .groupBy({
+        by: ['authorId'],
+        where: {
+          authorId: {
+            not: null,
+          },
+        },
+        _count: true,
+        orderBy: {
+          _count: {
+            authorId: 'desc',
+          },
+        },
+        skip,
+        take: safeLimit,
+      })
+      .then(async (topAuthors) => {
+        const allAuthorGroups = await this.prisma.post.groupBy({
+          by: ['authorId'],
+          where: {
+            authorId: {
+              not: null,
+            },
+          },
+          orderBy: {
+            authorId: 'asc',
+          },
+        });
+
+        return [topAuthors, allAuthorGroups] as const;
+      });
+
+    const total = allAuthorGroups.length;
+    const totalPages = Math.ceil(total / safeLimit);
+    const hasMore = safePage < totalPages;
+
+    const authorIds = topAuthors
+      .map((author) => author.authorId)
+      .filter((id): id is string => Boolean(id));
+
+    if (authorIds.length === 0) {
+      return {
+        data: [],
+        meta: {
+          total,
+          page: safePage,
+          limit: safeLimit,
+          totalPages,
+          hasMore,
+          nextPage: hasMore ? safePage + 1 : null,
+        },
+      };
+    }
+
+    const users = await this.prisma.user.findMany({
+      where: {
+        id: {
+          in: authorIds,
+        },
+      },
+      select: {
+        id: true,
+        slug: true,
+        avatar: true,
+        created_at: true,
+        full_name: true,
+        _count: {
+          select: {
+            userFollowers: true,
+          },
+        },
+      },
+    });
+
+    const userMap = new Map(users.map((user) => [user.id, user]));
+
+    const postCountMap = new Map(
+      topAuthors.map((author) => [author.authorId, author._count]),
+    );
+
+    return {
+      data: authorIds
+        .map((authorId) => {
+          const user = userMap.get(authorId);
+          if (!user) return null;
+
+          return {
+            id: user.id,
+            slug: user.slug,
+            avatar: user.avatar,
+            fullName: user.full_name,
+            createdAt: user.created_at,
+            statistics: {
+              postsCount: postCountMap.get(authorId) ?? 0,
+              followersCount: user._count.userFollowers,
+            },
+          };
+        })
+        .filter((user): user is NonNullable<typeof user> => user !== null),
+      meta: {
+        total,
+        page: safePage,
+        limit: safeLimit,
+        totalPages,
+        hasMore,
+        nextPage: hasMore ? safePage + 1 : null,
+      },
+    };
+  }
 }
