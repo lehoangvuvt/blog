@@ -166,6 +166,9 @@ export default function FollowingPage() {
         await queryClient.invalidateQueries({
           queryKey: ["suggested-authors"],
         });
+        await queryClient.invalidateQueries({
+          queryKey: ["me-preferred-posts"],
+        });
       },
       onError: () => {
         pushNotification("Failed to follow writer", "error");
@@ -181,6 +184,9 @@ export default function FollowingPage() {
         await queryClient.invalidateQueries({ queryKey: ["me"] });
         await queryClient.invalidateQueries({
           queryKey: ["suggested-authors"],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ["me-preferred-posts"],
         });
       },
       onError: () => {

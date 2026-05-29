@@ -323,6 +323,12 @@ export class UsersService {
             email: true,
             created_at: true,
             introduction: true,
+            _count: {
+              select: {
+                userFollowings: true,
+                posts: true,
+              },
+            },
           },
         },
       },
@@ -337,6 +343,10 @@ export class UsersService {
         email: f.following.email,
         createdAt: f.following.created_at,
         introduction: f.following.introduction,
+        statistics: {
+          followersCount: f.following._count.userFollowings,
+          postsCount: f.following._count.posts,
+        },
       };
     });
   }
